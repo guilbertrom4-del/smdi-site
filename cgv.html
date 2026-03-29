@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Conditions générales de vente applicables aux transactions entre SMDI et ses clients professionnels. L'accès à l'espace professionnel vaut acceptation des " />
+  <meta name="robots" content="noindex, follow" />
+  <title>CGV Professionnelles — SMDI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+
+    :root {
+      --bg:       #0a0a0a; --bg2: #0f0f0f; --bg3: #141414; --bg4: #1a1a1a;
+      --card:     #111111;
+      --border:   #1e1e1e; --border2: #252525; --border3: #303030;
+      --text:     #f0f0f0; --text2: #e0e0e0;
+      --muted:    #888888; --muted2: #555555;
+      --orange:   #ff4d00; --orange-h: #ff6520;
+      --orange-d: rgba(255,77,0,.09); --orange-g: rgba(255,77,0,.28);
+      --green:    #22c55e;
+      --ff-title: 'Space Grotesk', sans-serif;
+      --ff-body:  'Inter', sans-serif;
+      --ff-mono:  'Space Mono', monospace;
+      --nav-h: 64px; --max-w: 1280px; --r: 2px; --tr: .2s ease;
+    }
+
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body { background: var(--bg); color: var(--text2); font-family: var(--ff-body); font-size: 15px; line-height: 1.65; overflow-x: hidden; }
+    body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.68' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.02'/%3E%3C/svg%3E"); opacity: .55; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    button { font-family: var(--ff-body); cursor: pointer; border: none; background: none; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--bg); } ::-webkit-scrollbar-thumb { background: var(--border3); border-radius: 2px; }
+    .wrap { width: 100%; max-width: var(--max-w); margin: 0 auto; padding: 0 28px; }
+    .z1 { position: relative; z-index: 1; }
+    /* Boutons */
+    .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--ff-body); font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: var(--r); transition: all var(--tr); cursor: pointer; border: none; white-space: nowrap; text-decoration: none; }
+    .btn-dark { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+    .btn-dark:hover { background: var(--bg4); border-color: var(--border3); transform: translateY(-1px); }
+    .btn-primary { background: var(--orange); color: #000; font-weight: 700; }
+    .btn-primary:hover { background: var(--orange-h); box-shadow: 0 6px 24px var(--orange-g); transform: translateY(-1px); }
+    /* Header */
+    #site-header { position: sticky; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(10,10,10,.94); backdrop-filter: blur(22px) saturate(1.5); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; transition: box-shadow var(--tr); }
+    #site-header.scrolled { box-shadow: 0 4px 40px rgba(0,0,0,.7); }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: var(--ff-title); font-size: 20px; font-weight: 800; color: var(--text); text-decoration: none; flex-shrink: 0; }
+    .nav-logo-sq { width: 34px; height: 34px; background: var(--orange); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .nav-logo-sq svg { width: 18px; height: 18px; }
+    .nav-logo-name span { color: var(--orange); }
+    .header-bc { display: flex; align-items: center; gap: 8px; font-family: var(--ff-mono); font-size: 11px; color: var(--muted); }
+    .header-bc .sep { color: var(--orange); }
+    .header-bc .cur { color: var(--text2); font-weight: 700; }
+    .header-bc a:hover { color: var(--text2); }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    /* Hero */
+    .legal-hero { padding: calc(var(--nav-h) + 52px) 0 48px; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+    .legal-hero::before { content: ''; position: absolute; inset: 0; z-index: 0; background-image: linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px); background-size: 58px 58px; opacity: .12; mask-image: linear-gradient(180deg,black 0%,transparent 100%); }
+    .hero-label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--ff-mono); font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--orange); margin-bottom: 16px; }
+    .hero-label::before { content: ''; width: 18px; height: 2px; background: var(--orange); }
+    .legal-hero h1 { font-family: var(--ff-title); font-size: clamp(2rem,4vw,3.2rem); font-weight: 800; color: var(--text); letter-spacing: -.025em; line-height: 1.08; margin-bottom: 14px; }
+    .legal-hero p { font-size: 14px; color: var(--muted); max-width: 560px; line-height: 1.75; }
+    .hero-meta { margin-top: 22px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .hero-meta-item { display: flex; align-items: center; gap: 7px; font-family: var(--ff-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted2); }
+    .hero-meta-item::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+    /* Layout */
+    .legal-layout { display: grid; grid-template-columns: 240px 1fr; gap: 52px; align-items: start; padding: 60px 0 80px; }
+    /* TOC */
+    .legal-toc { position: sticky; top: calc(var(--nav-h) + 20px); }
+    .toc-title { font-family: var(--ff-mono); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted2); margin-bottom: 14px; }
+    .toc-list { display: flex; flex-direction: column; gap: 2px; }
+    .toc-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--muted); border-radius: var(--r); cursor: pointer; transition: all var(--tr); text-decoration: none; border: 1px solid transparent; }
+    .toc-item:hover { color: var(--text2); background: var(--bg3); border-color: var(--border2); }
+    .toc-item.active { color: var(--orange); background: var(--orange-d); border-color: rgba(255,77,0,.18); font-weight: 600; }
+    .toc-item .toc-n { font-family: var(--ff-mono); font-size: 9px; font-weight: 700; color: var(--muted2); min-width: 18px; }
+    .toc-item.active .toc-n { color: var(--orange); }
+    .toc-divider { height: 1px; background: var(--border); margin: 10px 0; }
+    .toc-other { margin-top: 14px; }
+    .toc-other-label { font-family: var(--ff-mono); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted2); margin-bottom: 8px; }
+    .toc-other-links { display: flex; flex-direction: column; gap: 2px; }
+    .toc-other-link { font-size: 12px; color: var(--muted2); padding: 6px 10px; border-radius: var(--r); transition: color var(--tr); display: block; }
+    .toc-other-link:hover { color: var(--orange); }
+    .toc-other-link.current { color: var(--orange); font-weight: 600; }
+    .toc-updated { margin-top: 12px; padding: 12px; background: var(--bg3); border: 1px solid var(--border2); font-family: var(--ff-mono); font-size: 10px; color: var(--muted2); line-height: 1.7; }
+    .toc-updated span { color: var(--orange); display: block; font-weight: 700; margin-bottom: 3px; }
+    /* Contenu */
+    .legal-content { min-width: 0; }
+    .section-anchor { display: block; position: relative; top: calc(-1 * var(--nav-h) - 20px); visibility: hidden; }
+    .legal-section { padding-bottom: 52px; border-bottom: 1px solid var(--border); margin-bottom: 52px; }
+    .legal-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .legal-section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .section-num { font-family: var(--ff-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--orange); background: var(--orange-d); border: 1px solid rgba(255,77,0,.2); padding: 4px 10px; border-radius: var(--r); white-space: nowrap; flex-shrink: 0; }
+    .legal-section h2 { font-family: var(--ff-title); font-size: 1.4rem; font-weight: 800; color: var(--text); letter-spacing: -.015em; line-height: 1.2; }
+    .data-block { background: var(--card); border: 1px solid var(--border2); padding: 24px 28px; margin-bottom: 20px; position: relative; }
+    .data-block::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--orange); }
+    .data-block h3 { font-family: var(--ff-title); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text); margin-bottom: 14px; }
+    .data-row { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .data-row:last-child { border-bottom: none; }
+    .data-key { font-family: var(--ff-mono); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted2); min-width: 160px; flex-shrink: 0; padding-top: 2px; }
+    .data-val { color: var(--text2); }
+    .data-val a { color: var(--orange); transition: color var(--tr); }
+    .data-val a:hover { color: var(--orange-h); text-decoration: underline; }
+    .legal-text { font-size: 14px; color: var(--muted); line-height: 1.85; margin-bottom: 18px; }
+    .legal-text:last-child { margin-bottom: 0; }
+    .legal-text strong { color: var(--text2); font-weight: 600; }
+    .legal-text a { color: var(--orange); transition: color var(--tr); }
+    .legal-text a:hover { color: var(--orange-h); text-decoration: underline; }
+    .legal-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+    .legal-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .legal-list li::before { content: '→'; color: var(--orange); font-size: 12px; flex-shrink: 0; margin-top: 3px; }
+    .legal-subsection { margin-bottom: 24px; }
+    .legal-subsection h3 { font-family: var(--ff-title); font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .legal-notice { background: var(--orange-d); border: 1px solid rgba(255,77,0,.2); border-left: 3px solid var(--orange); padding: 16px 20px; margin: 20px 0; font-size: 13px; color: var(--text2); line-height: 1.7; }
+    .legal-notice strong { color: var(--orange); }
+    .legal-info { background: var(--bg3); border: 1px solid var(--border2); padding: 16px 20px; margin: 20px 0; font-size: 13px; color: var(--muted); line-height: 1.7; font-family: var(--ff-mono); }
+    .legal-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    .legal-table th { font-family: var(--ff-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg3); }
+    .legal-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; line-height: 1.6; }
+    .legal-table tr:last-child td { border-bottom: none; }
+    .legal-table tr:hover td { background: var(--bg3); }
+    .price-row { display: flex; align-items: flex-start; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .price-row:last-child { border-bottom: none; }
+    .price-label { font-family: var(--ff-title); font-weight: 700; color: var(--text); min-width: 220px; flex-shrink: 0; }
+    .price-desc { color: var(--muted); flex: 1; }
+    .price-val { font-family: var(--ff-mono); font-weight: 700; color: var(--orange); white-space: nowrap; }
+    /* Footer */
+    footer { background: #050505; border-top: 1px solid var(--border); padding: 56px 0 32px; position: relative; z-index: 1; }
+    .foot-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 48px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+    .foot-brand p { font-size: 13px; color: var(--muted2); line-height: 1.75; max-width: 250px; margin-top: 14px; }
+    .foot-col h4 { font-family: var(--ff-title); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text); margin-bottom: 16px; }
+    .foot-col ul { display: flex; flex-direction: column; gap: 9px; }
+    .foot-col ul li a { font-size: 13px; color: var(--muted2); transition: color var(--tr); text-decoration: none; }
+    .foot-col ul li a:hover { color: var(--orange); }
+    .foot-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+    .foot-copy { font-family: var(--ff-mono); font-size: 11px; color: var(--muted2); letter-spacing: .04em; }
+    .foot-legal { display: flex; gap: 18px; }
+    .foot-legal a { font-size: 12px; color: var(--muted2); transition: color var(--tr); text-decoration: none; }
+    .foot-legal a:hover { color: var(--muted); }
+    /* Responsive */
+    @media(max-width:960px){ .legal-layout{grid-template-columns:1fr;} .legal-toc{position:static;} .toc-list{flex-direction:row;flex-wrap:wrap;gap:6px;} .toc-item{padding:6px 10px;} .toc-divider,.toc-other{display:none;} .foot-grid{grid-template-columns:1fr 1fr;gap:32px;} }
+    @media(max-width:640px){ .wrap{padding:0 18px;} .header-bc{display:none;} .data-row{flex-direction:column;gap:4px;} .data-key{min-width:unset;} .foot-grid{grid-template-columns:1fr;gap:28px;} .foot-bottom{flex-direction:column;align-items:flex-start;} .price-row{flex-direction:column;gap:6px;} }
+    @media(max-width:480px){ .legal-hero h1{font-size:1.8rem;} .hero-meta{flex-direction:column;gap:10px;} }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div id="site-header" role="banner">
+    <div class="wrap header-inner">
+      <a href="index.html" class="nav-logo" aria-label="SMDI — Retour à l'accueil">
+        <div class="nav-logo-sq" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1 1 14 0A7 7 0 0 1 3 10z" stroke="#000" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+        <div class="nav-logo-name">SM<span>DI</span></div>
+      </a>
+      <nav class="header-bc" aria-label="Fil d'Ariane">
+        <a href="index.html">Accueil</a>
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="cur" aria-current="page">CGV Professionnelles</span>
+      </nav>
+      <div class="header-right">
+        <a href="index.html" class="btn btn-dark" aria-label="Retour au site SMDI">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Retour au site
+        </a>
+        <a href="smdi-portal.html#login" class="btn btn-primary" aria-label="Espace professionnel SMDI">
+          Espace Pro
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="legal-hero" aria-label="En-tête cgv professionnelles">
+  <div class="wrap z1">
+    <div class="hero-label">Conditions générales de vente</div>
+    <h1>Conditions Générales de Vente</h1>
+    <p>Conditions générales de vente applicables aux transactions entre SMDI et ses clients professionnels. L'accès à l'espace professionnel vaut acceptation des présentes conditions.</p>
+    <div class="hero-meta">
+            <div class="hero-meta-item">Clients professionnels B2B uniquement</div>
+      <div class="hero-meta-item">Mise à jour : Janvier 2026</div>
+      <div class="hero-meta-item">Droit français applicable</div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="legal-layout">
+      <aside>
+        <nav class="legal-toc" aria-label="Sommaire" id="toc">
+          <div class="toc-title">Sommaire</div>
+          <div class="toc-list">
+        <a href="#champ" class="toc-item"><span class="toc-n">01</span>Champ d'application</a>
+        <a href="#commandes" class="toc-item"><span class="toc-n">02</span>Commandes</a>
+        <a href="#prix" class="toc-item"><span class="toc-n">03</span>Prix et facturation</a>
+        <a href="#livraison" class="toc-item"><span class="toc-n">04</span>Livraison</a>
+        <a href="#retours" class="toc-item"><span class="toc-n">05</span>Retours et garanties</a>
+        <a href="#paiement" class="toc-item"><span class="toc-n">06</span>Paiement</a>
+        <a href="#responsabilite" class="toc-item"><span class="toc-n">07</span>Responsabilité</a>
+        <a href="#resiliation" class="toc-item"><span class="toc-n">08</span>Résiliation du compte</a>
+        <a href="#droit-cgv" class="toc-item"><span class="toc-n">09</span>Droit applicable</a>
+          </div>
+          <div class="toc-divider"></div>
+          <div class="toc-other">
+            <div class="toc-other-label">Pages légales</div>
+            <div class="toc-other-links">
+        <a href="mentions-legales.html" class="toc-other-link">Mentions légales</a>
+        <a href="cgv.html" class="toc-other-link current">CGV professionnelles</a>
+        <a href="donnees-personnelles.html" class="toc-other-link">Données personnelles</a>
+        <a href="cookies.html" class="toc-other-link">Politique cookies</a>
+            </div>
+          </div>
+          <div class="toc-updated"><span>Mis à jour</span>Janvier 2026</div>
+        </nav>
+      </aside>
+      <article class="legal-content">
+
+        <section class="legal-section" id="champ" aria-labelledby="h-champ">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 01</span><h2 id="h-champ">Champ d'application</h2></div>
+          <p class="legal-text">Les présentes Conditions Générales de Vente (CGV) régissent exclusivement les relations contractuelles entre la société <strong>SMDI</strong> (ci-après « le Vendeur ») et tout client professionnel titulaire d'un compte validé sur l'espace B2B SMDI (ci-après « le Client »).</p>
+          <div class="legal-notice"><strong>Réservé aux professionnels.</strong> Toute commande passée sur smdi-lavage.fr implique l'acceptation sans réserve des présentes CGV. Ces conditions prévalent sur tout document émanant du Client, sauf accord écrit préalable.</div>
+          <div class="legal-subsection"><h3>Conditions d'accès</h3>
+          <ul class="legal-list">
+            <li>Être une personne morale ou physique agissant à titre professionnel</li>
+            <li>Disposer d'un numéro SIRET valide enregistré en France</li>
+            <li>Avoir un compte professionnel validé manuellement par SMDI</li>
+            <li>Exercer une activité dans le secteur du lavage automobile, de la haute pression ou domaines connexes</li>
+          </ul></div>
+        </section>
+
+        <section class="legal-section" id="commandes" aria-labelledby="h-commandes">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 02</span><h2 id="h-commandes">Formation des commandes</h2></div>
+          <div class="legal-subsection"><h3>Processus de commande</h3>
+          <ul class="legal-list">
+            <li>Le Client sélectionne les produits depuis son espace professionnel et les ajoute au panier</li>
+            <li>Il choisit le mode de livraison et le mode de paiement</li>
+            <li>Il valide la commande après avoir pris connaissance du récapitulatif</li>
+            <li>SMDI envoie un accusé de réception par email sous 24h ouvrées</li>
+            <li>La commande est définitivement confirmée par l'envoi d'un bon de commande signé</li>
+          </ul></div>
+          <div class="legal-subsection"><h3>Disponibilité des produits</h3>
+          <p class="legal-text">Les informations de stock sont mises à jour en temps réel dans l'espace professionnel. En cas d'indisponibilité constatée après validation, SMDI s'engage à en informer le Client dans les <strong>48h ouvrées</strong> et à proposer un délai de réapprovisionnement ou un article de substitution.</p></div>
+          <div class="legal-subsection"><h3>Devis</h3>
+          <p class="legal-text">Les devis émis par SMDI sont valables <strong>30 jours calendaires</strong> à compter de leur date d'émission, sauf mention contraire. La validation d'un devis par le Client constitue une commande ferme.</p></div>
+        </section>
+
+        <section class="legal-section" id="prix" aria-labelledby="h-prix">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 03</span><h2 id="h-prix">Prix et facturation</h2></div>
+          <div class="legal-subsection"><h3>Tarification B2B personnalisée</h3>
+          <p class="legal-text">Les prix affichés dans l'espace professionnel sont des prix <strong>hors taxes (HT)</strong>, exprimés en euros, spécifiques au niveau de compte du Client :</p>
+          <div class="data-block"><h3>Niveaux tarifaires</h3>
+            <div class="data-row"><div class="data-key">Bronze</div><div class="data-val">Tarifs professionnels standard — accessible à tous les comptes validés</div></div>
+            <div class="data-row"><div class="data-key">Silver</div><div class="data-val">Remise –5% sur l'ensemble du catalogue dès 500 € HT de commande</div></div>
+            <div class="data-row"><div class="data-key">Gold</div><div class="data-val">Remise –10% sur l'ensemble du catalogue + devis sous 4h ouvrées</div></div>
+            <div class="data-row"><div class="data-key">Platinum</div><div class="data-val">Remise –15% + commercial dédié + livraison express offerte dès 800 € HT</div></div>
+          </div></div>
+          <div class="legal-subsection"><h3>Révision des prix</h3>
+          <p class="legal-text">SMDI se réserve le droit de modifier ses tarifs à tout moment. Les prix applicables sont ceux en vigueur au moment de la validation de la commande. Le Client sera informé de toute évolution tarifaire significative avec un préavis de <strong>30 jours</strong>.</p></div>
+          <div class="legal-subsection"><h3>Facturation</h3>
+          <p class="legal-text">Les factures sont émises au moment de l'expédition et transmises par email au format PDF. Elles sont également disponibles dans l'espace professionnel dans la section « Commandes ».</p>
+          <p class="legal-text">La TVA applicable est la TVA française en vigueur (20% au taux normal). Pour les livraisons intracommunautaires, le Client doit fournir son numéro de TVA intracommunautaire valide.</p></div>
+        </section>
+
+        <section class="legal-section" id="livraison" aria-labelledby="h-livraison">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 04</span><h2 id="h-livraison">Livraison</h2></div>
+          <div class="data-block"><h3>Modalités de livraison</h3>
+            <div class="data-row"><div class="data-key">Colissimo Pro</div><div class="data-val">France métropolitaine · Délai : 48h · Offert dès 800 € HT (Gold/Platinum)</div></div>
+            <div class="data-row"><div class="data-key">Chronopost Express</div><div class="data-val">France métropolitaine · Délai : 24h garanti · Supplément : 18,90 € HT</div></div>
+            <div class="data-row"><div class="data-key">Mondial Relay</div><div class="data-val">France + Europe · Délai : 3–5 jours · Tarif selon destination</div></div>
+            <div class="data-row"><div class="data-key">Retrait Combs-la-Ville</div><div class="data-val">1 Rue René Dumont, 77380 · Lun–Ven 8h30–18h · Gratuit</div></div>
+          </div>
+          <div class="legal-subsection"><h3>Délais et réserves</h3>
+          <p class="legal-text">Les délais indiqués sont des délais indicatifs courant à compter de la confirmation d'expédition. SMDI ne saurait être tenue responsable des retards imputables au transporteur. En cas de retard significatif, le Client sera informé par email.</p>
+          <p class="legal-text">À réception, le Client doit vérifier l'état du colis. Toute anomalie (colis endommagé, produit manquant) doit être signalée au transporteur sur le bon de livraison et à SMDI par email dans les <strong>72h</strong> suivant la réception.</p></div>
+        </section>
+
+        <section class="legal-section" id="retours" aria-labelledby="h-retours">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 05</span><h2 id="h-retours">Retours, échanges et garanties</h2></div>
+          <div class="legal-subsection"><h3>Droit de retour professionnel</h3>
+          <p class="legal-text">Conformément à l'article L.221-3 du Code de la consommation, le droit de rétractation de 14 jours ne s'applique pas aux contrats conclus entre professionnels. Tout retour est soumis à l'accord préalable de SMDI.</p>
+          <p class="legal-text">Les retours acceptés doivent intervenir dans un délai de <strong>30 jours</strong> à compter de la réception, pour des produits non utilisés, dans leur emballage d'origine, accompagnés du bon de retour SMDI.</p></div>
+          <div class="legal-subsection"><h3>Garanties légales</h3>
+          <ul class="legal-list">
+            <li><strong>Garantie de conformité</strong> : tout produit livré est conforme à sa description technique</li>
+            <li><strong>Garantie contre les vices cachés</strong> : applicable selon les articles 1641 et suivants du Code civil</li>
+            <li><strong>Garantie constructeur</strong> : variable selon les produits, mentionnée sur les fiches techniques</li>
+          </ul></div>
+          <div class="legal-notice"><strong>Exclusions :</strong> Les dommages résultant d'une mauvaise installation, d'une utilisation non conforme aux spécifications techniques ou d'une modification non autorisée ne sont pas couverts.</div>
+        </section>
+
+        <section class="legal-section" id="paiement" aria-labelledby="h-paiement">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 06</span><h2 id="h-paiement">Conditions de paiement</h2></div>
+          <div class="data-block"><h3>Modes de paiement acceptés</h3>
+            <div class="data-row"><div class="data-key">Virement bancaire</div><div class="data-val">Conditions standard : 30 jours fin de mois · IBAN fourni sur facture</div></div>
+            <div class="data-row"><div class="data-key">Carte bancaire</div><div class="data-val">Paiement immédiat sécurisé 3D Secure · Visa, Mastercard</div></div>
+            <div class="data-row"><div class="data-key">Chèque</div><div class="data-val">À l'ordre de SMDI · Expédition après encaissement (5 jours ouvrés)</div></div>
+          </div>
+          <div class="legal-subsection"><h3>Retard de paiement</h3>
+          <p class="legal-text">Conformément à la loi n° 2001-420 du 15 mai 2001 sur les nouvelles régulations économiques, tout retard de paiement entraîne automatiquement, sans mise en demeure préalable :</p>
+          <ul class="legal-list">
+            <li>Des pénalités de retard au taux de 3 fois le taux d'intérêt légal</li>
+            <li>Une indemnité forfaitaire pour frais de recouvrement de <strong>40 €</strong> par facture impayée</li>
+            <li>La suspension immédiate de l'accès au catalogue et aux nouvelles commandes</li>
+          </ul></div>
+        </section>
+
+        <section class="legal-section" id="responsabilite" aria-labelledby="h-resp">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 07</span><h2 id="h-resp">Responsabilité</h2></div>
+          <p class="legal-text">SMDI ne saurait être tenue responsable des dommages indirects, pertes de chiffre d'affaires ou préjudices consécutifs à une indisponibilité de produit ou un retard de livraison. La responsabilité de SMDI est en tout état de cause limitée au montant de la commande concernée.</p>
+          <p class="legal-text">Le Client est seul responsable de la conformité des produits commandés aux réglementations applicables dans son pays d'utilisation, notamment les normes ICPE pour les installations.</p>
+        </section>
+
+        <section class="legal-section" id="resiliation" aria-labelledby="h-resil">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 08</span><h2 id="h-resil">Résiliation du compte</h2></div>
+          <p class="legal-text">SMDI se réserve le droit de suspendre ou résilier un compte professionnel en cas de : non-paiement répété, fourniture d'informations frauduleuses (SIRET invalide), violation des présentes CGV, ou comportement préjudiciable à SMDI ou à ses autres clients.</p>
+          <p class="legal-text">Le Client peut demander la clôture de son compte à tout moment en contactant <a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a>. Les commandes en cours seront traitées jusqu'à leur terme.</p>
+        </section>
+
+        <section class="legal-section" id="droit-cgv" aria-labelledby="h-droit-cgv">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head"><span class="section-num">Article 09</span><h2 id="h-droit-cgv">Droit applicable et litiges</h2></div>
+          <p class="legal-text">Les présentes CGV sont soumises au droit français. En cas de litige, les parties s'engagent à rechercher une solution amiable dans un délai de 30 jours. À défaut, le litige sera soumis au Tribunal de Commerce de Melun, sauf disposition légale impérative contraire.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;">
+            <a href="index.html#contact" class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Nous contacter</a>
+            <a href="index.html" class="btn btn-dark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Retour au site</a>
+          </div>
+        </section>
+
+      </article>
+    </div>
+  </div>
+</main>
+
+<footer role="contentinfo">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="nav-logo" aria-label="SMDI — Retour à l'accueil">
+          <div class="nav-logo-sq" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1 1 14 0A7 7 0 0 1 3 10z" stroke="#000" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+          <div class="nav-logo-name">SM<span>DI</span></div>
+        </a>
+        <p>Équipements &amp; pièces professionnelles pour stations de lavage automobile. Île-de-France &amp; France entière.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="index.html#catalogue">Catalogue vitrine</a></li>
+          <li><a href="index.html#prestations">Prestations</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Espace Pro</h4>
+        <ul>
+          <li><a href="smdi-portal.html#login">Connexion</a></li>
+          <li><a href="smdi-portal.html#register">Créer un compte</a></li>
+          <li><a href="smdi-portal.html#quote">Demander un devis</a></li>
+          <li><a href="smdi-portal.html#dashboard">Mon dashboard</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Informations légales</h4>
+        <ul>
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+          <li><a href="cgv.html" aria-current="page" style="color:var(--orange);">CGV complète</a></li>
+          <li><a href="donnees-personnelles.html">Confidentialité</a></li>
+          <li><a href="cookies.html">Cookies</a></li>
+          <li><a href="index.html#contact">Nous contacter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p class="foot-copy">© 2026 SMDI — Tous droits réservés · 1 Rue René Dumont, 77380 Combs-la-Ville · SIRET 000 000 000 00000</p>
+      <nav class="foot-legal" aria-label="Liens légaux">
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="cgv.html" aria-current="page">CGV</a>
+        <a href="donnees-personnelles.html">Confidentialité</a>
+        <a href="cookies.html">Cookies</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+'use strict';
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+(function initTocSpy() {
+  const sections = document.querySelectorAll('.legal-section[id]');
+  const tocLinks = document.querySelectorAll('.toc-item');
+  const NAV_H = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 64;
+  if (!sections.length || !tocLinks.length) return;
+  function getActive() {
+    let active = sections[0].id;
+    sections.forEach(sec => { if (window.scrollY >= sec.offsetTop - NAV_H - 32) active = sec.id; });
+    return active;
+  }
+  function updateToc() {
+    const cur = getActive();
+    tocLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+  }
+  window.addEventListener('scroll', updateToc, { passive: true });
+  updateToc();
+})();
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const t  = document.getElementById(id);
+    if (!t) return;
+    e.preventDefault();
+    const h = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 64;
+    window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - h - 16, behavior: 'smooth' });
+  });
+});
+
+</script>
+</body>
+</html>

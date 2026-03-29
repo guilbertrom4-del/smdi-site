@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Mentions légales du site SMDI — Équipements professionnels pour stations de lavage." />
+  <meta name="robots" content="noindex, follow" />
+  <title>Mentions légales — SMDI</title>
+
+  <!-- Fonts identiques au core (index.html + smdi-portal.html) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ══════════════════════════════════════════════════════
+       DESIGN SYSTEM — copie exacte des tokens du core
+       Source : index.html + smdi-portal.html
+    ══════════════════════════════════════════════════════ */
+    :root {
+      --bg:       #0a0a0a;
+      --bg2:      #0f0f0f;
+      --bg3:      #141414;
+      --bg4:      #1a1a1a;
+      --card:     #111111;
+      --border:   #1e1e1e;
+      --border2:  #252525;
+      --border3:  #303030;
+      --text:     #f0f0f0;
+      --text2:    #e0e0e0;
+      --muted:    #888888;
+      --muted2:   #555555;
+      --orange:   #ff4d00;
+      --orange-h: #ff6520;
+      --orange-d: rgba(255,77,0,.09);
+      --orange-g: rgba(255,77,0,.28);
+      --green:    #22c55e;
+
+      --ff-title: 'Space Grotesk', sans-serif;
+      --ff-body:  'Inter', sans-serif;
+      --ff-mono:  'Space Mono', monospace;
+
+      --nav-h:  64px;
+      --max-w:  1280px;
+      --r:      2px;
+      --tr:     .2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      background: var(--bg);
+      color: var(--text2);
+      font-family: var(--ff-body);
+      font-size: 15px;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* Noise texture — identique au core */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.68' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.02'/%3E%3C/svg%3E");
+      opacity: .55;
+    }
+
+    a   { color: inherit; text-decoration: none; }
+    ul  { list-style: none; }
+    button { font-family: var(--ff-body); cursor: pointer; border: none; background: none; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border3); border-radius: 2px; }
+
+    /* ── Conteneur ─────────────────────────────────────── */
+    .wrap {
+      width: 100%;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+    .z1 { position: relative; z-index: 1; }
+
+    /* ── Boutons (subset du core) ──────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--ff-body); font-size: 13px; font-weight: 600;
+      padding: 10px 20px; border-radius: var(--r);
+      transition: all var(--tr); cursor: pointer; border: none;
+      white-space: nowrap; text-decoration: none;
+    }
+    .btn-dark {
+      background: var(--bg3); color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+    .btn-dark:hover { background: var(--bg4); border-color: var(--border3); transform: translateY(-1px); }
+
+    .btn-primary {
+      background: var(--orange); color: #000; font-weight: 700;
+    }
+    .btn-primary:hover {
+      background: var(--orange-h);
+      box-shadow: 0 6px 24px var(--orange-g);
+      transform: translateY(-1px);
+    }
+
+    /* ══════════════════════════════════════════════════════
+       HEADER — simplifié pour page satellite
+    ══════════════════════════════════════════════════════ */
+    #site-header {
+      position: sticky; top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(10,10,10,.94);
+      backdrop-filter: blur(22px) saturate(1.5);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      display: flex; align-items: center;
+      transition: box-shadow var(--tr);
+    }
+    #site-header.scrolled { box-shadow: 0 4px 40px rgba(0,0,0,.7); }
+
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    }
+
+    /* Logo — copie exacte du core */
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--ff-title); font-size: 20px; font-weight: 800;
+      color: var(--text); text-decoration: none; flex-shrink: 0;
+    }
+    .nav-logo-sq {
+      width: 34px; height: 34px; background: var(--orange); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-sq svg { width: 18px; height: 18px; }
+    .nav-logo-name span { color: var(--orange); }
+
+    /* Fil d'Ariane header */
+    .header-breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--ff-mono); font-size: 11px; color: var(--muted);
+    }
+    .header-breadcrumb .sep { color: var(--orange); }
+    .header-breadcrumb .current { color: var(--text2); font-weight: 700; }
+    .header-breadcrumb a { transition: color var(--tr); }
+    .header-breadcrumb a:hover { color: var(--text2); }
+
+    .header-right { display: flex; align-items: center; gap: 8px; }
+
+    /* ══════════════════════════════════════════════════════
+       HERO JURIDIQUE — sobre, structuré
+    ══════════════════════════════════════════════════════ */
+    .legal-hero {
+      padding: calc(var(--nav-h) + 52px) 0 52px;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .legal-hero::before {
+      content: '';
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 58px 58px; opacity: .12;
+      mask-image: linear-gradient(180deg, black 0%, transparent 100%);
+    }
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--ff-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .2em; text-transform: uppercase; color: var(--orange);
+      margin-bottom: 16px;
+    }
+    .hero-label::before { content: ''; width: 18px; height: 2px; background: var(--orange); }
+    .legal-hero h1 {
+      font-family: var(--ff-title);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800; color: var(--text);
+      letter-spacing: -.025em; line-height: 1.08;
+      margin-bottom: 14px;
+    }
+    .legal-hero p {
+      font-size: 14px; color: var(--muted); max-width: 560px;
+      line-height: 1.75;
+    }
+    .hero-meta {
+      margin-top: 24px; display: flex; align-items: center; gap: 20px;
+      flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      display: flex; align-items: center; gap: 7px;
+      font-family: var(--ff-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted2);
+    }
+    .hero-meta-item::before {
+      content: ''; width: 5px; height: 5px;
+      border-radius: 50%; background: var(--orange); flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       LAYOUT CONTENU JURIDIQUE
+    ══════════════════════════════════════════════════════ */
+    .legal-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 52px;
+      align-items: start;
+      padding: 60px 0 80px;
+    }
+
+    /* ── Sommaire latéral ── */
+    .legal-toc {
+      position: sticky;
+      top: calc(var(--nav-h) + 20px);
+    }
+    .toc-title {
+      font-family: var(--ff-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--muted2); margin-bottom: 14px;
+    }
+    .toc-list { display: flex; flex-direction: column; gap: 2px; }
+    .toc-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      font-size: 12px; font-weight: 500; color: var(--muted);
+      border-radius: var(--r); cursor: pointer;
+      transition: all var(--tr); text-decoration: none;
+      border: 1px solid transparent;
+    }
+    .toc-item:hover {
+      color: var(--text2); background: var(--bg3);
+      border-color: var(--border2);
+    }
+    .toc-item.active {
+      color: var(--orange); background: var(--orange-d);
+      border-color: rgba(255,77,0,.18); font-weight: 600;
+    }
+    .toc-item .toc-n {
+      font-family: var(--ff-mono); font-size: 9px; font-weight: 700;
+      color: var(--muted2); min-width: 18px;
+    }
+    .toc-item.active .toc-n { color: var(--orange); }
+    .toc-divider { height: 1px; background: var(--border); margin: 10px 0; }
+    .toc-updated {
+      margin-top: 14px; padding: 12px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      font-family: var(--ff-mono); font-size: 10px; color: var(--muted2);
+      line-height: 1.7;
+    }
+    .toc-updated span { color: var(--orange); display: block; font-weight: 700; margin-bottom: 3px; }
+
+    /* ── Corps des articles ── */
+    .legal-content { min-width: 0; }
+
+    /* Séparateur de section */
+    .legal-section {
+      padding-bottom: 52px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 52px;
+    }
+    .legal-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .section-anchor { display: block; position: relative; top: calc(-1 * var(--nav-h) - 20px); visibility: hidden; }
+
+    .legal-section-head {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    }
+    .section-num {
+      font-family: var(--ff-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--orange);
+      background: var(--orange-d); border: 1px solid rgba(255,77,0,.2);
+      padding: 4px 10px; border-radius: var(--r); white-space: nowrap; flex-shrink: 0;
+    }
+    .legal-section h2 {
+      font-family: var(--ff-title); font-size: 1.4rem; font-weight: 800;
+      color: var(--text); letter-spacing: -.015em; line-height: 1.2;
+    }
+
+    /* Blocs de données */
+    .data-block {
+      background: var(--card); border: 1px solid var(--border2);
+      padding: 24px 28px; margin-bottom: 20px;
+      position: relative;
+    }
+    .data-block::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0;
+      width: 3px; background: var(--orange);
+    }
+    .data-block h3 {
+      font-family: var(--ff-title); font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .data-row {
+      display: flex; gap: 16px; padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-key {
+      font-family: var(--ff-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted2); min-width: 160px; flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .data-val { color: var(--text2); }
+    .data-val a { color: var(--orange); transition: color var(--tr); }
+    .data-val a:hover { color: var(--orange-h); text-decoration: underline; }
+
+    /* Texte courant */
+    .legal-text { font-size: 14px; color: var(--muted); line-height: 1.85; margin-bottom: 18px; }
+    .legal-text:last-child { margin-bottom: 0; }
+    .legal-text strong { color: var(--text2); font-weight: 600; }
+    .legal-text a { color: var(--orange); transition: color var(--tr); }
+    .legal-text a:hover { color: var(--orange-h); text-decoration: underline; }
+
+    /* Liste juridique */
+    .legal-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+    .legal-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--muted); line-height: 1.7;
+    }
+    .legal-list li::before {
+      content: '→'; color: var(--orange); font-size: 12px;
+      flex-shrink: 0; margin-top: 3px;
+    }
+
+    /* Sous-section */
+    .legal-subsection { margin-bottom: 24px; }
+    .legal-subsection h3 {
+      font-family: var(--ff-title); font-size: 14px; font-weight: 700;
+      color: var(--text); margin-bottom: 10px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Bloc alerte / info */
+    .legal-notice {
+      background: var(--orange-d); border: 1px solid rgba(255,77,0,.2);
+      border-left: 3px solid var(--orange);
+      padding: 16px 20px; margin: 20px 0;
+      font-size: 13px; color: var(--text2); line-height: 1.7;
+    }
+    .legal-notice strong { color: var(--orange); }
+
+    .legal-info {
+      background: var(--bg3); border: 1px solid var(--border2);
+      padding: 16px 20px; margin: 20px 0;
+      font-size: 13px; color: var(--muted); line-height: 1.7;
+      font-family: var(--ff-mono);
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FOOTER — copie exacte du core
+    ══════════════════════════════════════════════════════ */
+    footer {
+      background: #050505;
+      border-top: 1px solid var(--border);
+      padding: 56px 0 32px;
+      position: relative; z-index: 1;
+    }
+    .foot-grid {
+      display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px;
+      padding-bottom: 48px; border-bottom: 1px solid var(--border); margin-bottom: 28px;
+    }
+    .foot-brand p {
+      font-size: 13px; color: var(--muted2); line-height: 1.75;
+      max-width: 250px; margin-top: 14px;
+    }
+    .foot-col h4 {
+      font-family: var(--ff-title); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text); margin-bottom: 16px;
+    }
+    .foot-col ul { display: flex; flex-direction: column; gap: 9px; }
+    .foot-col ul li a {
+      font-size: 13px; color: var(--muted2);
+      transition: color var(--tr); text-decoration: none;
+    }
+    .foot-col ul li a:hover { color: var(--orange); }
+    .foot-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 14px;
+    }
+    .foot-copy {
+      font-family: var(--ff-mono); font-size: 11px; color: var(--muted2); letter-spacing: .04em;
+    }
+    .foot-legal { display: flex; gap: 18px; }
+    .foot-legal a {
+      font-size: 12px; color: var(--muted2); transition: color var(--tr); text-decoration: none;
+    }
+    .foot-legal a:hover { color: var(--muted); }
+
+    /* ══════════════════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════════════════ */
+    @media (max-width: 960px) {
+      .legal-layout { grid-template-columns: 1fr; }
+      .legal-toc { position: static; }
+      .toc-list { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+      .toc-item { padding: 6px 10px; }
+      .toc-divider { display: none; }
+      .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 0 18px; }
+      .header-breadcrumb { display: none; }
+      .data-row { flex-direction: column; gap: 4px; }
+      .data-key { min-width: unset; }
+      .foot-grid { grid-template-columns: 1fr; gap: 28px; }
+      .foot-bottom { flex-direction: column; align-items: flex-start; }
+      .legal-section h2 { font-size: 1.2rem; }
+    }
+    @media (max-width: 480px) {
+      .legal-hero h1 { font-size: 1.8rem; }
+      .hero-meta { flex-direction: column; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     HEADER — navigation simplifiée pour page satellite
+══════════════════════════════════════════════════════ -->
+<header>
+  <div id="site-header" role="banner">
+    <div class="wrap header-inner">
+
+      <!-- Logo → retour index.html -->
+      <a href="index.html" class="nav-logo" aria-label="SMDI — Retour à l'accueil">
+        <div class="nav-logo-sq" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 10a7 7 0 1 1 14 0A7 7 0 0 1 3 10z" stroke="#000" stroke-width="1.5"/>
+            <path d="M7 10h6M10 7v6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="nav-logo-name">SM<span>DI</span></div>
+      </a>
+
+      <!-- Fil d'Ariane -->
+      <nav class="header-breadcrumb" aria-label="Fil d'Ariane">
+        <a href="index.html">Accueil</a>
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="current" aria-current="page">Mentions légales</span>
+      </nav>
+
+      <!-- Actions droite -->
+      <div class="header-right">
+        <a href="index.html" class="btn btn-dark" aria-label="Retour au site SMDI">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Retour au site
+        </a>
+        <a href="smdi-portal.html#login" class="btn btn-primary" aria-label="Accéder à l'espace professionnel">
+          Espace Pro
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     HERO JURIDIQUE
+══════════════════════════════════════════════════════ -->
+<section class="legal-hero" aria-label="En-tête mentions légales">
+  <div class="wrap z1">
+    <div class="hero-label">Informations légales</div>
+    <h1>Mentions légales</h1>
+    <p>Informations légales et réglementaires relatives au site internet et aux services proposés par la société SMDI, conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN).</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">Dernière mise à jour : Janvier 2026</div>
+      <div class="hero-meta-item">Loi LCEN du 21 juin 2004</div>
+      <div class="hero-meta-item">RGPD applicable</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     CONTENU PRINCIPAL
+══════════════════════════════════════════════════════ -->
+<main>
+  <div class="wrap">
+    <div class="legal-layout">
+
+      <!-- ── Sommaire latéral ── -->
+      <aside>
+        <nav class="legal-toc" aria-label="Sommaire des mentions légales" id="toc">
+          <div class="toc-title">Sommaire</div>
+          <div class="toc-list">
+            <a href="#editeur"        class="toc-item active"><span class="toc-n">01</span>Éditeur du site</a>
+            <a href="#hebergement"    class="toc-item"><span class="toc-n">02</span>Hébergement</a>
+            <a href="#directeur"      class="toc-item"><span class="toc-n">03</span>Directeur de publication</a>
+            <a href="#propriete"      class="toc-item"><span class="toc-n">04</span>Propriété intellectuelle</a>
+            <a href="#donnees"        class="toc-item"><span class="toc-n">05</span>Données personnelles</a>
+            <a href="#cookies"        class="toc-item"><span class="toc-n">06</span>Cookies</a>
+            <a href="#responsabilite" class="toc-item"><span class="toc-n">07</span>Responsabilité</a>
+            <a href="#liens"          class="toc-item"><span class="toc-n">08</span>Liens hypertextes</a>
+            <a href="#droit"          class="toc-item"><span class="toc-n">09</span>Droit applicable</a>
+            <a href="#contact-ml"     class="toc-item"><span class="toc-n">10</span>Contact</a>
+          </div>
+          <div class="toc-divider"></div>
+          <div class="toc-updated">
+            <span>Mis à jour</span>
+            Janvier 2026
+          </div>
+        </nav>
+      </aside>
+
+      <!-- ── Articles juridiques ── -->
+      <article class="legal-content">
+
+        <!-- ══ 1. ÉDITEUR ══ -->
+        <section class="legal-section" id="editeur" aria-labelledby="h-editeur">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 01</span>
+            <h2 id="h-editeur">Éditeur du site</h2>
+          </div>
+
+          <div class="data-block">
+            <h3>Identification de la société</h3>
+            <div class="data-row">
+              <div class="data-key">Raison sociale</div>
+              <div class="data-val"><strong>SMDI</strong></div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Forme juridique</div>
+              <div class="data-val">SARL (Société à Responsabilité Limitée)</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Capital social</div>
+              <div class="data-val">XX 000 € (à compléter)</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">SIRET</div>
+              <div class="data-val">000 000 000 00000 (à compléter)</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">N° TVA intracommunautaire</div>
+              <div class="data-val">FR 00 000000000 (à compléter)</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">RCS</div>
+              <div class="data-val">Melun B XXX XXX XXX (à compléter)</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Code APE / NAF</div>
+              <div class="data-val">4662Z — Commerce de gros de machines et équipements</div>
+            </div>
+          </div>
+
+          <div class="data-block">
+            <h3>Coordonnées</h3>
+            <div class="data-row">
+              <div class="data-key">Siège social</div>
+              <div class="data-val">1 Rue René Dumont, 77380 Combs-la-Ville</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Téléphone</div>
+              <div class="data-val"><a href="tel:+33175137356">01 75 13 73 56</a></div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Email</div>
+              <div class="data-val"><a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a></div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Site internet</div>
+              <div class="data-val"><a href="index.html">www.smdi-lavage.fr</a></div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Horaires</div>
+              <div class="data-val">Lundi au Vendredi, 8h30 – 18h00</div>
+            </div>
+          </div>
+
+          <p class="legal-text">
+            SMDI est une société spécialisée dans la distribution de pièces et équipements professionnels destinés aux stations de lavage automobile et aux centres haute pression. Ses services sont exclusivement réservés aux professionnels disposant d'un numéro SIRET valide.
+          </p>
+        </section>
+
+        <!-- ══ 2. HÉBERGEMENT ══ -->
+        <section class="legal-section" id="hebergement" aria-labelledby="h-hebergement">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 02</span>
+            <h2 id="h-hebergement">Hébergement</h2>
+          </div>
+
+          <div class="data-block">
+            <h3>Prestataire d'hébergement</h3>
+            <div class="data-row">
+              <div class="data-key">Société</div>
+              <div class="data-val">À compléter (OVH, Infomaniak, AWS…)</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Siège social</div>
+              <div class="data-val">À compléter</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Téléphone</div>
+              <div class="data-val">À compléter</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Site web</div>
+              <div class="data-val">À compléter</div>
+            </div>
+          </div>
+
+          <p class="legal-text">
+            L'hébergeur est responsable du stockage physique des données du site. En cas de besoin, vous pouvez le contacter directement aux coordonnées indiquées ci-dessus.
+          </p>
+        </section>
+
+        <!-- ══ 3. DIRECTEUR DE PUBLICATION ══ -->
+        <section class="legal-section" id="directeur" aria-labelledby="h-directeur">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 03</span>
+            <h2 id="h-directeur">Directeur de publication</h2>
+          </div>
+
+          <div class="data-block">
+            <h3>Responsable éditorial</h3>
+            <div class="data-row">
+              <div class="data-key">Nom &amp; Prénom</div>
+              <div class="data-val">À compléter — Gérant de SMDI</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Qualité</div>
+              <div class="data-val">Gérant de la société SMDI</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Contact</div>
+              <div class="data-val"><a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a></div>
+            </div>
+          </div>
+
+          <p class="legal-text">
+            Conformément à l'article 6 de la loi n° 2004-575 du 21 juin 2004, le directeur de publication est responsable du contenu éditorial mis en ligne sur le présent site.
+          </p>
+        </section>
+
+        <!-- ══ 4. PROPRIÉTÉ INTELLECTUELLE ══ -->
+        <section class="legal-section" id="propriete" aria-labelledby="h-propriete">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 04</span>
+            <h2 id="h-propriete">Propriété intellectuelle</h2>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Contenu du site</h3>
+            <p class="legal-text">
+              L'ensemble des éléments constituant ce site — textes, graphiques, logotypes, icônes, images, clips audio et vidéo, logiciels, code source — est la propriété exclusive de SMDI ou de ses partenaires, et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.
+            </p>
+            <p class="legal-text">
+              Toute reproduction, représentation, modification, publication, adaptation, totale ou partielle, des éléments de ce site, quel que soit le moyen ou le procédé utilisé, est interdite <strong>sans autorisation écrite préalable</strong> de SMDI.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Marques et logos</h3>
+            <p class="legal-text">
+              Les marques et logos figurant sur ce site sont des marques déposées ou non, appartenant à SMDI ou à des tiers. Toute reproduction ou utilisation sans autorisation préalable est strictement interdite.
+            </p>
+          </div>
+
+          <div class="legal-notice">
+            <strong>Utilisation autorisée :</strong> La consultation du site à des fins personnelles et non commerciales est autorisée. Tout usage commercial des contenus nécessite un accord écrit de SMDI.
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Catalogue et données produits</h3>
+            <p class="legal-text">
+              Les références produits, tarifs, fiches techniques et documentations techniques disponibles dans l'espace professionnel sont exclusivement réservés aux comptes professionnels validés. Leur reproduction ou diffusion à des tiers est strictement interdite.
+            </p>
+          </div>
+        </section>
+
+        <!-- ══ 5. DONNÉES PERSONNELLES ══ -->
+        <section class="legal-section" id="donnees" aria-labelledby="h-donnees">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 05</span>
+            <h2 id="h-donnees">Protection des données personnelles</h2>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Responsable du traitement</h3>
+            <p class="legal-text">
+              SMDI, dont le siège social est situé 1 Rue René Dumont, 77380 Combs-la-Ville, est responsable du traitement des données personnelles collectées sur ce site.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Données collectées</h3>
+            <p class="legal-text">Dans le cadre de l'utilisation du site et de l'espace professionnel, SMDI collecte les données suivantes :</p>
+            <ul class="legal-list">
+              <li>Données d'identification : nom, prénom, raison sociale, numéro SIRET</li>
+              <li>Données de contact : adresse email professionnelle, numéro de téléphone</li>
+              <li>Données de navigation : adresse IP, pages visitées, durée de session (anonymisées)</li>
+              <li>Données commerciales : historique des commandes, devis, préférences produits</li>
+              <li>Données de facturation : adresse de livraison, mode de paiement (jamais de données bancaires complètes)</li>
+            </ul>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Finalités du traitement</h3>
+            <ul class="legal-list">
+              <li>Gestion des comptes professionnels et validation SIRET</li>
+              <li>Traitement des commandes et suivi des livraisons</li>
+              <li>Établissement des devis et factures</li>
+              <li>Communication commerciale avec les clients professionnels</li>
+              <li>Amélioration des services et du site</li>
+              <li>Respect des obligations légales et comptables</li>
+            </ul>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Base légale</h3>
+            <p class="legal-text">
+              Les traitements effectués reposent sur les bases légales suivantes, conformément au Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679) :
+            </p>
+            <ul class="legal-list">
+              <li><strong>Exécution d'un contrat</strong> : traitement des commandes, gestion des comptes</li>
+              <li><strong>Intérêt légitime</strong> : amélioration des services, sécurité du site</li>
+              <li><strong>Obligation légale</strong> : conservation des documents comptables et fiscaux</li>
+              <li><strong>Consentement</strong> : newsletters, communications commerciales optionnelles</li>
+            </ul>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Durée de conservation</h3>
+            <div class="data-block">
+              <h3>Tableaux de rétention</h3>
+              <div class="data-row">
+                <div class="data-key">Données de compte</div>
+                <div class="data-val">Durée de la relation commerciale + 3 ans</div>
+              </div>
+              <div class="data-row">
+                <div class="data-key">Documents comptables</div>
+                <div class="data-val">10 ans (obligation légale)</div>
+              </div>
+              <div class="data-row">
+                <div class="data-key">Données de navigation</div>
+                <div class="data-val">13 mois maximum</div>
+              </div>
+              <div class="data-row">
+                <div class="data-key">Données de prospection</div>
+                <div class="data-val">3 ans à compter du dernier contact</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Vos droits</h3>
+            <p class="legal-text">
+              Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits suivants sur vos données personnelles :
+            </p>
+            <ul class="legal-list">
+              <li><strong>Droit d'accès</strong> : obtenir la confirmation du traitement et une copie de vos données</li>
+              <li><strong>Droit de rectification</strong> : faire corriger des données inexactes ou incomplètes</li>
+              <li><strong>Droit à l'effacement</strong> : demander la suppression de vos données dans les cas prévus par la loi</li>
+              <li><strong>Droit à la portabilité</strong> : recevoir vos données dans un format structuré et lisible</li>
+              <li><strong>Droit d'opposition</strong> : vous opposer au traitement de vos données à des fins de prospection</li>
+              <li><strong>Droit à la limitation</strong> : demander la suspension temporaire d'un traitement</li>
+            </ul>
+            <p class="legal-text">
+              Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a> en joignant une copie d'une pièce d'identité. Délai de réponse : <strong>1 mois maximum</strong>. En cas de litige, vous pouvez saisir la <a href="https://www.cnil.fr" target="_blank" rel="noopener">CNIL</a>.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Destinataires des données</h3>
+            <p class="legal-text">
+              Vos données sont destinées aux équipes internes de SMDI (commercial, technique, comptabilité). Elles peuvent être transmises à des sous-traitants techniques (hébergeur, transporteurs, prestataires de paiement) dans le strict cadre de leur mission et sous contrat de traitement de données.
+            </p>
+            <p class="legal-text">
+              <strong>SMDI ne vend ni ne loue vos données à des tiers.</strong> Aucune donnée n'est transférée en dehors de l'Union Européenne sans garanties appropriées.
+            </p>
+          </div>
+        </section>
+
+        <!-- ══ 6. COOKIES ══ -->
+        <section class="legal-section" id="cookies" aria-labelledby="h-cookies">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 06</span>
+            <h2 id="h-cookies">Politique des cookies</h2>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Qu'est-ce qu'un cookie ?</h3>
+            <p class="legal-text">
+              Un cookie est un petit fichier texte déposé sur votre terminal (ordinateur, tablette, smartphone) lors de la visite d'un site web. Il permet au site de mémoriser des informations sur votre visite.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Cookies utilisés sur ce site</h3>
+            <div class="data-block">
+              <h3>Tableau des cookies</h3>
+              <div class="data-row">
+                <div class="data-key">Session B2B</div>
+                <div class="data-val">Maintien de la session dans l'espace pro · Durée : session · Nécessaire</div>
+              </div>
+              <div class="data-row">
+                <div class="data-key">Préférences</div>
+                <div class="data-val">Mémorisation des préférences d'affichage · Durée : 12 mois · Nécessaire</div>
+              </div>
+              <div class="data-row">
+                <div class="data-key">Analytics</div>
+                <div class="data-val">Mesure d'audience anonymisée · Durée : 13 mois · Consentement requis</div>
+              </div>
+              <div class="data-row">
+                <div class="data-key">Marketing</div>
+                <div class="data-val">Aucun cookie publicitaire tiers · Non applicable</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Gestion de vos cookies</h3>
+            <p class="legal-text">
+              Vous pouvez à tout moment modifier vos préférences de cookies via les paramètres de votre navigateur. La désactivation des cookies strictement nécessaires peut affecter le fonctionnement de l'espace professionnel.
+            </p>
+            <ul class="legal-list">
+              <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Google Chrome</a></li>
+              <li><a href="https://support.mozilla.org/fr/kb/cookies-informations-sites-enregistrent" target="_blank" rel="noopener">Mozilla Firefox</a></li>
+              <li><a href="https://support.apple.com/fr-fr/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Apple Safari</a></li>
+              <li><a href="https://support.microsoft.com/fr-fr/windows/supprimer-et-gérer-les-cookies" target="_blank" rel="noopener">Microsoft Edge</a></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ══ 7. RESPONSABILITÉ ══ -->
+        <section class="legal-section" id="responsabilite" aria-labelledby="h-responsabilite">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 07</span>
+            <h2 id="h-responsabilite">Limitation de responsabilité</h2>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Contenu du site</h3>
+            <p class="legal-text">
+              SMDI s'efforce de maintenir des informations actualisées et exactes sur ce site. Cependant, des erreurs ou omissions peuvent survenir. SMDI ne saurait être tenue responsable des dommages directs ou indirects résultant de l'utilisation des informations publiées.
+            </p>
+            <p class="legal-text">
+              Les fiches produits, tarifs et informations techniques présentés sur l'espace professionnel sont fournis à titre indicatif. Seul le bon de commande signé par les deux parties fait foi contractuellement.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Disponibilité du service</h3>
+            <p class="legal-text">
+              SMDI met en œuvre tous les moyens raisonnables pour assurer la disponibilité du site et du portail professionnel. Toutefois, des interruptions de service peuvent survenir pour maintenance, mises à jour ou incidents techniques. SMDI ne saurait être tenue responsable des pertes résultant de ces interruptions.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Espace professionnel</h3>
+            <p class="legal-text">
+              L'accès à l'espace professionnel est conditionné à la création d'un compte valide et à la validation manuelle par nos équipes. L'utilisateur est seul responsable de la confidentialité de ses identifiants de connexion. Toute utilisation frauduleuse d'un compte doit être signalée immédiatement à <a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a>.
+            </p>
+          </div>
+        </section>
+
+        <!-- ══ 8. LIENS HYPERTEXTES ══ -->
+        <section class="legal-section" id="liens" aria-labelledby="h-liens">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 08</span>
+            <h2 id="h-liens">Liens hypertextes</h2>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Liens sortants</h3>
+            <p class="legal-text">
+              Ce site peut contenir des liens vers des sites tiers. SMDI n'exerce aucun contrôle sur ces sites et décline toute responsabilité quant à leur contenu, leurs pratiques de confidentialité ou leur disponibilité.
+            </p>
+          </div>
+
+          <div class="legal-subsection">
+            <h3>Liens entrants</h3>
+            <p class="legal-text">
+              Tout lien hypertexte pointant vers ce site doit faire l'objet d'une autorisation préalable écrite de SMDI. Les liens de type deep linking (pointant directement vers une page interne de l'espace professionnel) sont strictement interdits sans accord écrit.
+            </p>
+          </div>
+        </section>
+
+        <!-- ══ 9. DROIT APPLICABLE ══ -->
+        <section class="legal-section" id="droit" aria-labelledby="h-droit">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 09</span>
+            <h2 id="h-droit">Droit applicable et juridiction</h2>
+          </div>
+
+          <p class="legal-text">
+            Le présent site et les présentes mentions légales sont soumis au droit français. En cas de litige relatif à l'utilisation du site, les tribunaux compétents sont ceux du ressort de la Cour d'Appel de Paris, sauf disposition légale contraire.
+          </p>
+
+          <div class="legal-subsection">
+            <h3>Textes de référence</h3>
+            <ul class="legal-list">
+              <li>Loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN)</li>
+              <li>Loi n° 78-17 du 6 janvier 1978 modifiée relative à l'informatique, aux fichiers et aux libertés</li>
+              <li>Règlement (UE) 2016/679 du 27 avril 2016 — Règlement Général sur la Protection des Données (RGPD)</li>
+              <li>Directive 2002/58/CE modifiée relative à la vie privée et aux communications électroniques</li>
+              <li>Code civil français — articles relatifs aux contrats à distance</li>
+            </ul>
+          </div>
+
+          <div class="legal-info">
+            Autorité de contrôle compétente : Commission Nationale de l'Informatique et des Libertés (CNIL) — www.cnil.fr — 3 Place de Fontenoy, 75007 Paris
+          </div>
+        </section>
+
+        <!-- ══ 10. CONTACT ══ -->
+        <section class="legal-section" id="contact-ml" aria-labelledby="h-contact-ml">
+          <span class="section-anchor" aria-hidden="true"></span>
+          <div class="legal-section-head">
+            <span class="section-num">Article 10</span>
+            <h2 id="h-contact-ml">Contact pour questions légales</h2>
+          </div>
+
+          <div class="data-block">
+            <h3>Coordonnées du responsable</h3>
+            <div class="data-row">
+              <div class="data-key">Société</div>
+              <div class="data-val">SMDI</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Adresse</div>
+              <div class="data-val">1 Rue René Dumont, 77380 Combs-la-Ville</div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Email (RGPD)</div>
+              <div class="data-val"><a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a></div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Téléphone</div>
+              <div class="data-val"><a href="tel:+33175137356">01 75 13 73 56</a></div>
+            </div>
+            <div class="data-row">
+              <div class="data-key">Délai de réponse</div>
+              <div class="data-val">1 mois maximum (RGPD) · 24h ouvrées pour les demandes commerciales</div>
+            </div>
+          </div>
+
+          <p class="legal-text">
+            Pour toute demande relative à vos droits sur vos données personnelles, merci d'adresser un email à <a href="mailto:contact@smdi-lavage.fr">contact@smdi-lavage.fr</a> avec l'objet <strong>"Demande RGPD"</strong> en joignant une copie d'une pièce d'identité valide.
+          </p>
+
+          <p class="legal-text">
+            Pour toute question juridique relative au site ou aux CGV professionnelles, contactez notre service juridique aux coordonnées ci-dessus.
+          </p>
+
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:28px;">
+            <a href="index.html#contact" class="btn btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Nous contacter
+            </a>
+            <a href="index.html" class="btn btn-dark">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Retour au site
+            </a>
+          </div>
+        </section>
+
+      </article><!-- /legal-content -->
+    </div><!-- /legal-layout -->
+  </div><!-- /wrap -->
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     FOOTER — copie conforme du footer de index.html
+══════════════════════════════════════════════════════ -->
+<footer role="contentinfo">
+  <div class="wrap">
+    <div class="foot-grid">
+
+      <div class="foot-brand">
+        <a href="index.html" class="nav-logo" aria-label="SMDI — Retour à l'accueil">
+          <div class="nav-logo-sq" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M3 10a7 7 0 1 1 14 0A7 7 0 0 1 3 10z" stroke="#000" stroke-width="1.5"/>
+              <path d="M7 10h6M10 7v6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="nav-logo-name">SM<span>DI</span></div>
+        </a>
+        <p>Équipements &amp; pièces professionnelles pour stations de lavage automobile. Île-de-France &amp; France entière.</p>
+      </div>
+
+      <div class="foot-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="index.html#catalogue">Catalogue vitrine</a></li>
+          <li><a href="index.html#prestations">Prestations</a></li>
+          <li><a href="index.html#comment">Fonctionnement</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Espace Pro</h4>
+        <ul>
+          <li><a href="smdi-portal.html#login">Connexion</a></li>
+          <li><a href="smdi-portal.html#register">Créer un compte</a></li>
+          <li><a href="smdi-portal.html#catalogue">Catalogue B2B</a></li>
+          <li><a href="smdi-portal.html#quote">Demander un devis</a></li>
+          <li><a href="smdi-portal.html#dashboard">Mon dashboard</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Informations</h4>
+        <ul>
+          <li><a href="mentions-legales.html" aria-current="page" style="color:var(--orange);">Mentions légales</a></li>
+          <li><a href="cgv.html">CGV professionnelles</a></li>
+          <li><a href="donnees-personnelles.html">Données personnelles</a></li>
+          <li><a href="cookies.html">Politique cookies</a></li>
+          <li><a href="index.html#contact">Nous contacter</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="foot-bottom">
+      <p class="foot-copy">© 2026 SMDI — Tous droits réservés · 1 Rue René Dumont, 77380 Combs-la-Ville · SIRET 000 000 000 00000</p>
+      <nav class="foot-legal" aria-label="Liens légaux">
+        <a href="mentions-legales.html" aria-current="page">Mentions légales</a>
+        <a href="cgv.html">CGV</a>
+        <a href="donnees-personnelles.html">Confidentialité</a>
+        <a href="cookies.html">Cookies</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT — lightweight, vanilla uniquement
+══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── Scroll shadow sur le header ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+/* ── Sommaire actif au scroll ───────────────────────────────────────
+   Met en surbrillance l'article courant dans le TOC latéral
+   au fil du défilement de la page.
+─────────────────────────────────────────────────────────────────── */
+(function initTocSpy() {
+  const sections = document.querySelectorAll('.legal-section[id]');
+  const tocLinks = document.querySelectorAll('.toc-item');
+  const NAV_H    = parseInt(
+    getComputedStyle(document.documentElement).getPropertyValue('--nav-h')
+  ) || 64;
+
+  if (!sections.length || !tocLinks.length) return;
+
+  function getActive() {
+    let active = sections[0].id;
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - NAV_H - 32) {
+        active = sec.id;
+      }
+    });
+    return active;
+  }
+
+  function updateToc() {
+    const current = getActive();
+    tocLinks.forEach(link => {
+      const href   = link.getAttribute('href');
+      const isActive = href === '#' + current;
+      link.classList.toggle('active', isActive);
+      if (isActive) {
+        // Scroll le toc vers le lien actif sur mobile (flex-row)
+        link.scrollIntoView && link.scrollIntoView({ block: 'nearest', inline: 'center' });
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateToc, { passive: true });
+  updateToc(); // initialisation
+})();
+
+/* ── Scroll fluide sur les liens d'ancre ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id     = a.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const NAV_H = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--nav-h')
+    ) || 64;
+    const top = target.getBoundingClientRect().top + window.scrollY - NAV_H - 16;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+</script>
+
+</body>
+</html>

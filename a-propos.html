@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="À propos de SMDI — Plus de 20 ans d'expertise en équipements professionnels pour stations de lavage automobile. Partenaire technique des professionnels du lavage." />
+  <title>À propos — SMDI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design system — tokens identiques à index.html ── */
+    :root {
+      --bg:#0a0a0a; --bg2:#0f0f0f; --bg3:#141414; --bg4:#1a1a1a;
+      --card:#111111; --border:#1e1e1e; --border2:#252525; --border3:#303030;
+      --text:#f0f0f0; --text2:#e0e0e0; --muted:#888; --muted2:#555;
+      --orange:#ff4d00; --orange-h:#ff6520;
+      --orange-d:rgba(255,77,0,.09); --orange-g:rgba(255,77,0,.28);
+      --green:#22c55e; --yellow:#f59e0b;
+      --ff-title:'Space Grotesk',sans-serif;
+      --ff-body:'Inter',sans-serif;
+      --ff-mono:'Space Mono',monospace;
+      --nav-h:64px; --max-w:1280px; --r:2px; --tr:.2s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+    body{background:var(--bg);color:var(--text2);font-family:var(--ff-body);font-size:15px;line-height:1.65;overflow-x:hidden}
+    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.68' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.02'/%3E%3C/svg%3E");opacity:.55}
+    a{color:inherit;text-decoration:none} ul{list-style:none} img{display:block;max-width:100%}
+    button{font-family:var(--ff-body);cursor:pointer;border:none;background:none}
+    ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border3);border-radius:2px}
+
+    .wrap{width:100%;max-width:var(--max-w);margin:0 auto;padding:0 28px}
+    .z1{position:relative;z-index:1}
+
+    /* ── Boutons ── */
+    .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-body);font-size:13px;font-weight:600;padding:10px 20px;border-radius:var(--r);transition:all var(--tr);cursor:pointer;border:none;white-space:nowrap;text-decoration:none;position:relative;overflow:hidden}
+    .btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.06);opacity:0;transition:opacity var(--tr)}
+    .btn:hover::after{opacity:1} .btn:active{transform:scale(.985)}
+    .btn-primary{background:var(--orange);color:#000;font-weight:700}
+    .btn-primary:hover{background:var(--orange-h);box-shadow:0 6px 24px var(--orange-g);transform:translateY(-1px)}
+    .btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+    .btn-outline:hover{border-color:var(--orange);color:var(--orange);transform:translateY(-1px)}
+    .btn-dark{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+    .btn-dark:hover{background:var(--bg4);border-color:var(--border3);transform:translateY(-1px)}
+    .btn-ghost{background:transparent;color:var(--orange);border:1px solid var(--orange)}
+    .btn-ghost:hover{background:var(--orange-d)}
+    .btn-sm{padding:8px 16px;font-size:12px}
+    .btn-lg{padding:15px 32px;font-size:14px;font-weight:700}
+
+    /* ── Header ── */
+    #site-header{position:sticky;top:0;left:0;right:0;height:var(--nav-h);background:rgba(10,10,10,.94);backdrop-filter:blur(22px) saturate(1.5);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;transition:box-shadow var(--tr)}
+    #site-header.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.7)}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--ff-title);font-size:20px;font-weight:800;color:var(--text);text-decoration:none;flex-shrink:0}
+    .nav-logo-sq{width:34px;height:34px;background:var(--orange);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .nav-logo-sq svg{width:18px;height:18px}
+    .nav-logo-name span{color:var(--orange)}
+    .header-bc{display:flex;align-items:center;gap:8px;font-family:var(--ff-mono);font-size:11px;color:var(--muted)}
+    .header-bc .sep{color:var(--orange)} .header-bc .cur{color:var(--text2);font-weight:700}
+    .header-bc a{transition:color var(--tr)} .header-bc a:hover{color:var(--text2)}
+    .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+    /* ── Typo sections ── */
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:14px}
+    .eyebrow::before{content:'';width:18px;height:2px;background:var(--orange)}
+    .section-title{font-family:var(--ff-title);font-size:clamp(1.9rem,3.2vw,2.8rem);font-weight:800;line-height:1.08;color:var(--text);letter-spacing:-.025em;margin-bottom:14px}
+    .section-title em{font-style:normal;color:var(--orange)}
+    .section-sub{font-size:15px;color:var(--muted);line-height:1.8;max-width:560px}
+    .section{padding:88px 0}
+    .section-alt{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+
+    /* ── Hero ── */
+    .page-hero{padding:calc(var(--nav-h) + 64px) 0 60px;position:relative;overflow:hidden}
+    .page-hero::before{content:'';position:absolute;inset:0;z-index:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:58px 58px;opacity:.14;mask-image:radial-gradient(ellipse 80% 70% at 50% 40%,black 20%,transparent 100%)}
+    .page-hero::after{content:'';position:absolute;bottom:-100px;left:-60px;width:520px;height:520px;background:radial-gradient(circle,rgba(255,77,0,.07) 0%,transparent 65%);pointer-events:none;z-index:0}
+
+    /* ── Stats strip ── */
+    .stats-strip{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:0}
+    .stats-inner{display:flex;overflow-x:auto;scrollbar-width:none}
+    .stats-inner::-webkit-scrollbar{display:none}
+    .stat-item{display:flex;align-items:center;gap:14px;padding:22px 36px;flex-shrink:0;border-right:1px solid var(--border);transition:background var(--tr)}
+    .stat-item:hover{background:var(--bg3)}
+    .stat-icon{width:38px;height:38px;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .stat-icon svg{width:18px;height:18px}
+    .stat-icon svg path,.stat-icon svg rect,.stat-icon svg circle,.stat-icon svg polyline{stroke:var(--orange);fill:none;stroke-width:1.8}
+    .stat-num{font-family:var(--ff-title);font-size:1.6rem;font-weight:800;color:var(--text);line-height:1}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:2px}
+
+    /* ── Histoire 2 colonnes ── */
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+
+    /* Frise chronologique */
+    .timeline{display:flex;flex-direction:column;gap:0}
+    .tl-item{display:flex;gap:20px;padding:22px 0;border-bottom:1px solid var(--border);position:relative}
+    .tl-item:first-child{border-top:1px solid var(--border)}
+    .tl-year{font-family:var(--ff-title);font-size:1.5rem;font-weight:800;color:var(--orange);min-width:68px;flex-shrink:0;line-height:1.1;padding-top:2px}
+    .tl-body h3{font-family:var(--ff-title);font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .tl-body p{font-size:13px;color:var(--muted);line-height:1.65}
+
+    /* Bloc visuel droite */
+    .about-visual-box{background:var(--bg3);border:1px solid var(--border2);padding:44px;position:relative;overflow:hidden}
+    .about-visual-box::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--orange) 0%,transparent 100%)}
+    .about-visual-box::after{content:'';position:absolute;bottom:-50px;right:-50px;width:180px;height:180px;border:30px solid var(--border);border-radius:50%;opacity:.3}
+    .about-big-quote{font-family:var(--ff-title);font-size:clamp(1.3rem,2.2vw,1.8rem);font-weight:800;line-height:1.25;color:var(--text);margin-bottom:20px;position:relative;z-index:1}
+    .about-big-quote span{color:var(--orange)}
+    .about-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:24px;position:relative;z-index:1}
+    .atag{font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:5px 11px;border:1px solid var(--border2);color:var(--muted);transition:all var(--tr)}
+    .atag:hover{border-color:var(--orange);color:var(--orange)}
+    .about-badge{position:absolute;bottom:-18px;right:-16px;background:var(--orange);color:#000;font-family:var(--ff-title);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;display:flex;flex-direction:column;z-index:2}
+    .about-badge strong{font-size:22px;line-height:1}
+
+    /* ── Valeurs ── */
+    .values-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);border:1px solid var(--border)}
+    .value-card{background:var(--card);padding:32px 24px;position:relative;overflow:hidden;transition:background var(--tr)}
+    .value-card:hover{background:var(--bg3)}
+    .value-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform var(--tr)}
+    .value-card:hover::before{transform:scaleX(1)}
+    .value-icon{width:44px;height:44px;background:var(--bg);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:all var(--tr)}
+    .value-card:hover .value-icon{background:var(--orange);border-color:var(--orange)}
+    .value-icon svg{width:20px;height:20px}
+    .value-icon svg path,.value-icon svg circle,.value-icon svg rect,.value-icon svg polyline{stroke:var(--orange);fill:none;stroke-width:1.8;transition:stroke var(--tr)}
+    .value-card:hover .value-icon svg path,.value-card:hover .value-icon svg circle,.value-card:hover .value-icon svg rect,.value-card:hover .value-icon svg polyline{stroke:#000}
+    .value-title{font-family:var(--ff-title);font-size:16px;font-weight:800;color:var(--text);margin-bottom:10px}
+    .value-desc{font-size:13px;color:var(--muted);line-height:1.7}
+
+    /* ── Équipe / Engagement ── */
+    .engagement-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);border:1px solid var(--border)}
+    .eng-card{background:var(--card);padding:36px 32px;display:flex;gap:20px;align-items:flex-start;transition:background var(--tr)}
+    .eng-card:hover{background:var(--bg3)}
+    .eng-icon{width:48px;height:48px;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--tr)}
+    .eng-card:hover .eng-icon{background:var(--orange);border-color:var(--orange)}
+    .eng-icon svg{width:22px;height:22px}
+    .eng-icon svg path,.eng-icon svg line,.eng-icon svg polyline,.eng-icon svg circle,.eng-icon svg rect{stroke:var(--orange);fill:none;stroke-width:1.8;transition:stroke var(--tr)}
+    .eng-card:hover .eng-icon svg path,.eng-card:hover .eng-icon svg line,.eng-card:hover .eng-icon svg polyline,.eng-card:hover .eng-icon svg circle,.eng-card:hover .eng-icon svg rect{stroke:#000}
+    .eng-title{font-family:var(--ff-title);font-size:15px;font-weight:800;color:var(--text);margin-bottom:8px}
+    .eng-text{font-size:13px;color:var(--muted);line-height:1.7}
+
+    /* ── Zone d'intervention ── */
+    .zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+    .zone-visual{background:var(--bg3);border:1px solid var(--border2);padding:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative}
+    .zone-visual::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--orange)}
+    .zone-big{font-family:var(--ff-title);font-size:4rem;font-weight:800;color:var(--orange);line-height:1;margin-bottom:8px}
+    .zone-label{font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+    .zone-depts{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;justify-content:center}
+    .zone-dept{font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border:1px solid var(--border2);color:var(--muted);transition:all var(--tr)}
+    .zone-dept:hover{border-color:var(--orange);color:var(--orange)}
+    .zone-list{display:flex;flex-direction:column;gap:12px}
+    .zone-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+    .zone-item:first-child{border-top:1px solid var(--border)}
+    .zone-item::before{content:'→';color:var(--orange);font-size:12px;flex-shrink:0;margin-top:2px}
+
+    /* ── CTA Banner ── */
+    .cta-section{padding:72px 0;text-align:center;position:relative;overflow:hidden}
+    .cta-section::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:52px 52px;opacity:.1}
+    .cta-section::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:240px;background:radial-gradient(ellipse,rgba(255,77,0,.07),transparent 70%);pointer-events:none}
+    .cta-inner{position:relative;z-index:1}
+    .cta-title{font-family:var(--ff-title);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;color:var(--text);letter-spacing:-.025em;line-height:1.1;margin-bottom:14px}
+    .cta-title em{font-style:normal;color:var(--orange)}
+    .cta-sub{font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.75;max-width:520px;margin-left:auto;margin-right:auto}
+    .cta-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+
+    /* ── Footer ── */
+    footer{background:#050505;border-top:1px solid var(--border);padding:56px 0 32px;position:relative;z-index:1}
+    .foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px;border-bottom:1px solid var(--border);margin-bottom:28px}
+    .foot-brand p{font-size:13px;color:var(--muted2);line-height:1.75;max-width:250px;margin-top:14px}
+    .foot-col h4{font-family:var(--ff-title);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text);margin-bottom:16px}
+    .foot-col ul{display:flex;flex-direction:column;gap:9px}
+    .foot-col ul li a{font-size:13px;color:var(--muted2);transition:color var(--tr)}
+    .foot-col ul li a:hover{color:var(--orange)}
+    .foot-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+    .foot-copy{font-family:var(--ff-mono);font-size:11px;color:var(--muted2);letter-spacing:.04em}
+    .foot-legal{display:flex;gap:18px}
+    .foot-legal a{font-size:12px;color:var(--muted2);transition:color var(--tr)}
+    .foot-legal a:hover{color:var(--muted)}
+
+    /* ── Reveal ── */
+    .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+    .reveal.in{opacity:1;transform:none}
+    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+    /* ── Responsive ── */
+    @media(max-width:1024px){.about-grid,.zone-grid{grid-template-columns:1fr;gap:48px}.about-badge{display:none}.values-grid{grid-template-columns:repeat(2,1fr)}.engagement-grid{grid-template-columns:1fr}.foot-grid{grid-template-columns:1fr 1fr;gap:32px}}
+    @media(max-width:768px){.wrap{padding:0 18px}.header-bc{display:none}.values-grid{grid-template-columns:1fr}.foot-grid{grid-template-columns:1fr}.foot-bottom{flex-direction:column;align-items:flex-start}.cta-actions{flex-direction:column;align-items:center}.section{padding:64px 0}}
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div id="site-header" role="banner">
+    <div class="wrap header-inner">
+      <a href="index.html" class="nav-logo" aria-label="SMDI — Retour à l'accueil">
+        <div class="nav-logo-sq" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1 1 14 0A7 7 0 0 1 3 10z" stroke="#000" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="nav-logo-name">SM<span>DI</span></div>
+      </a>
+      <nav class="header-bc" aria-label="Fil d'Ariane">
+        <a href="index.html">Accueil</a>
+        <span class="sep">/</span>
+        <span class="cur" aria-current="page">À propos</span>
+      </nav>
+      <div class="header-right">
+        <a href="index.html" class="btn btn-dark btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Retour
+        </a>
+        <a href="smdi-portal.html#login" class="btn btn-dark btn-sm">Connexion</a>
+        <a href="smdi-portal.html#register" class="btn btn-primary btn-sm">
+          Espace Pro
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ HERO ═══ -->
+<section class="page-hero" aria-label="À propos de SMDI">
+  <div class="wrap z1">
+    <div class="eyebrow reveal">À propos de SMDI</div>
+    <h1 class="section-title reveal d1" style="font-size:clamp(2.4rem,4.5vw,4rem);letter-spacing:-.03em;max-width:720px">
+      Partenaire technique des<br><em>stations de lavage</em><br>depuis plus de 20 ans.
+    </h1>
+    <p class="section-sub reveal d2" style="max-width:600px;font-size:16px">
+      SMDI accompagne les professionnels du lavage automobile et de la haute pression dans la sélection, la fourniture et la maintenance de leurs équipements — avec rigueur, réactivité et expertise sectorielle.
+    </p>
+    <div class="reveal d3" style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap">
+      <a href="smdi-portal.html#register" class="btn btn-primary btn-lg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+        Créer un compte pro
+      </a>
+      <a href="index.html#contact" class="btn btn-outline btn-lg">Nous contacter</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<div class="stats-strip" role="region" aria-label="Chiffres clés">
+  <div class="wrap">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="1"/><polyline points="8 21 12 17 16 21"/></svg></div>
+        <div><div class="stat-num">+1 500</div><div class="stat-label">Références pro</div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div><div class="stat-num">20+</div><div class="stat-label">Ans d'expertise</div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><div class="stat-num">&lt;4h</div><div class="stat-label">Dépannage urgence IDF</div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <div><div class="stat-num">48h</div><div class="stat-label">Livraison France</div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <div><div class="stat-num">500+</div><div class="stat-label">Clients professionnels</div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg></div>
+        <div><div class="stat-num">–15%</div><div class="stat-label">Remise max Platinum</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NOTRE HISTOIRE ═══ -->
+<section class="section" id="histoire" aria-labelledby="h-histoire">
+  <div class="wrap">
+    <div class="about-grid">
+      <!-- Frise gauche -->
+      <div>
+        <div class="eyebrow reveal">Notre histoire</div>
+        <h2 class="section-title reveal d1" id="h-histoire">
+          Construits autour de<br><em>l'expertise terrain</em>
+        </h2>
+        <p class="section-sub reveal d2" style="margin-bottom:36px">
+          SMDI est né de la conviction que les professionnels du lavage méritent un fournisseur qui comprend vraiment leurs contraintes : disponibilité des pièces, réactivité en cas de panne, tarifs justes.
+        </p>
+        <div class="timeline reveal d2">
+          <div class="tl-item">
+            <div class="tl-year">2003</div>
+            <div class="tl-body">
+              <h3>Création de SMDI</h3>
+              <p>Fondée à Combs-la-Ville (Seine-et-Marne), SMDI démarre avec un catalogue de 200 références destinées aux gérants de stations de lavage en Île-de-France.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2008</div>
+            <div class="tl-body">
+              <h3>Expansion catalogue & SAV technique</h3>
+              <p>Lancement d'une offre de maintenance sur site. Le catalogue passe à 600 références. Première équipe de techniciens certifiés Kärcher et WashTec.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2015</div>
+            <div class="tl-body">
+              <h3>Couverture France entière</h3>
+              <p>Partenariats logistiques Colissimo Pro et Chronopost pour une livraison en 48h en France métropolitaine. Extension de l'offre traitement de l'eau et osmoseurs industriels.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2020</div>
+            <div class="tl-body">
+              <h3>Digitalisation de l'offre B2B</h3>
+              <p>Lancement du portail professionnel en ligne avec tarifs personnalisés, gestion des devis et suivi de commandes. +1 500 références disponibles 24h/24.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2026</div>
+            <div class="tl-body">
+              <h3>Nouveau portail B2B v2</h3>
+              <p>Espace professionnel entièrement repensé avec validation SIRET, niveaux de compte Bronze à Platinum, dashboard client et catalogue complet en temps réel.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Visual droite -->
+      <div class="reveal d2" style="position:relative">
+        <div class="about-visual-box">
+          <div class="about-big-quote">
+            Le bon équipement, livré vite, au juste <span>prix pro</span>.
+          </div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:24px;position:relative;z-index:1">
+            Depuis 20 ans, nous n'avons qu'une seule obsession : permettre à vos stations de tourner sans interruption. Chaque référence de notre catalogue a été sélectionnée pour sa fiabilité, sa compatibilité et sa disponibilité.
+          </p>
+          <div class="about-tags">
+            <span class="atag">Haute pression</span>
+            <span class="atag">Lavage auto</span>
+            <span class="atag">Osmoseurs</span>
+            <span class="atag">Pièces détachées</span>
+            <span class="atag">Kärcher</span>
+            <span class="atag">WashTec</span>
+            <span class="atag">Istobal</span>
+            <span class="atag">B2B exclusif</span>
+          </div>
+          <div class="about-badge"><strong>ISO 898</strong>Certifié</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NOS VALEURS ═══ -->
+<section class="section section-alt" id="valeurs" aria-labelledby="h-valeurs">
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:52px">
+      <div class="eyebrow reveal" style="justify-content:center">Nos valeurs</div>
+      <h2 class="section-title reveal d1" id="h-valeurs" style="margin-bottom:0">Ce qui nous définit</h2>
+    </div>
+    <div class="values-grid reveal d1">
+      <div class="value-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="value-title">Réactivité</div>
+        <p class="value-desc">Dépannage en moins de 4h sur tout le territoire francilien. Astreinte technique disponible. Parce qu'un portique à l'arrêt, c'est du chiffre d'affaires perdu.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="value-title">Fiabilité</div>
+        <p class="value-desc">Chaque pièce est certifiée et testée. Nos fournisseurs sont sélectionnés selon des critères stricts de qualité. Nous ne vendons que ce que nous garantissons.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="value-title">Expertise</div>
+        <p class="value-desc">Nos techniciens sont certifiés par les grands constructeurs (Kärcher, WashTec, Istobal). 20 ans de savoir-faire sur le terrain, pas dans des brochures.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg></div>
+        <div class="value-title">Transparence</div>
+        <p class="value-desc">Des tarifs B2B clairs, personnalisés selon votre volume. Aucun frais caché. La validation SIRET garantit que vous traitez avec de vrais professionnels.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NOS ENGAGEMENTS ═══ -->
+<section class="section" id="engagements" aria-labelledby="h-eng">
+  <div class="wrap">
+    <div class="eyebrow reveal">Nos engagements</div>
+    <h2 class="section-title reveal d1" id="h-eng">Ce que vous pouvez<br><em>attendre de nous</em></h2>
+    <p class="section-sub reveal d2" style="margin-bottom:48px">Des engagements concrets, pas des promesses marketing.</p>
+    <div class="engagement-grid reveal d1">
+      <div class="eng-card">
+        <div class="eng-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <div>
+          <div class="eng-title">Livraison 48h France entière</div>
+          <p class="eng-text">Colissimo Pro, Chronopost ou Mondial Relay selon vos besoins. Retrait gratuit à notre dépôt de Combs-la-Ville du lundi au vendredi, 8h30–18h00. Expédition le jour même pour les commandes passées avant 14h.</p>
+        </div>
+      </div>
+      <div class="eng-card">
+        <div class="eng-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
+        <div>
+          <div class="eng-title">Devis sous 4h ouvrées</div>
+          <p class="eng-text">Chaque demande de devis reçoit une réponse dans les 4 heures ouvrées. Pour les comptes Gold et Platinum, un commercial dédié suit personnellement chaque projet, des grandes quantités aux commandes urgentes.</p>
+        </div>
+      </div>
+      <div class="eng-card">
+        <div class="eng-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div>
+          <div class="eng-title">Dépannage &lt;4h en Île-de-France</div>
+          <p class="eng-text">Techniciens disponibles sur tout le territoire francilien. Intervention garantie en moins de 4 heures pour les pannes urgentes. Rapport d'intervention systématique et pièces prélevées sur stock immédiat.</p>
+        </div>
+      </div>
+      <div class="eng-card">
+        <div class="eng-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div>
+          <div class="eng-title">Catalogue certifié & tracé</div>
+          <p class="eng-text">Toutes nos pièces sont traçables par lot. Certificats matière disponibles sur demande (EN 10204 3.1). Conformité CE et RoHS sur l'ensemble des équipements électriques et électroniques.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ZONE D'INTERVENTION ═══ -->
+<section class="section section-alt" id="zone" aria-labelledby="h-zone">
+  <div class="wrap">
+    <div class="eyebrow reveal">Zone d'intervention</div>
+    <h2 class="section-title reveal d1" id="h-zone">Île-de-France &amp; <em>France entière</em></h2>
+    <div class="zone-grid reveal d1" style="margin-top:40px">
+      <div class="zone-visual">
+        <div class="zone-big">ÎDF</div>
+        <div class="zone-label">Interventions sur site</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.65">Dépannage, entretien, installation</div>
+        <div class="zone-depts">
+          <span class="zone-dept">75 Paris</span>
+          <span class="zone-dept">77 S&M</span>
+          <span class="zone-dept">78 Yvelines</span>
+          <span class="zone-dept">91 Essonne</span>
+          <span class="zone-dept">92 HdS</span>
+          <span class="zone-dept">93 SSD</span>
+          <span class="zone-dept">94 VM</span>
+          <span class="zone-dept">95 VOise</span>
+        </div>
+      </div>
+      <div>
+        <div class="zone-list">
+          <div class="zone-item">Expédition produits France métropolitaine et DOM-TOM</div>
+          <div class="zone-item">Livraison Europe via Mondial Relay et transporteurs partenaires</div>
+          <div class="zone-item">Retrait gratuit — 1 Rue René Dumont, 77380 Combs-la-Ville</div>
+          <div class="zone-item">Interventions techniques Île-de-France &lt;4h en urgence</div>
+          <div class="zone-item">Assistance téléphonique France entière — 01 75 13 73 56</div>
+          <div class="zone-item">Support technique par email sous 24h ouvrées</div>
+        </div>
+        <div style="margin-top:28px;padding:18px 20px;background:var(--orange-d);border:1px solid rgba(255,77,0,.2);border-left:3px solid var(--orange);font-size:13px;color:var(--text2)">
+          <strong style="color:var(--orange)">Siège social :</strong><br>
+          1 Rue René Dumont, 77380 Combs-la-Ville<br>
+          Tél. : <a href="tel:+33175137356" style="color:var(--orange)">01 75 13 73 56</a> · Lun–Ven 8h30–18h00
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA FINAL ═══ -->
+<section class="cta-section" aria-labelledby="h-cta-ap">
+  <div class="cta-inner wrap">
+    <div class="eyebrow reveal" style="justify-content:center">Rejoignez l'espace professionnel</div>
+    <h2 class="cta-title reveal d1" id="h-cta-ap">
+      Prêt à travailler avec <em>SMDI</em> ?
+    </h2>
+    <p class="cta-sub reveal d2">
+      Créez votre compte professionnel gratuitement. Accès au catalogue complet, tarifs B2B personnalisés et devis en ligne dès validation de votre dossier.
+    </p>
+    <div class="cta-actions reveal d3">
+      <a href="smdi-portal.html#register" class="btn btn-primary btn-lg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+        Créer mon compte pro — Gratuit
+      </a>
+      <a href="index.html#contact" class="btn btn-outline btn-lg">Nous contacter d'abord</a>
+    </div>
+    <p class="reveal d4" style="margin-top:16px;font-family:var(--ff-mono);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em">SIRET requis · Validation 24–48h · Accès B2B exclusif</p>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer role="contentinfo">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="nav-logo" aria-label="SMDI — Retour à l'accueil">
+          <div class="nav-logo-sq"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1 1 14 0A7 7 0 0 1 3 10z" stroke="#000" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+          <div class="nav-logo-name">SM<span>DI</span></div>
+        </a>
+        <p>Équipements &amp; pièces professionnelles pour stations de lavage automobile. Île-de-France &amp; France entière.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="a-propos.html" style="color:var(--orange)">À propos</a></li>
+          <li><a href="prestations.html">Prestations</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Espace Pro</h4>
+        <ul>
+          <li><a href="smdi-portal.html#login">Connexion</a></li>
+          <li><a href="smdi-portal.html#register">Créer un compte</a></li>
+          <li><a href="smdi-portal.html#catalogue">Catalogue B2B</a></li>
+          <li><a href="smdi-portal.html#quote">Demander un devis</a></li>
+          <li><a href="smdi-portal.html#dashboard">Mon dashboard</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Informations</h4>
+        <ul>
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+          <li><a href="cgv.html">CGV professionnelles</a></li>
+          <li><a href="donnees-personnelles.html">Données personnelles</a></li>
+          <li><a href="cookies.html">Politique cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p class="foot-copy">© 2026 SMDI — Tous droits réservés · 1 Rue René Dumont, 77380 Combs-la-Ville · SIRET 000 000 000 00000</p>
+      <nav class="foot-legal" aria-label="Liens légaux">
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="cgv.html">CGV</a>
+        <a href="donnees-personnelles.html">Confidentialité</a>
+        <a href="cookies.html">Cookies</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+'use strict';
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+const IO = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); IO.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => IO.observe(el));
+</script>
+</body>
+</html>
