@@ -2778,7 +2778,7 @@ function seedDemoUsersIfNeeded() {
       email:     'admin@smdi.fr',
       pwd:       'admin123',
       role:      'admin',
-      status:    'approved',
+      status:    'validated',
       tier:      null,
       name:      'Admin SMDI',
       company:   'SMDI',
@@ -2790,7 +2790,7 @@ function seedDemoUsersIfNeeded() {
       email:     'pro@demo.fr',
       pwd:       'demo123',
       role:      'customer',
-      status:    'approved',
+      status:    'validated',
       tier:      'gold',
       name:      'Station Soleil Vert',
       company:   'Station Soleil Vert SAS',
@@ -3064,7 +3064,7 @@ function reorderItems(orderId) {
 function renderAdminView() {
   const users    = getUsers().filter(u => u.role === 'customer');
   const pending  = users.filter(u => u.status === 'pending');
-  const approved = users.filter(u => u.status === 'approved');
+  const approved = users.filter(u => u.status === 'validated');
   const rejected = users.filter(u => u.status === 'rejected');
 
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -3136,32 +3136,42 @@ function renderAdminPendingCard(u) {
 }
 
 // Valider un compte (admin)
-function adminValidateUser(userId) {
-  const users  = getUsers();
-  const idx    = users.findIndex(u => u.id === userId);
-  if (idx === -1) return;
-  const tier   = document.getElementById('tier-select-' + userId)?.value || 'bronze';
-  users[idx].status      = 'approved';
-  users[idx].tier        = tier;
-  users[idx].validatedAt = new Date().toISOString();
-  saveUsers(users);
-  showToast(`✓ "${users[idx].company || users[idx].name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
-  renderAdminView();
-}
+async function adminValidateUser(userId) {
+  const tier = document.getElementById('tier-select-' + userId)?.value || 'bronze';
 
-// Refuser un compte (admin)
-function adminRefuseUser(userId) {
-  const users = getUsers();
-  const idx   = users.findIndex(u => u.id === userId);
-  if (idx === -1) return;
-  users[idx].status     = 'rejected';
-  users[idx].rejectedAt = new Date().toISOString();
-  saveUsers(users);
-  showToast(`Compte "${users[idx].company || users[idx].name}" refusé.`, 'warn');
-  renderAdminView();
-}
+  const { data, error } = await sb
+    .from('profiles')
+    .update({ status: 'validated', tier, validated_at: new Date().toISOString() })
+    .eq('id', userId)
+    .select('*')
+    .single();
 
-/* Helper : détecte si la page est ouverte en file:// (Supabase fetch bloqué) */
+  if (error || !data) {
+    console.error('[adminValidateUser] update error', error?.message);
+    showToast('Erreur lors de la validation du compte.', 'err');
+    return;
+  }
+
+  showToast(`✓ "${data.company || data.name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
+  renderAdminView();
+}// Refuser un compte (admin)
+async function adminRefuseUser(userId) {
+  const { data, error } = await sb
+    .from('profiles')
+    .update({ status: 'rejected', rejected_at: new Date().toISOString() })
+    .eq('id', userId)
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    console.error('[adminRefuseUser] update error', error?.message);
+    showToast('Erreur lors du refus du compte.', 'err');
+    return;
+  }
+
+  showToast(`Compte "${data.company || data.name}" refusé.`, 'warn');
+  renderAdminView();
+}/* Helper : détecte si la page est ouverte en file:// (Supabase fetch bloqué) */
 function isFileProtocol() {
   return window.location.protocol === 'file:';
 }
@@ -3212,6 +3222,7 @@ async function doLogin() {
 
   if (!email || !pwd) { showToast('Remplissez email et mot de passe.', 'warn'); return; }
 
+  // 1. Auth Supabase
   let data, error;
   try {
     const res = await sb.auth.signInWithPassword({ email, password: pwd });
@@ -3227,15 +3238,15 @@ async function doLogin() {
   if (error) { showToast('Identifiants incorrects.', 'err'); return; }
   if (!data || !data.user) { showToast('Connexion incomplète. Réessayez.', 'err'); return; }
 
-  const { data: profile, error: profileErr } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('id', data.user.id)
-    .single();
+  // 2. Charger le profil depuis public.profiles
+  let profile = null;
+  const { data: p1, error: e1 } = await sb
+    .from('profiles').select('*').eq('id', data.user.id).single();
 
-  if (profile && !profileErr) {
-    currentUser = profile;
+  if (p1 && !e1) {
+    profile = p1;
   } else {
+    // Profil absent — tenter un insert minimal
     const minimal = {
       id:     data.user.id,
       email:  data.user.email,
@@ -3245,14 +3256,24 @@ async function doLogin() {
       name:   data.user.email.split('@')[0],
     };
     const { error: insertErr } = await sb.from('profiles').insert(minimal);
-    if (insertErr) {
-      console.error('[doLogin] profile insert error', insertErr.message);
-      showToast('Connexion OK mais profil non créé. Réessayez.', 'warn');
-      return;
+
+    if (!insertErr) {
+      profile = minimal;
+    } else {
+      // Insert échoué (race condition ou doublon) — re-select immédiat
+      console.warn('[doLogin] insert failed, retrying select', insertErr.message);
+      const { data: p2 } = await sb
+        .from('profiles').select('*').eq('id', data.user.id).single();
+      profile = p2 || null;
     }
-    currentUser = minimal;
   }
 
+  if (!profile) {
+    showToast('Profil introuvable. Contactez le support.', 'err');
+    return;
+  }
+
+  currentUser = profile;
   setCurrentUser(currentUser);
   bootApp();
 }
