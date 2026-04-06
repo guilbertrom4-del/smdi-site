@@ -3176,6 +3176,8 @@ function isFetchNetworkError(err) {
          msg.includes('cors');
 }
 
+
+
 /* ══════════════ AUTH ══════════════ */
 function switchAuthTab(tab) {
   document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && tab==='login')||(i===1 && tab==='register')));
@@ -3200,9 +3202,8 @@ function setDemo(email, pwd, status) {
    Aucun fallback par mot de passe local.
    ─────────────────────────────────────────────────────────── */
 async function doLogin() {
-  // Garde file:// — Supabase inaccessible sans HTTP
   if (isFileProtocol()) {
-    showToast('Ouvrez la page via http://localhost — Supabase ne fonctionne pas en file://.', 'err');
+    showToast('Ouvrez la page via une URL web (http/https), pas en file://.', 'err');
     return;
   }
 
@@ -3211,53 +3212,53 @@ async function doLogin() {
 
   if (!email || !pwd) { showToast('Remplissez email et mot de passe.', 'warn'); return; }
 
-  // Auth Supabase — seule source de vérité
   let data, error;
   try {
     const res = await sb.auth.signInWithPassword({ email, password: pwd });
     data  = res.data;
     error = res.error;
   } catch (err) {
-    const msg = isFetchNetworkError(err)
+    showToast(isFetchNetworkError(err)
       ? 'Connexion Supabase impossible. Vérifiez votre réseau.'
-      : 'Erreur inattendue lors de la connexion.';
-    showToast(msg, 'err');
+      : 'Erreur inattendue lors de la connexion.', 'err');
     return;
   }
 
   if (error) { showToast('Identifiants incorrects.', 'err'); return; }
   if (!data || !data.user) { showToast('Connexion incomplète. Réessayez.', 'err'); return; }
 
-  // Profil applicatif local — rapprochement par email uniquement
-  const users   = getUsers();
-  const profile = users.find(u => u.email.toLowerCase() === email);
+  const { data: profile, error: profileErr } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('id', data.user.id)
+    .single();
 
-  if (profile) {
-    currentUser = { ...profile };
+  if (profile && !profileErr) {
+    currentUser = profile;
   } else {
-    currentUser = {
-      id:        data.user.id,
-      email:     data.user.email,
-      role:      'customer',
-      status:    'pending',
-      tier:      null,
-      name:      data.user.email.split('@')[0],
-      company:   '',
-      siret:     '',
-      createdAt: data.user.created_at,
+    const minimal = {
+      id:     data.user.id,
+      email:  data.user.email,
+      role:   'customer',
+      status: 'pending',
+      tier:   null,
+      name:   data.user.email.split('@')[0],
     };
-    const allUsers = getUsers();
-    allUsers.push(currentUser);
-    saveUsers(allUsers);
+    const { error: insertErr } = await sb.from('profiles').insert(minimal);
+    if (insertErr) {
+      console.error('[doLogin] profile insert error', insertErr.message);
+      showToast('Connexion OK mais profil non créé. Réessayez.', 'warn');
+      return;
+    }
+    currentUser = minimal;
   }
 
   setCurrentUser(currentUser);
   bootApp();
 }
 async function doRegister() {
-  // Garde file:// — Supabase inaccessible sans HTTP
   if (isFileProtocol()) {
-    showToast('Ouvrez la page via http://localhost — Supabase ne fonctionne pas en file://.', 'err');
+    showToast('Ouvrez la page via une URL web (http/https), pas en file://.', 'err');
     return;
   }
 
@@ -3270,71 +3271,52 @@ async function doRegister() {
   const email = (document.getElementById('r-email').value || '').trim().toLowerCase();
   if (!email)         { showToast('Email requis.', 'warn'); return; }
 
-  // Doublon profil local
-  const users = getUsers();
-  if (users.find(u => u.email.toLowerCase() === email)) {
-    showToast('Cet email est déjà utilisé.', 'err'); return;
-  }
-
-  // Appel Supabase Auth
   let data, error;
   try {
     const res = await sb.auth.signUp({ email, password: pwd });
     data  = res.data;
     error = res.error;
-    console.log('[doRegister] SUPABASE SIGNUP DATA', data);
-    console.log('[doRegister] SUPABASE SIGNUP ERROR', error);
+    console.log('[doRegister] SIGNUP DATA', data);
+    console.log('[doRegister] SIGNUP ERROR', error);
   } catch (err) {
     console.error('[doRegister] NETWORK ERROR', err);
-    const msg = isFetchNetworkError(err)
+    showToast(isFetchNetworkError(err)
       ? 'Connexion Supabase impossible. Ouvrez la page via http://localhost.'
-      : 'Erreur réseau lors de la création du compte.';
-    showToast(msg, 'err');
+      : 'Erreur réseau lors de la création du compte.', 'err');
     return;
   }
 
-  // Garde 1 : erreur Supabase explicite
-  if (error) {
-    showToast(error.message || 'Erreur lors de la création du compte.', 'err');
-    return;
-  }
-
-  // Garde 2 : data.user absent = faux succès bloqué
-  // (email déjà dans Supabase Auth, ou confirmation email active sans session)
+  if (error) { showToast(error.message || 'Erreur lors de la création du compte.', 'err'); return; }
   if (!data || !data.user) {
-    console.warn('[doRegister] data.user absent', data);
-    showToast('Création Supabase incomplète : utilisateur non créé.', 'err');
-    return;
+    showToast('Création Supabase incomplète : utilisateur non créé.', 'err'); return;
   }
 
-  console.log('[doRegister] user.id', data.user.id, 'email', data.user.email);
+  const { error: profileError } = await sb.from('profiles').insert({
+    id:      data.user.id,
+    email:   email,
+    role:    'customer',
+    status:  'pending',
+    tier:    null,
+    name:    ((document.getElementById('r-prenom')?.value || '') + ' ' +
+              (document.getElementById('r-nom')?.value || '')).trim() || 'Nouveau Pro',
+    company: document.getElementById('r-company')?.value || 'Votre Société',
+    siret:   document.getElementById('r-siret')?.value   || '000 000 000 00000',
+  });
 
-  // Profil applicatif local — créé uniquement après validation data.user
-  const newUser = {
-    id:        data.user.id,
-    email:     data.user.email,
-    role:      'customer',
-    status:    'pending',
-    tier:      null,
-    name:      ((document.getElementById('r-prenom')?.value || '') + ' ' +
-                (document.getElementById('r-nom')?.value || '')).trim() || 'Nouveau Pro',
-    company:   document.getElementById('r-company')?.value || 'Votre Société',
-    siret:     document.getElementById('r-siret')?.value   || '000 000 000 00000',
-    createdAt: data.user.created_at || new Date().toISOString(),
-  };
+  if (profileError) {
+    console.error('[doRegister] profile insert error', profileError.message);
+    showToast('Compte Auth créé, mais le profil applicatif sera finalisé à la première connexion.', 'warn');
+  }
 
-  users.push(newUser);
-  saveUsers(users);
-
-  // Session et boot
   if (data.session) {
-    currentUser = { ...newUser };
+    const { data: profile } = await sb
+      .from('profiles').select('*').eq('id', data.user.id).single();
+    currentUser = profile || { id: data.user.id, email, role: 'customer', status: 'pending', tier: null };
     setCurrentUser(currentUser);
     showToast('Compte créé ! Validation sous 24–48h ouvées.', 'ok');
     bootApp();
   } else {
-    // Confirmation email requise — ne pas appeler bootApp()
-    showToast('Compte Auth créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
+    showToast('Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
   }
 }
 function doLogout() {
@@ -4009,23 +3991,36 @@ function fmt(n) {
 seedDemoUsersIfNeeded();
 
 // 2. Restaurer la session — Supabase en priorité, localStorage en fallback
-(async function restoreSession() {
-  // Supabase Auth en priorité — seule source d'authentification valide
+async function restoreSession() {
   try {
     const { data: { session } } = await sb.auth.getSession();
 
     if (session) {
-      const users   = getUsers();
-      const profile = users.find(u => u.email.toLowerCase() === session.user.email.toLowerCase());
-      currentUser   = profile ? { ...profile } : {
-        id:      session.user.id,
-        email:   session.user.email,
-        role:    'customer',
-        status:  'pending',
-        tier:    null,
-        name:    session.user.email.split('@')[0],
-        company: '', siret: '', createdAt: session.user.created_at,
-      };
+      const { data: profile, error: profileErr } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile && !profileErr) {
+        currentUser = profile;
+      } else {
+        const minimal = {
+          id:     session.user.id,
+          email:  session.user.email,
+          role:   'customer',
+          status: 'pending',
+          tier:   null,
+          name:   session.user.email.split('@')[0],
+        };
+        const { error: insertErr } = await sb.from('profiles').insert(minimal);
+        if (insertErr) {
+          console.error('[restoreSession] profile insert error', insertErr.message);
+          return;
+        }
+        currentUser = minimal;
+      }
+
       setCurrentUser(currentUser);
       cartItems = getCart();
       bootApp();
@@ -4035,10 +4030,10 @@ seedDemoUsersIfNeeded();
     console.log('[restoreSession] getSession indisponible', err.message);
   }
 
-  // Pas de session Supabase active — écran de connexion.
-  // Aucun fallback sur session localStorage non validée par Supabase.
-  cartItems = getCart();  // panier restauré (non-auth)
-})();
+  cartItems = getCart();
+}
+
+restoreSession();
 
 // 3. Afficher la date du jour dans le dashboard
 const _dateEl = document.getElementById('dash-date');
