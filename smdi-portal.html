@@ -2862,86 +2862,75 @@ function seedDemoUsersIfNeeded() {
 async function renderDashboardStats() {
   if (!currentUser) return;
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
   const isAdmin = currentUser.role === 'admin';
 
-  if (isAdmin) {
-    const allOrders = getOrders();
-    const ca        = allOrders.reduce((s, o) => s + (o.total || 0), 0);
+  const { data: raw } = await sb.from('orders').select('id, cart_total, status, created_at');
+  const all = raw || [];
+  const ca  = all.reduce((s, o) => s + Number(o.cart_total || 0), 0);
 
-    // Compter les pending depuis Supabase (source de vérité)
+  if (isAdmin) {
     let pendingCount = 0;
     try {
-      const { count } = await sb
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+      const { count } = await sb.from('profiles').select('*', { count:'exact', head:true }).eq('status','pending');
       pendingCount = count || 0;
-    } catch (e) { /* Supabase indisponible — KPI pending affiché à 0 */ }
-
-    _set('kpi-orders', allOrders.length);
-    _set('kpi-pending-orders', allOrders.filter(o => o.status === 'pending').length);
-    _set('kpi-ca',     fmt(ca) + ' €');
-
-    const dOrders = document.getElementById('kpi-orders-delta');
-    const dCA     = document.getElementById('kpi-ca-delta');
-    if (dOrders) dOrders.textContent = 'Total toutes commandes';
-    if (dCA)     dCA.textContent     = 'CA total brut';
+    } catch (_) {}
+    _set('kpi-orders',         all.length);
+    _set('kpi-pending-orders', all.filter(o => o.status === 'pending').length);
+    _set('kpi-ca',             fmt(ca) + ' €');
+    const dO = document.getElementById('kpi-orders-delta');
+    const dC = document.getElementById('kpi-ca-delta');
+    if (dO) dO.textContent = 'Total toutes commandes';
+    if (dC) dC.textContent = 'CA total brut';
   } else {
-    const myOrders = getOrders().filter(o => o.userId === currentUser.id);
-    const myQuotes = getQuotes().filter(q => q.userId === currentUser.id);
-    const ca       = myOrders.reduce((s, o) => s + (o.total || 0), 0);
-
-    // Commandes ce mois
     const now   = new Date();
-    const month = myOrders.filter(o => {
-      const d = new Date(o.createdAt);
+    const month = all.filter(o => {
+      const d = new Date(o.created_at);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
-
-    _set('kpi-orders', month);
-    _set('kpi-pending-orders', myOrders.filter(o => ['pending','processing'].includes(o.status)).length);
-    _set('kpi-ca',     fmt(ca) + ' €');
+    _set('kpi-orders',         month);
+    _set('kpi-pending-orders', all.filter(o => ['pending','processing'].includes(o.status)).length);
+    _set('kpi-ca',             fmt(ca) + ' €');
   }
-
   renderDashboardRecentOrders();
 }
 
-function renderDashboardRecentOrders() {
+async function renderDashboardRecentOrders() {
   const tbody = document.getElementById('dash-orders-tbody');
   if (!tbody || !currentUser) return;
 
-  const isAdmin = currentUser.role === 'admin';
-  let orders = isAdmin
-    ? getOrders()
-    : getOrders().filter(o => o.userId === currentUser.id);
+  const { data: raw, error } = await sb
+    .from('orders').select('*').order('created_at', { ascending: false }).limit(5);
 
-  orders = orders
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
-
-  if (!orders.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Aucune commande pour l\'instant.</td></tr>';
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Erreur de chargement.</td></tr>';
     return;
   }
 
-  const statusMap = {
+  const orders  = (raw || []).map(normalizeOrder);
+  const isAdmin = currentUser.role === 'admin';
+
+  if (!orders.length) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;color:var(--muted);padding:24px;font-size:13px;'>Aucune commande pour l'instant.</td></tr>";
+    return;
+  }
+
+  const SM = {
     pending:    { label:'En attente',    cls:'badge-yellow' },
     processing: { label:'En traitement', cls:'badge-blue'   },
-    validated:  { label:'Validée',       cls:'badge-orange' },
-    invoiced:   { label:'Facturée',      cls:'badge-green'  },
+    validated:  { label:'Validée',    cls:'badge-orange' },
+    invoiced:   { label:'Facturée',   cls:'badge-green'  },
   };
 
   tbody.innerHTML = orders.map(o => {
-    const s       = statusMap[o.status] || { label: o.status, cls:'badge-muted' };
-    const summary = (o.items || []).map(i => i.name).slice(0, 2).join(', ') || '—';
-    const client  = isAdmin ? `<div class="td-ref">${o.clientName || '—'}</div>` : '';
+    const st      = SM[o.status] || { label: o.status, cls:'badge-muted' };
+    const summary = o.items.map(i => i.name).slice(0,2).join(', ') || '—';
+    const client  = isAdmin ? `<div class="td-ref">${o.clientName}</div>` : '';
     return `<tr>
-      <td><div class="td-name">#${o.id}</div>${client}</td>
+      <td><div class="td-name">#${o.orderNum || o.id.slice(0,8)}</div>${client}</td>
       <td style="color:var(--muted);font-size:12px;">${fmtDate(o.createdAt)}</td>
       <td style="font-size:12px;color:var(--muted)">${summary}</td>
-      <td class="td-amount">${fmt(o.total || 0)} €</td>
-      <td><span class="badge ${s.cls}">${s.label}</span></td>
+      <td class="td-amount">${fmt(o.total)} €</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
       <td class="td-action"><button class="btn btn-outline btn-sm" onclick="openOrderDetail('${o.id}')">Détail</button></td>
     </tr>`;
   }).join('');
@@ -2950,29 +2939,24 @@ function renderDashboardRecentOrders() {
 /* ══════════════════════════════════════════════════════════════
    RENDER — Vue "Mes commandes" (client) ou toutes (admin)
    ══════════════════════════════════════════════════════════════ */
-function renderUserOrders() {
+async function renderUserOrders() {
   if (!currentUser) return;
+  const isAdmin = currentUser.role === 'admin';
 
-  const isAdmin  = currentUser.role === 'admin';
-  const myOrders = isAdmin
-    ? getOrders()
-    : getOrders().filter(o => o.userId === currentUser.id);
+  const { data: raw, error } = await sb
+    .from('orders').select('*').order('created_at', { ascending: false });
 
-  const sorted = [...myOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (error) { showToast('Erreur lors du chargement des commandes.', 'err'); return; }
 
-  // Stats mini
-  const total      = sorted.length;
-  const ca         = sorted.reduce((s, o) => s + (o.total || 0), 0);
-  const invoiced   = sorted.filter(o => o.status === 'invoiced').length;
-  const processing = sorted.filter(o => ['processing', 'pending'].includes(o.status)).length;
+  const sorted = (raw || []).map(normalizeOrder);
+  const ca     = sorted.reduce((s, o) => s + o.total, 0);
 
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  _set('ord-stat-total',      total);
-  _set('ord-stat-invoiced',   invoiced);
-  _set('ord-stat-processing', processing);
+  _set('ord-stat-total',      sorted.length);
+  _set('ord-stat-invoiced',   sorted.filter(o => o.status === 'invoiced').length);
+  _set('ord-stat-processing', sorted.filter(o => ['processing','pending'].includes(o.status)).length);
   _set('ord-stat-ca',         fmt(ca) + ' €');
 
-  // Liste des commandes
   const listEl = document.getElementById('orders-list');
   if (!listEl) return;
 
@@ -2984,7 +2968,6 @@ function renderUserOrders() {
     </div>`;
     return;
   }
-
   listEl.innerHTML = sorted.map(o => renderOrderCard(o, isAdmin)).join('');
 }
 
@@ -3013,7 +2996,7 @@ function renderOrderCard(o, showClient) {
 
   return `<div class="order-card" id="ocard-${o.id}">
     <div class="order-card-head" onclick="toggleOrder(this)">
-      <div><div class="order-num">#${o.id}</div>${clientInfo}</div>
+      <div><div class="order-num">#${o.orderNum || o.id}</div>${clientInfo}</div>
       <div>
         <div class="td-name">${(o.items||[]).length} article${(o.items||[]).length>1?'s':''} — ${itemSummary}</div>
         <div class="order-date">${fmtDate(o.createdAt)}</div>
@@ -3041,28 +3024,34 @@ function renderOrderCard(o, showClient) {
 }
 
 // Mettre à jour le statut d'une commande (admin uniquement)
-function updateOrderStatus(orderId, newStatus) {
-  const orders = getOrders();
-  const idx    = orders.findIndex(o => o.id === orderId);
-  if (idx === -1) return;
-  orders[idx].status = newStatus;
-  saveOrders(orders);
+async function updateOrderStatus(orderId, newStatus) {
+  const { error } = await sb.from('orders').update({ status: newStatus }).eq('id', orderId);
+
+  if (error) {
+    console.error('[updateOrderStatus]', error.message);
+    showToast('Erreur lors de la mise à jour du statut.', 'err');
+    return;
+  }
+
   const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée' };
-  showToast(`Commande #${orderId} → ${labels[newStatus] || newStatus}`, 'ok');
-  // Rafraîchir le dashboard si visible
+  showToast('Statut mis à jour → ' + (labels[newStatus] || newStatus), 'ok');
   if (currentView === 'dashboard') renderDashboardStats();
+  if (currentView === 'orders')    renderUserOrders();
 }
 
 // Recommander les articles d'une commande passée
-function reorderItems(orderId) {
-  const order = getOrders().find(o => o.id === orderId);
-  if (!order) return;
+async function reorderItems(orderId) {
+  const { data: order, error } = await sb
+    .from('orders').select('items').eq('id', orderId).single();
+
+  if (error || !order) { showToast('Impossible de recharger les articles.', 'warn'); return; }
+
   let added = 0;
-  (order.items || []).forEach(i => {
+  (Array.isArray(order.items) ? order.items : []).forEach(i => {
     const p = PRODUCTS.find(x => x.ref === i.ref || x.name === i.name);
     if (p) { addToCart(p.id); added++; }
   });
-  showToast(added ? `${added} article(s) ajouté(s) au panier.` : 'Produits introuvables dans le catalogue.', added ? 'ok' : 'warn');
+  showToast(added ? `${added} article(s) ajouté(s) au panier.` : 'Produits introuvables.', added ? 'ok' : 'warn');
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -3257,6 +3246,9 @@ async function doLogin() {
     return;
   }
 
+  console.log('[doLogin] auth user id', data?.user?.id);
+  console.log('[doLogin] auth email', data?.user?.email);
+
   if (error) { showToast('Identifiants incorrects.', 'err'); return; }
   if (!data || !data.user) { showToast('Connexion incomplète. Réessayez.', 'err'); return; }
 
@@ -3264,6 +3256,9 @@ async function doLogin() {
   let profile = null;
   const { data: p1, error: e1 } = await sb
     .from('profiles').select('*').eq('id', data.user.id).single();
+
+  console.log('[doLogin] first select profile', p1);
+  console.log('[doLogin] first select error', e1);
 
   if (p1 && !e1) {
     profile = p1;
@@ -3279,6 +3274,8 @@ async function doLogin() {
     };
     const { error: insertErr } = await sb.from('profiles').insert(minimal);
 
+    console.log('[doLogin] insert minimal error', insertErr);
+
     if (!insertErr) {
       profile = minimal;
     } else {
@@ -3286,11 +3283,15 @@ async function doLogin() {
       console.warn('[doLogin] insert failed, retrying select', insertErr.message);
       const { data: p2 } = await sb
         .from('profiles').select('*').eq('id', data.user.id).single();
+
+      console.log('[doLogin] second select profile', p2);
+
       profile = p2 || null;
     }
   }
 
   if (!profile) {
+    console.log('[doLogin] final profile null after retries');
     showToast('Profil introuvable. Contactez le support.', 'err');
     return;
   }
@@ -3938,46 +3939,61 @@ function removeFromCart(pid) {
    Flux unique : panier → validation → commande stockée.
    Remplace le double tunnel devis/commande.
    ════════════════════════════════════════════════════════ */
-function placeOrderFromCart() {
+async function placeOrderFromCart() {
   if (!cartItems.length) { showToast('Votre panier est vide.', 'warn'); return; }
   if (!currentUser)       { showToast('Connectez-vous pour passer une commande.', 'err'); return; }
 
-  const tier  = currentUser.tier || 'bronze';
   const total = cartItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
 
-  const order = {
-    id:         genId('CMD'),
-    userId:     currentUser.id,
-    clientName: currentUser.company || currentUser.name,
-    items:      cartItems.map(i => ({
-      name:      i.name,
-      ref:       i.ref,
-      qty:       i.qty,
-      unitPrice: i.unitPrice,
-    })),
-    total,
-    status:    'pending',
-    createdAt: new Date().toISOString(),
-  };
+  const { data: order, error } = await sb
+    .from('orders')
+    .insert({
+      user_id:          currentUser.id,
+      profile_id:       currentUser.id,
+      customer_name:    currentUser.company || currentUser.name || null,
+      customer_email:   currentUser.email   || null,
+      customer_company: currentUser.company || null,
+      items: cartItems.map(i => ({ name: i.name, ref: i.ref, qty: i.qty, unit_price: i.unitPrice })),
+      cart_total: total,
+      status:     'pending',
+      source:     'portal',
+    })
+    .select('id, order_number')
+    .single();
 
-  const orders = getOrders();
-  orders.push(order);
-  saveOrders(orders);
+  if (error || !order) {
+    console.error('[placeOrderFromCart] insert error', error?.message);
+    showToast('Erreur lors de la création de la commande. Réessayez.', 'err');
+    return;
+  }
 
-  // Vider le panier
   cartItems = [];
   saveCart([]);
   document.getElementById('cart-count').textContent = '0';
   closeModal('modal-cart');
 
-  showToast(`✓ Commande #${order.id} enregistrée — SMDI vous confirmera sous 4h ouvrées.`, 'ok');
-
-  // Rafraîchir si dashboard visible
+  showToast('✓ Commande ' + order.order_number + ' enregistrée — SMDI vous confirmera sous 4h ouvées.', 'ok');
   if (currentView === 'dashboard') renderDashboardStats();
-  // Naviguer vers Mes commandes
   navigate('orders');
 }
 
+
+/* ══════════════════════════════════════════════════════════════
+   normalizeOrder() : traduit les colonnes Supabase → noms attendus
+   par les fonctions de rendu existantes (sans les modifier).
+   ══════════════════════════════════════════════════════════════ */
+function normalizeOrder(o) {
+  return {
+    id:         o.id,
+    orderNum:   o.order_number,
+    userId:     o.user_id,
+    clientName: o.customer_name || o.customer_email || '—',
+    items:      Array.isArray(o.items) ? o.items : [],
+    total:      Number(o.cart_total) || 0,
+    status:     o.status,
+    createdAt:  o.created_at,
+  };
+}
 
 /* ══════════════ COMMANDES ══════════════ */
 function toggleOrder(head) {
