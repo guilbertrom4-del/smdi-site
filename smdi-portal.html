@@ -3061,19 +3061,32 @@ function reorderItems(orderId) {
 /* ══════════════════════════════════════════════════════════════
    RENDER — Vue admin : comptes pending + table comptes validés
    ══════════════════════════════════════════════════════════════ */
-function renderAdminView() {
-  const users    = getUsers().filter(u => u.role === 'customer');
-  const pending  = users.filter(u => u.status === 'pending');
-  const approved = users.filter(u => u.status === 'validated');
-  const rejected = users.filter(u => u.status === 'rejected');
-
+async function renderAdminView() {
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  // Charger tous les profils customers depuis Supabase
+  const { data: allProfiles, error } = await sb
+    .from('profiles')
+    .select('*')
+    .neq('role', 'admin')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[renderAdminView] load error', error.message);
+    showToast('Erreur lors du chargement des comptes.', 'err');
+    return;
+  }
+
+  const profiles  = allProfiles || [];
+  const pending   = profiles.filter(u => u.status === 'pending');
+  const validated = profiles.filter(u => u.status === 'validated');
+  const rejected  = profiles.filter(u => u.status === 'rejected');
 
   // Stats
   _set('admin-stat-pending',  pending.length);
-  _set('admin-stat-approved', approved.length);
+  _set('admin-stat-approved', validated.length);
   _set('admin-stat-rejected', rejected.length);
-  _set('admin-stat-total',    users.length);
+  _set('admin-stat-total',    profiles.length);
   const badge = document.getElementById('admin-pending-badge');
   if (badge) badge.textContent = pending.length + ' en attente';
 
@@ -3088,16 +3101,16 @@ function renderAdminView() {
   // Table comptes validés
   const tbodyEl = document.getElementById('admin-all-users-tbody');
   if (tbodyEl) {
-    tbodyEl.innerHTML = approved.length
-      ? approved.map(u => {
+    tbodyEl.innerHTML = validated.length
+      ? validated.map(u => {
           const ca      = getOrders().filter(o => o.userId === u.id).reduce((s, o) => s + (o.total || 0), 0);
           const tierCls = getTierBadgeClass(u.tier);
           return `<tr>
-            <td><div class="td-name">${u.company || u.name}</div></td>
+            <td><div class="td-name">${u.company || u.name || '—'}</div></td>
             <td><div class="td-ref">${u.siret || '—'}</div></td>
             <td><span class="badge ${tierCls}">${getTierLabel(u.tier) || '—'}</span></td>
             <td class="td-amount">${fmt(ca)} €</td>
-            <td style="font-size:12px;color:var(--muted)">${fmtDate(u.validatedAt || u.createdAt)}</td>
+            <td style="font-size:12px;color:var(--muted)">${fmtDate(u.validated_at || u.created_at)}</td>
             <td><span class="badge badge-green">Actif</span></td>
           </tr>`;
         }).join('')
@@ -3117,7 +3130,7 @@ function renderAdminPendingCard(u) {
     <div>
       <div class="admin-company">${u.company || u.name}</div>
       <div class="admin-siret">SIRET : ${u.siret || '—'}</div>
-      <div class="admin-email">${u.email} · <span style="color:var(--muted);font-size:11px;">Créé le ${fmtDate(u.createdAt)}</span></div>
+      <div class="admin-email">${u.email} · <span style="color:var(--muted);font-size:11px;">Créé le ${fmtDate(u.created_at || u.createdAt)}</span></div>
     </div>
     <div>
       <label style="font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted2);display:block;margin-bottom:4px;">Niveau</label>
@@ -3154,7 +3167,9 @@ async function adminValidateUser(userId) {
 
   showToast(`✓ "${data.company || data.name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
   renderAdminView();
-}// Refuser un compte (admin)
+}
+
+// Refuser un compte (admin)
 async function adminRefuseUser(userId) {
   const { data, error } = await sb
     .from('profiles')
