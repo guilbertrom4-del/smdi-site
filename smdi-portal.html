@@ -2727,31 +2727,24 @@ let redirectAfterLogin = null;
 
 // ── Clés localStorage ──────────────────────────────────────────
 const LS = {
-  USERS:   'smdi_users',
-  ORDERS:  'smdi_orders',
-  SESSION: 'smdi_session',
-  CART:    'smdi_cart',
-  SEEDED:  'smdi_seeded',
+  SESSION: 'smdi_session',  // session utilisateur courante
+  CART:    'smdi_cart',     // panier temporaire (UI locale)
 };
 
 // ── Helpers de sérialisation (safe) ───────────────────────────
-function getUsers()       { try { return JSON.parse(localStorage.getItem(LS.USERS)  || '[]'); } catch(e) { return []; } }
-function saveUsers(u)     { localStorage.setItem(LS.USERS,  JSON.stringify(u)); }
-function getOrders()      { try { return JSON.parse(localStorage.getItem(LS.ORDERS) || '[]'); } catch(e) { return []; } }
-function saveOrders(o)    { localStorage.setItem(LS.ORDERS, JSON.stringify(o)); }
-function getQuotes()      { try { return JSON.parse(localStorage.getItem(LS.QUOTES) || '[]'); } catch(e) { return []; } }
-function saveQuotes(q)    { localStorage.setItem(LS.QUOTES, JSON.stringify(q)); }
+
+
+
+
+
+
 function getCurrentUser() { try { return JSON.parse(localStorage.getItem(LS.SESSION) || 'null'); } catch(e) { return null; } }
 function setCurrentUser(u){ u ? localStorage.setItem(LS.SESSION, JSON.stringify(u)) : localStorage.removeItem(LS.SESSION); }
 function getCart()        { try { return JSON.parse(localStorage.getItem(LS.CART)   || '[]'); } catch(e) { return []; } }
 function saveCart(c)      { localStorage.setItem(LS.CART, JSON.stringify(c)); }
 
 // ── Générateur d'IDs uniques ───────────────────────────────────
-function genId(prefix) {
-  const ts  = Date.now().toString(36).toUpperCase();
-  const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${prefix}-${ts}-${rnd}`;
-}
+
 
 // ── Formatage date ─────────────────────────────────────────────
 function fmtDate(iso) {
@@ -2769,92 +2762,7 @@ function getTierBadgeClass(tier) {
    SEED — Compte admin + comptes démo au premier lancement
    Exécuté une seule fois (flag smdi_seeded dans localStorage).
    ══════════════════════════════════════════════════════════════ */
-function seedDemoUsersIfNeeded() {
-  if (localStorage.getItem(LS.SEEDED)) return;
 
-  const users = [
-    {
-      id:        'usr-admin',
-      email:     'admin@smdi.fr',
-      pwd:       'admin123',
-      role:      'admin',
-      status:    'validated',
-      tier:      null,
-      name:      'Admin SMDI',
-      company:   'SMDI',
-      siret:     '000 000 000 00000',
-      createdAt: new Date('2024-01-01').toISOString(),
-    },
-    {
-      id:        'usr-demo-gold',
-      email:     'pro@demo.fr',
-      pwd:       'demo123',
-      role:      'customer',
-      status:    'validated',
-      tier:      'gold',
-      name:      'Station Soleil Vert',
-      company:   'Station Soleil Vert SAS',
-      siret:     '552 100 554 03297',
-      createdAt: new Date('2024-06-01').toISOString(),
-      validatedAt: new Date('2024-06-02').toISOString(),
-    },
-    {
-      id:        'usr-demo-pending',
-      email:     'pending@demo.fr',
-      pwd:       'demo123',
-      role:      'customer',
-      status:    'pending',
-      tier:      null,
-      name:      'Garage Martin',
-      company:   'Garage Martin SARL',
-      siret:     '712 345 678 00012',
-      createdAt: new Date().toISOString(),
-    },
-  ];
-  saveUsers(users);
-
-  // Commandes démo liées au compte Gold
-  const orders = [
-    {
-      id:         'CMD-2025-0087',
-      userId:     'usr-demo-gold',
-      clientName: 'Station Soleil Vert SAS',
-      items: [
-        { name:'Pompe HP 250 Bar Triphasée',  ref:'PCE-PMP-250B', qty:1, unitPrice:612 },
-        { name:'Shampooing HP Concentré Pro', ref:'ENT-HP90-5L',  qty:4, unitPrice:40  },
-      ],
-      total:     772,
-      status:    'invoiced',
-      createdAt: new Date('2025-03-12').toISOString(),
-    },
-    {
-      id:         'CMD-2025-0081',
-      userId:     'usr-demo-gold',
-      clientName: 'Station Soleil Vert SAS',
-      items: [
-        { name:'Osmoseur Industriel 500 L/h', ref:'EAU-OSM-500', qty:1, unitPrice:2880 },
-      ],
-      total:     2880,
-      status:    'processing',
-      createdAt: new Date('2025-03-05').toISOString(),
-    },
-    {
-      id:         'CMD-2025-0076',
-      userId:     'usr-demo-gold',
-      clientName: 'Station Soleil Vert SAS',
-      items: [
-        { name:'Cire de Finition Auto-Brillante', ref:'ENT-CIRE-1L',  qty:6, unitPrice:25 },
-        { name:'Dégraissant Jantes HP 5L',        ref:'ENT-DGR-JNT',  qty:4, unitPrice:34 },
-      ],
-      total:     350,
-      status:    'invoiced',
-      createdAt: new Date('2025-02-28').toISOString(),
-    },
-  ];
-  saveOrders(orders);
-
-  localStorage.setItem(LS.SEEDED, '1');
-}
 
 /* ══════════════════════════════════════════════════════════════
    RENDER — Dashboard KPIs + tableau commandes récentes
@@ -3060,13 +2968,19 @@ async function reorderItems(orderId) {
 async function renderAdminView() {
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  // Charger tous les profils customers depuis Supabase
-  const { data: allProfiles, error } = await sb
-    .from('profiles')
-    .select('*')
-    .neq('role', 'admin')
-    .order('created_at', { ascending: false });
+  // Charger profils et commandes en parallèle — évite N+1
+  const [profilesRes, ordersRes] = await Promise.all([
+    sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: false }),
+    sb.from('orders').select('user_id, cart_total'),
+  ]);
 
+  // Index CA par user_id pour le tableau des comptes validés
+  const caByUser = {};
+  (ordersRes.data || []).forEach(o => {
+    caByUser[o.user_id] = (caByUser[o.user_id] || 0) + Number(o.cart_total || 0);
+  });
+
+  const { data: allProfiles, error } = profilesRes;
   if (error) {
     console.error('[renderAdminView] load error', error.message);
     showToast('Erreur lors du chargement des comptes.', 'err');
@@ -3099,7 +3013,7 @@ async function renderAdminView() {
   if (tbodyEl) {
     tbodyEl.innerHTML = validated.length
       ? validated.map(u => {
-          const ca      = getOrders().filter(o => o.userId === u.id).reduce((s, o) => s + (o.total || 0), 0);
+          const ca      = caByUser[u.id] || 0;
           const tierCls = getTierBadgeClass(u.tier);
           return `<tr>
             <td><div class="td-name">${u.company || u.name || '—'}</div></td>
@@ -4047,7 +3961,6 @@ function fmt(n) {
 /* ══════════════ INIT DE BASE ══════════════ */
 
 // 1. Seeder les comptes démo au premier lancement
-seedDemoUsersIfNeeded();
 
 // 2. Restaurer la session — Supabase en priorité, localStorage en fallback
 async function restoreSession() {
