@@ -277,6 +277,8 @@ select.form-ctrl option { background: var(--bg2); }
   flex-direction: column;
   min-height: 100vh;
   position: relative; z-index: 1;
+  min-width: 0;        /* empêche le flex child de dépasser la zone allouée */
+  overflow-x: hidden;  /* stoppe tout débordement horizontal des vues enfants */
 }
 
 /* Top bar */
@@ -329,7 +331,21 @@ select.form-ctrl option { background: var(--bg2); }
 }
 
 /* Page content */
-#page-content { flex: 1; padding: 32px; }
+#page-content {
+  flex: 1;
+  padding: 32px;
+  min-width: 0;        /* empêche le flex child de dépasser son conteneur */
+  overflow-x: hidden;  /* stoppe tout débordement horizontal */
+}
+
+/* Toutes les vues occupent 100% de la zone de contenu disponible.
+   min-width:0 est nécessaire dans un contexte flex pour éviter que
+   le contenu interne (grilles, tableaux) pousse le bloc hors du flux. */
+.view {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
 
 /* ═══════════════════════════════════════════
    AUTH PAGES (login / register)
@@ -692,6 +708,7 @@ select.form-ctrl option { background: var(--bg2); }
 }
 .prod-card:hover::after { transform: scaleX(1); }
 
+/* Zone image des cartes catalogue */
 .prod-img {
   height: 160px; background: var(--bg3);
   border-bottom: 1px solid var(--border);
@@ -699,9 +716,29 @@ select.form-ctrl option { background: var(--bg2); }
   position: relative; overflow: hidden;
 }
 .prod-img svg { width: 64px; height: 64px; opacity: .2; }
+/* Image produit — object-fit:cover pour remplir proprement la zone fixe */
+.prod-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
 .prod-img .prod-cat-badge {
   position: absolute; top: 10px; left: 10px;
+  z-index: 1;
 }
+
+/* Miniature vue liste — même logique d'affichage */
+.prod-row-thumb {
+  width: 72px; height: 56px; background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+}
+.prod-row-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.prod-row-thumb svg { width: 28px; height: 28px; opacity: .25; }
 
 .prod-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
 .prod-ref  { font-family: var(--fm); font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
@@ -747,12 +784,6 @@ select.form-ctrl option { background: var(--bg2); }
   transition: transform var(--tr); transform-origin: top;
 }
 .prod-row:hover::before { transform: scaleY(1); }
-.prod-row-thumb {
-  width: 72px; height: 56px; background: var(--bg3);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.prod-row-thumb svg { width: 28px; height: 28px; opacity: .25; }
 
 /* Tier pricing table */
 .tier-prices {
@@ -765,70 +796,6 @@ select.form-ctrl option { background: var(--bg2); }
 }
 .tier-price-chip .qty-range { font-size: 9px; color: var(--muted2); }
 .tier-price-chip .price    { color: var(--orange); }
-
-/* ═══════════════════════════════════════════
-   DEVIS VIEW
-═══════════════════════════════════════════ */
-.quote-builder {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 20px;
-  align-items: start;
-}
-
-.quote-items { display: flex; flex-direction: column; gap: 2px; }
-.quote-item {
-  display: grid;
-  grid-template-columns: 1fr 100px 100px 36px;
-  align-items: center; gap: 12px;
-  padding: 14px 16px;
-  background: var(--card);
-  border: 1px solid var(--border2);
-  transition: border-color var(--tr);
-}
-.quote-item:hover { border-color: var(--orange); }
-.qi-name  { font-size: 13px; font-weight: 600; color: var(--text); }
-.qi-ref   { font-family: var(--fm); font-size: 10px; color: var(--muted2); margin-top: 2px; }
-.qi-qty   { text-align: center; }
-.qi-total { font-family: var(--ft); font-size: 14px; font-weight: 700; color: var(--orange); text-align: right; }
-.qi-del   { display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted2); transition: color var(--tr); }
-.qi-del:hover { color: var(--red); }
-.qi-del svg { width: 16px; height: 16px; }
-
-.quote-summary {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  position: sticky; top: calc(var(--nav-h) + 20px);
-}
-.qs-head {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.qs-head-title {
-  font-family: var(--ft); font-size: 13px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: .06em; color: var(--text);
-}
-.qs-lines { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
-.qs-line { display: flex; justify-content: space-between; align-items: center; }
-.qs-line-label { font-size: 12px; color: var(--muted); }
-.qs-line-val { font-family: var(--fm); font-size: 13px; font-weight: 700; color: var(--text2); }
-.qs-total-line {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 20px; background: var(--orange-d);
-  border-top: 1px solid rgba(255,77,0,.2);
-}
-.qs-total-label { font-family: var(--ft); font-size: 14px; font-weight: 800; color: var(--text); }
-.qs-total-val   { font-family: var(--ft); font-size: 22px; font-weight: 800; color: var(--orange); }
-.qs-actions { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); }
-
-.quote-list-item {
-  background: var(--card); border: 1px solid var(--border2);
-  padding: 16px 20px; margin-bottom: 2px;
-  display: grid; grid-template-columns: auto 1fr auto auto auto;
-  align-items: center; gap: 16px;
-  transition: border-color var(--tr);
-}
-.quote-list-item:hover { border-color: var(--orange); }
 
 /* ═══════════════════════════════════════════
    COMMANDES VIEW
@@ -992,43 +959,8 @@ select.form-ctrl option { background: var(--bg2); }
 .toast.err { border-left-color: var(--red); }
 
 /* ═══════════════════════════════════════════
-   RESPONSIVE
+   STEPPER (inscription multi-étapes)
 ═══════════════════════════════════════════ */
-@media(max-width:1280px){
-  .kpi-grid { grid-template-columns:repeat(2,1fr); }
-  .dash-grid { grid-template-columns:1fr; }
-  .products-grid-4 { grid-template-columns:repeat(3,1fr); }
-  .account-grid { grid-template-columns:1fr; }
-  .quote-builder { grid-template-columns:1fr; }
-}
-@media(max-width:960px){
-  :root { --sidebar-w:0px; }
-  #sidebar { transform: translateX(-240px); width:240px; }
-  #sidebar.mobile-open { transform:none; }
-  #main-area { margin-left:0; }
-  .auth-container { grid-template-columns:1fr; }
-  .auth-brand { display:none; }
-  .products-grid-4, .products-grid-3 { grid-template-columns:repeat(2,1fr); }
-  .kpi-grid { grid-template-columns:repeat(2,1fr); }
-}
-@media(max-width:640px){
-  #page-content { padding:16px; }
-  .products-grid-4, .products-grid-3 { grid-template-columns:1fr; }
-  .kpi-grid { grid-template-columns:1fr; }
-  .form-row-2, .form-row-3 { grid-template-columns:1fr; }
-  .auth-form-side { padding:32px 24px; }
-}
-
-/* Empty state */
-.empty-state {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:60px 24px; text-align:center;
-}
-.empty-state svg { width:56px; height:56px; opacity:.2; margin-bottom:16px; }
-.empty-state h3 { font-family:var(--ft); font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px; }
-.empty-state p   { font-size:13px; color:var(--muted); max-width:320px; }
-
-/* Stepper (register) */
 .stepper { display:flex; align-items:center; gap:0; margin-bottom:28px; }
 .step { display:flex; align-items:center; gap:8px; }
 .step-num {
@@ -1088,13 +1020,12 @@ select.form-ctrl option { background: var(--bg2); }
       filter: drop-shadow(0 1px 4px rgba(0,0,0,.5));
       transition: opacity .2s ease;
     }
-/* ══════════════════════════════════════════════════════════════
-   STEP 6 — Premium product detail (fiche produit redesign)
-   Inspiré de la logique UX produit premium (grand visuel gauche,
-   informations structurées droite, barre CTA sticky en bas).
-   Univers : fond sombre / orange SMDI / industriel B2B.
-   Toutes les classes sont préfixées pd- — isolation totale.
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   FICHE PRODUIT PREMIUM (modale #modal-product-detail)
+   Styles pour .pd-layout, colonnes image/info,
+   sections specs/benefits, barre CTA sticky.
+   Toutes les classes sont préfixées pd-.
+═══════════════════════════════════════════ */
 
 /* Modale élargie — quasi plein écran sur desktop */
 #modal-product-detail .modal {
@@ -1450,17 +1381,114 @@ select.form-ctrl option { background: var(--bg2); }
 .pd-btn-back:hover { color: var(--orange); }
 
 /* ═══════════════════════ RESPONSIVE ════════════════════════════ */
-@media (max-width: 760px) {
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   Tous les breakpoints sont regroupés ici :
+   ≤1280px  — tablette large / petits desktops
+   ≤960px   — tablette portrait / sidebar masquée
+   ≤640px   — mobile
+═══════════════════════════════════════════ */
+
+/* ≤1280px — Tablette large */
+@media(max-width:1280px){
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .dash-grid { grid-template-columns:1fr; }
+  .products-grid-4 { grid-template-columns:repeat(3,1fr); }
+  .account-grid { grid-template-columns:1fr; }
+}
+
+/* Tablette (≤960px) */
+@media(max-width:960px){
+  :root { --sidebar-w:0px; }
+  #sidebar { transform: translateX(-240px); width:240px; }
+  #sidebar.mobile-open { transform:none; }
+  #main-area { margin-left:0; min-width:0; overflow-x:hidden; }
+  .auth-container { grid-template-columns:1fr; }
+  .auth-brand { display:none; }
+  .products-grid-4, .products-grid-3 { grid-template-columns:repeat(2,1fr); }
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+
+  /* Fiche produit */
   .pd-layout { grid-template-columns: 1fr; }
   .pd-col-image { border-right: none; border-bottom: 1px solid var(--border); }
-  .pd-img-wrap { padding: 20px; }
-  #modal-product-detail .modal { max-height: 98vh; width: 100vw; }
-  #modal-product-detail .modal-footer { flex-direction: column; align-items: stretch; }
-  .pd-cta-actions { flex-direction: column; }
-  .pd-btn-back { margin-left: 0; }
+  .pd-img-wrap { padding: 24px; flex-direction: row; align-items: flex-start; gap: 20px; }
+  .pd-img-main { width: 160px; flex-shrink: 0; }
+  .pd-gallery-row { flex-wrap: wrap; }
+
+  /* Commandes : réduire les colonnes */
+  .order-card-head { grid-template-columns: auto 1fr auto auto; gap: 12px; }
+
+  /* Admin : cartes pending flexibles */
+  .admin-pending-card { flex-wrap: wrap; gap: 12px; }
+  .admin-actions { width: 100%; justify-content: flex-end; }
 }
-/* ═══════════════════════════════════════════════════════════════ */
+
+/* Mobile (≤640px) */
+@media(max-width:640px){
+  #page-content { padding:16px; }
+  .products-grid-4, .products-grid-3 { grid-template-columns:1fr; }
+  .kpi-grid { grid-template-columns:1fr; }
+  .form-row-2, .form-row-3 { grid-template-columns:1fr; }
+  .auth-form-side { padding:32px 24px; }
+
+  /* Fiche produit : layout empilé, barre CTA compacte */
+  .pd-img-wrap { flex-direction: column; align-items: center; padding: 16px; }
+  .pd-img-main { width: 100%; max-width: 280px; }
+  #modal-product-detail .modal { max-height: 100dvh; width: 100vw; border-radius: 0; }
+  #modal-product-detail .modal-footer { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 16px; }
+  .pd-cta-actions { flex-direction: column; }
+  .pd-cta-sep { display: none; } /* Masquer les séparateurs verticaux en colonne */
+  .pd-btn-back { margin-left: 0; }
+  .pd-info-head { padding: 16px 16px 12px; }
+  .pd-info-body { padding: 16px; }
+
+  /* Vue liste catalogue : stack vertical sur mobile */
+  .prod-row {
+    grid-template-columns: 48px 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px; padding: 12px;
+  }
+  .prod-row-thumb { width: 48px; height: 48px; }
+  /* Prix et boutons passent sur une deuxième ligne */
+  .prod-row > div:nth-child(3),
+  .prod-row > div:nth-child(4),
+  .prod-row > div:nth-child(5) {
+    grid-column: 2;
+  }
+
+  /* Commandes : stack complet */
+  .order-card-head {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 8px; padding: 12px;
+  }
+  .order-card-head > div:nth-child(2) { grid-column: 1 / -1; }
+  .order-date { grid-column: 1 / -1; }
+
+  /* Admin cards : pleine largeur */
+  .admin-pending-card { flex-direction: column; align-items: stretch; }
+  .admin-actions { display: flex; gap: 8px; }
+  .admin-actions button { flex: 1; }
+
+  /* Stat minis : 2 par ligne sur mobile */
+  .stat-mini { min-width: 140px; }
+}
+
+/* Empty state */
+.empty-state {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 24px; text-align:center;
+}
+.empty-state svg { width:56px; height:56px; opacity:.2; margin-bottom:16px; }
+.empty-state h3 { font-family:var(--ft); font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.empty-state p   { font-size:13px; color:var(--muted); max-width:320px; }
+
+
 </style>
+<!-- Supabase CDN — connexion initiale uniquement -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1702,11 +1730,7 @@ select.form-ctrl option { background: var(--bg2); }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
           Catalogue
         </div>
-        <div class="sidebar-link" data-view="quotes" onclick="navigate('quotes')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          Mes devis
-          <span class="sl-badge" id="badge-quotes">3</span>
-        </div>
+        
         <div class="sidebar-link" data-view="orders" onclick="navigate('orders')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           Commandes
@@ -1821,32 +1845,32 @@ select.form-ctrl option { background: var(--bg2); }
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/></svg>
               Commandes ce mois
             </div>
-            <div class="kpi-value">12</div>
-            <div class="kpi-delta up">↑ +3 vs mois dernier</div>
+            <div class="kpi-value" id="kpi-orders">—</div>
+            <div class="kpi-delta up" id="kpi-orders-delta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Devis en attente
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              Commandes en cours
             </div>
-            <div class="kpi-value">3</div>
-            <div class="kpi-delta neutral">— Dont 1 urgent</div>
+            <div class="kpi-value" id="kpi-pending-orders">—</div>
+            <div class="kpi-delta neutral" id="kpi-pending-orders-delta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
               CA cumulé (HT)
             </div>
-            <div class="kpi-value">8 420 €</div>
-            <div class="kpi-delta up">↑ +18% vs trim. dernier</div>
+            <div class="kpi-value" id="kpi-ca">—</div>
+            <div class="kpi-delta up" id="kpi-ca-delta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               Prochaine intervention
             </div>
-            <div class="kpi-value">Lun. 7</div>
-            <div class="kpi-delta neutral">Entretien préventif #3</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-delta neutral">Contactez le support</div>
           </div>
         </div>
 
@@ -1868,26 +1892,20 @@ select.form-ctrl option { background: var(--bg2); }
                 <thead><tr>
                   <th>N° Commande</th><th>Date</th><th>Produits</th><th>Montant HT</th><th>Statut</th><th class="td-action">Action</th>
                 </tr></thead>
-                <tbody>
-                  <tr><td><div class="td-name">#CMD-2025-0087</div><div class="td-ref">5 articles</div></td><td style="color:var(--muted);font-size:12px;">12/03/2025</td><td style="font-size:12px;color:var(--muted)">Pompe HP, Shampooing…</td><td class="td-amount">1 240 €</td><td><span class="badge badge-green">Livré</span></td><td class="td-action"><button class="btn btn-outline btn-sm" onclick="openOrderDetail('CMD-2025-0087')">Détail</button></td></tr>
-                  <tr><td><div class="td-name">#CMD-2025-0081</div><div class="td-ref">2 articles</div></td><td style="color:var(--muted);font-size:12px;">05/03/2025</td><td style="font-size:12px;color:var(--muted)">Osmoseur 500L/h</td><td class="td-amount">3 850 €</td><td><span class="badge badge-blue">En transit</span></td><td class="td-action"><button class="btn btn-outline btn-sm">Suivre</button></td></tr>
-                  <tr><td><div class="td-name">#CMD-2025-0076</div><div class="td-ref">8 articles</div></td><td style="color:var(--muted);font-size:12px;">28/02/2025</td><td style="font-size:12px;color:var(--muted)">Consommables, pièces</td><td class="td-amount">687 €</td><td><span class="badge badge-green">Livré</span></td><td class="td-action"><button class="btn btn-outline btn-sm">Détail</button></td></tr>
-                  <tr><td><div class="td-name">#CMD-2025-0071</div><div class="td-ref">3 articles</div></td><td style="color:var(--muted);font-size:12px;">20/02/2025</td><td style="font-size:12px;color:var(--muted)">Borne CB + NFC</td><td class="td-amount">2 100 €</td><td><span class="badge badge-muted">Archivé</span></td><td class="td-action"><button class="btn btn-outline btn-sm">Détail</button></td></tr>
+                <tbody id="dash-orders-tbody">
+                  <!-- Rempli dynamiquement par renderDashboardRecentOrders() -->
                 </tbody>
               </table>
             </div>
 
-            <!-- Devis en cours -->
+            <!-- Commandes en cours -->
             <div class="widget">
               <div class="widget-head">
                 <div class="widget-title">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  Devis en cours
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+                  Commandes en cours
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="navigate('quotes')">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Nouveau devis
-                </button>
+
               </div>
               <table class="data-table">
                 <thead><tr><th>N° Devis</th><th>Objet</th><th>Montant HT</th><th>Validité</th><th>Statut</th><th class="td-action"></th></tr></thead>
@@ -1912,8 +1930,7 @@ select.form-ctrl option { background: var(--bg2); }
                   <div class="quick-action-name">Commander</div>
                   <div class="quick-action-desc">+1 500 références</div>
                 </div>
-                <div class="quick-action" onclick="navigate('quotes')">
-                  <div class="quick-action-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                
                   <div class="quick-action-name">Devis rapide</div>
                   <div class="quick-action-desc">Réponse 4h</div>
                 </div>
@@ -1984,7 +2001,7 @@ select.form-ctrl option { background: var(--bg2); }
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
                 Panier (<span id="cart-count">0</span>)
               </button>
-              <button class="btn btn-primary" onclick="navigate('quotes')">Créer un devis</button>
+        
             </div>
           </div>
         </div>
@@ -2016,92 +2033,7 @@ select.form-ctrl option { background: var(--bg2); }
       </div><!-- /catalog -->
 
       <!-- ═══ DEVIS ═══ -->
-      <div id="view-quotes" class="view" style="display:none;">
-        <div class="page-header">
-          <div class="page-header-top">
-            <div>
-              <h1 class="page-title">Mes Devis</h1>
-              <p class="page-sub">Créez, gérez et validez vos demandes de devis</p>
-            </div>
-            <button class="btn btn-primary" onclick="openNewQuote()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nouveau devis
-            </button>
-          </div>
-        </div>
-
-        <!-- Constructeur de devis -->
-        <div id="quote-builder-panel" style="display:none;margin-bottom:28px;">
-          <div class="widget" style="border-color:var(--orange);">
-            <div class="widget-head" style="background:var(--orange-d);">
-              <div class="widget-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nouveau devis en cours
-              </div>
-              <button class="btn btn-outline btn-sm" onclick="closeNewQuote()">Annuler</button>
-            </div>
-            <div class="widget-body" style="padding:20px;">
-              <div class="quote-builder">
-                <div>
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                    <div style="font-family:var(--ft);font-size:13px;font-weight:700;color:var(--text);">Articles du devis</div>
-                    <button class="btn btn-ghost btn-sm" onclick="openAddProduct()">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                      Ajouter un produit
-                    </button>
-                  </div>
-                  <div class="quote-items" id="quote-items">
-                    <div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;background:var(--bg3);border:1px dashed var(--border2);">
-                      Cliquez "Ajouter un produit" pour démarrer votre devis
-                    </div>
-                  </div>
-                </div>
-                <div class="quote-summary">
-                  <div class="qs-head">
-                    <div class="qs-head-title">Récapitulatif</div>
-                  </div>
-                  <div class="qs-lines">
-                    <div class="qs-line"><span class="qs-line-label">Sous-total HT</span><span class="qs-line-val" id="qs-subtotal">0,00 €</span></div>
-                    <div class="qs-line"><span class="qs-line-label">Remise <span id="qs-disc-pct">0%</span></span><span class="qs-line-val" id="qs-discount" style="color:var(--green)">— 0,00 €</span></div>
-                    <div class="qs-line"><span class="qs-line-label">TVA 20%</span><span class="qs-line-val" id="qs-tva">0,00 €</span></div>
-                    <div class="qs-line" style="padding-top:8px;border-top:1px solid var(--border)">
-                      <span class="qs-line-label" style="font-weight:600;color:var(--text2)">Total TTC</span>
-                      <span class="qs-line-val" id="qs-ttc">0,00 €</span>
-                    </div>
-                  </div>
-                  <div class="qs-total-line">
-                    <span class="qs-total-label">Total HT</span>
-                    <span class="qs-total-val" id="qs-total">0,00 €</span>
-                  </div>
-                  <div class="qs-actions">
-                    <button class="btn btn-primary btn-full" onclick="submitQuote()">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                      Envoyer le devis
-                    </button>
-                    <button class="btn btn-outline btn-full" onclick="showToast('Devis sauvegardé en brouillon.','ok')">Sauvegarder brouillon</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Liste des devis -->
-        <div class="widget">
-          <div class="widget-head">
-            <div class="widget-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Tous mes devis</div>
-          </div>
-          <table class="data-table">
-            <thead><tr><th>N° Devis</th><th>Objet</th><th>Produits</th><th>Montant HT</th><th>Créé le</th><th>Validité</th><th>Statut</th><th class="td-action">Actions</th></tr></thead>
-            <tbody>
-              <tr><td><div class="td-name">#DEV-2025-033</div></td><td style="font-size:12px">Renouvellement consommables annuels</td><td style="font-size:12px;color:var(--muted)">6 produits</td><td class="td-amount">2 340 €</td><td style="font-size:12px;color:var(--muted)">10/03/25</td><td style="font-size:12px;color:var(--muted)">25/03/25</td><td><span class="badge badge-yellow">En attente</span></td><td class="td-action" style="display:flex;gap:6px;"><button class="btn btn-primary btn-sm">Valider</button><button class="btn btn-outline btn-sm">PDF</button></td></tr>
-              <tr><td><div class="td-name">#DEV-2025-029</div></td><td style="font-size:12px">Pompe HP 250b + kit install.</td><td style="font-size:12px;color:var(--muted)">3 produits</td><td class="td-amount">4 800 €</td><td style="font-size:12px;color:var(--muted)">05/03/25</td><td style="font-size:12px;color:var(--muted)">20/03/25</td><td><span class="badge badge-orange">Révision</span></td><td class="td-action" style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm">Modifier</button><button class="btn btn-outline btn-sm">PDF</button></td></tr>
-              <tr><td><div class="td-name">#DEV-2025-024</div></td><td style="font-size:12px">Système osmose inverse complet</td><td style="font-size:12px;color:var(--muted)">2 produits</td><td class="td-amount">6 200 €</td><td style="font-size:12px;color:var(--muted)">20/02/25</td><td style="font-size:12px;color:var(--muted)">07/03/25</td><td><span class="badge badge-red">Expiré</span></td><td class="td-action" style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm">Renouveler</button></td></tr>
-              <tr><td><div class="td-name">#DEV-2025-018</div></td><td style="font-size:12px">Adoucisseur + maintenance annuelle</td><td style="font-size:12px;color:var(--muted)">4 produits</td><td class="td-amount">3 450 €</td><td style="font-size:12px;color:var(--muted)">10/02/25</td><td style="font-size:12px;color:var(--muted)">25/02/25</td><td><span class="badge badge-green">Accepté</span></td><td class="td-action" style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm">Voir</button><button class="btn btn-outline btn-sm">PDF</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div><!-- /quotes -->
+      
 
       <!-- ═══ COMMANDES ═══ -->
       <div id="view-orders" class="view" style="display:none;">
@@ -2119,16 +2051,14 @@ select.form-ctrl option { background: var(--bg2); }
         </div>
         <!-- Stats mini -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;">
-          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg></div><div><div class="stat-mini-val">32</div><div class="stat-mini-label">Total commandes</div></div></div>
-          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-mini-val" style="color:var(--green)">28</div><div class="stat-mini-label">Livrées</div></div></div>
-          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg></div><div><div class="stat-mini-val" style="color:var(--blue)">1</div><div class="stat-mini-label">En transit</div></div></div>
-          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg></div><div><div class="stat-mini-val">18 420 €</div><div class="stat-mini-label">CA cumulé HT</div></div></div>
+          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg></div><div><div class="stat-mini-val" id="ord-stat-total">—</div><div class="stat-mini-label">Total commandes</div></div></div>
+          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-mini-val" id="ord-stat-invoiced" style="color:var(--green)">—</div><div class="stat-mini-label">Facturées</div></div></div>
+          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg></div><div><div class="stat-mini-val" id="ord-stat-processing" style="color:var(--blue)">—</div><div class="stat-mini-label">En traitement</div></div></div>
+          <div class="stat-mini"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg></div><div><div class="stat-mini-val" id="ord-stat-ca">—</div><div class="stat-mini-label">CA cumulé HT</div></div></div>
         </div>
         <!-- Commandes -->
         <div id="orders-list">
-          <div class="order-card"><div class="order-card-head" onclick="toggleOrder(this)"><div><div class="order-num">#CMD-2025-0087</div></div><div><div class="td-name">5 articles — Pompe, consommables, pièces</div><div class="order-date">12 mars 2025</div></div><span class="badge badge-green">Livré</span><div class="td-amount">1 240 €</div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="order-body"><div class="order-products"><div class="order-product"><div class="order-product-name">Pompe HP 250 Bar Triphasée</div><div class="order-product-qty">× 1</div><div class="order-product-amt">680 €</div></div><div class="order-product"><div class="order-product-name">Shampooing HP Concentré 5L</div><div class="order-product-qty">× 4</div><div class="order-product-amt">240 €</div></div><div class="order-product"><div class="order-product-name">Lance HP Inox 40cm</div><div class="order-product-qty">× 2</div><div class="order-product-amt">180 €</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-outline btn-sm">Télécharger BL</button><button class="btn btn-outline btn-sm">Facture PDF</button><button class="btn btn-ghost btn-sm" onclick="reorderAll()">Recommander tout</button></div></div></div>
-          <div class="order-card"><div class="order-card-head" onclick="toggleOrder(this)"><div><div class="order-num">#CMD-2025-0081</div></div><div><div class="td-name">2 articles — Osmoseur industriel</div><div class="order-date">05 mars 2025</div></div><span class="badge badge-blue">En transit</span><div class="td-amount">3 850 €</div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="order-body"><div class="order-products"><div class="order-product"><div class="order-product-name">Osmoseur Industriel 500 L/h</div><div class="order-product-qty">× 1</div><div class="order-product-amt">3 200 €</div></div><div class="order-product"><div class="order-product-name">Kit de raccordement pro</div><div class="order-product-qty">× 1</div><div class="order-product-amt">650 €</div></div></div><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">Suivre le colis</button><button class="btn btn-outline btn-sm">Bon de commande</button></div></div></div>
-          <div class="order-card"><div class="order-card-head" onclick="toggleOrder(this)"><div><div class="order-num">#CMD-2025-0076</div></div><div><div class="td-name">8 articles — Consommables complets</div><div class="order-date">28 février 2025</div></div><span class="badge badge-green">Livré</span><div class="td-amount">687 €</div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="order-body"><div class="order-products"><div class="order-product"><div class="order-product-name">Cire de Finition Auto-Brillante 1L</div><div class="order-product-qty">× 6</div><div class="order-product-amt">270 €</div></div><div class="order-product"><div class="order-product-name">Dégraissant Jantes HP 5L</div><div class="order-product-qty">× 4</div><div class="order-product-amt">220 €</div></div></div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm">Facture PDF</button><button class="btn btn-ghost btn-sm" onclick="reorderAll()">Recommander</button></div></div></div>
+          <!-- Rempli dynamiquement par renderUserOrders() -->
         </div>
       </div><!-- /orders -->
 
@@ -2285,32 +2215,26 @@ select.form-ctrl option { background: var(--bg2); }
         <div class="page-header">
           <div class="page-header-top">
             <div><h1 class="page-title">Administration — Validation comptes</h1><p class="page-sub">Validez ou refusez les demandes d'accès professionnel</p></div>
-            <span class="badge badge-yellow" style="font-size:12px;padding:6px 14px;">5 en attente</span>
+            <span class="badge badge-yellow" id="admin-pending-badge" style="font-size:12px;padding:6px 14px;">— en attente</span>
           </div>
         </div>
         <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><div class="stat-mini-val" style="color:var(--yellow)">5</div><div class="stat-mini-label">En attente validation</div></div></div>
-          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-mini-val" style="color:var(--green)">142</div><div class="stat-mini-label">Comptes validés</div></div></div>
-          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="stat-mini-val" style="color:var(--red)">8</div><div class="stat-mini-label">Refusés (30j)</div></div></div>
-          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="stat-mini-val">150</div><div class="stat-mini-label">Total comptes</div></div></div>
+          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><div class="stat-mini-val" id="admin-stat-pending" style="color:var(--yellow)">—</div><div class="stat-mini-label">En attente validation</div></div></div>
+          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-mini-val" id="admin-stat-approved" style="color:var(--green)">—</div><div class="stat-mini-label">Comptes validés</div></div></div>
+          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="stat-mini-val" id="admin-stat-rejected" style="color:var(--red)">—</div><div class="stat-mini-label">Refusés (30j)</div></div></div>
+          <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="stat-mini-val" id="admin-stat-total">—</div><div class="stat-mini-label">Total comptes</div></div></div>
         </div>
         <div class="widget" style="margin-bottom:20px;">
           <div class="widget-head"><div class="widget-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Demandes en attente de validation</div></div>
           <div id="admin-pending-list">
-            <div class="admin-pending-card"><div style="width:40px;height:40px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:var(--ft);font-size:16px;font-weight:800;color:#000;flex-shrink:0;">L</div><div><div class="admin-company">Lavage Express Nanterre SARL</div><div class="admin-siret">SIRET : 423 185 987 00025</div><div class="admin-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d4b7bbbaa0b5b7a094b8b5a2b5b3b1f9bab5baa0b1a6a6b1fab2a6">[email&#160;protected]</a> · 01 44 55 66 77 · <span style="color:var(--orange)">Station de lavage auto</span></div></div><span class="badge badge-yellow">Bronze</span><div class="admin-actions"><button class="btn btn-primary btn-sm" onclick="validateAccount(this,'Lavage Express Nanterre')">✓ Valider</button><button class="btn btn-danger btn-sm" onclick="refuseAccount(this)">✗ Refuser</button></div></div>
-            <div class="admin-pending-card"><div style="width:40px;height:40px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:var(--ft);font-size:16px;font-weight:800;color:#fff;flex-shrink:0;">P</div><div><div class="admin-company">Pro Wash Solutions IDF</div><div class="admin-siret">SIRET : 518 254 369 00012</div><div class="admin-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="680c011a0d0b1c01070628181a071f091b0045010c0e460e1a">[email&#160;protected]</a> · 06 12 34 56 78 · <span style="color:var(--orange)">Centre haute pression</span></div></div><span class="badge badge-orange">Gold</span><div class="admin-actions"><button class="btn btn-primary btn-sm" onclick="validateAccount(this,'Pro Wash Solutions')">✓ Valider</button><button class="btn btn-danger btn-sm" onclick="refuseAccount(this)">✗ Refuser</button></div></div>
-            <div class="admin-pending-card"><div style="width:40px;height:40px;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--ft);font-size:16px;font-weight:800;color:#000;flex-shrink:0;">A</div><div><div class="admin-company">AutoStation Marne-la-Vallée</div><div class="admin-siret">SIRET : 678 912 345 00031</div><div class="admin-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b1d8dfd7def1d0c4c5dec2c5d0c5d8dedf9cdcddc79fd7c3">[email&#160;protected]</a> · 01 64 77 88 99 · <span style="color:var(--orange)">Gestionnaire de flotte</span></div></div><span class="badge badge-muted">Silver</span><div class="admin-actions"><button class="btn btn-primary btn-sm" onclick="validateAccount(this,'AutoStation MLV')">✓ Valider</button><button class="btn btn-danger btn-sm" onclick="refuseAccount(this)">✗ Refuser</button></div></div>
-            <div class="admin-pending-card"><div style="width:40px;height:40px;background:var(--muted2);display:flex;align-items:center;justify-content:center;font-family:var(--ft);font-size:16px;font-weight:800;color:#fff;flex-shrink:0;">G</div><div><div class="admin-company">Garage Central Services 77</div><div class="admin-siret">SIRET : 345 678 901 00018</div><div class="admin-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="553236266262153238343c397b363a38">[email&#160;protected]</a> · 06 98 76 54 32 · <span style="color:var(--muted)">Garage / Centre auto</span></div></div><span class="badge badge-muted">Bronze</span><div class="admin-actions"><button class="btn btn-primary btn-sm" onclick="validateAccount(this,'Garage Central 77')">✓ Valider</button><button class="btn btn-danger btn-sm" onclick="refuseAccount(this)">✗ Refuser</button></div></div>
-            <div class="admin-pending-card"><div style="width:40px;height:40px;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:var(--ft);font-size:16px;font-weight:800;color:#000;flex-shrink:0;">H</div><div><div class="admin-company">HP Clean Distributeur SAS</div><div class="admin-siret">SIRET : 789 012 678 00044</div><div class="admin-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c0a1a3a8a1b4b380a8b0a3aca5a1aeeda4a9b3b4b2a9a2eea6b2">[email&#160;protected]</a> · 01 55 44 33 22 · <span style="color:var(--orange)">Distributeur / Revendeur</span></div></div><span class="badge badge-orange">Platinum</span><div class="admin-actions"><button class="btn btn-primary btn-sm" onclick="validateAccount(this,'HP Clean Distributeur')">✓ Valider</button><button class="btn btn-danger btn-sm" onclick="refuseAccount(this)">✗ Refuser</button></div></div>
-          </div>
+          <!-- Rempli dynamiquement par renderAdminView() -->
         </div>
+
         <!-- Tous les comptes -->
         <div class="widget">
           <div class="widget-head"><div class="widget-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Comptes validés récents</div></div>
-          <table class="data-table"><thead><tr><th>Société</th><th>SIRET</th><th>Niveau</th><th>CA cumulé</th><th>Validé le</th><th>Statut</th></tr></thead><tbody>
-            <tr><td><div class="td-name">Station Soleil Vert SAS</div></td><td><div class="td-ref">552 100 554 03297</div></td><td><span class="badge badge-orange">Gold</span></td><td class="td-amount">8 420 €</td><td style="font-size:12px;color:var(--muted)">01/01/2025</td><td><span class="badge badge-green">Actif</span></td></tr>
-            <tr><td><div class="td-name">WashPro Roissy</div></td><td><div class="td-ref">712 345 678 00012</div></td><td><span class="badge badge-muted">Silver</span></td><td class="td-amount">3 200 €</td><td style="font-size:12px;color:var(--muted)">15/01/2025</td><td><span class="badge badge-green">Actif</span></td></tr>
-            <tr><td><div class="td-name">Centre Lavage Évry</div></td><td><div class="td-ref">834 567 123 00056</div></td><td><span class="badge badge-blue">Platinum</span></td><td class="td-amount">22 100 €</td><td style="font-size:12px;color:var(--muted)">10/12/2024</td><td><span class="badge badge-green">Actif</span></td></tr>
+          <table class="data-table"><thead><tr><th>Société</th><th>SIRET</th><th>Niveau</th><th>CA cumulé</th><th>Validé le</th><th>Statut</th></tr></thead><tbody id="admin-all-users-tbody">
+            <!-- Rempli dynamiquement par renderAdminView() -->
           </tbody></table>
         </div>
       </div>
@@ -2338,17 +2262,6 @@ select.form-ctrl option { background: var(--bg2); }
      MODALS
 ═══════════════════════════════════════════ -->
 
-<!-- Modal : Ajout produit devis -->
-<div class="modal-overlay" id="modal-add-product">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Ajouter au devis</div><button class="modal-close" onclick="closeModal('modal-add-product')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label">Rechercher un produit</label><input type="text" class="form-ctrl" placeholder="Pompe, shampooing, osmoseur…" oninput="filterModalProducts(this.value)" id="prod-search-input"/></div>
-      <div id="modal-products-list" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Modal : Panier -->
 <div class="modal-overlay" id="modal-cart">
   <div class="modal">
@@ -2364,9 +2277,9 @@ select.form-ctrl option { background: var(--bg2); }
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-cart')">Continuer</button>
-      <button class="btn btn-primary" onclick="convertCartToQuote()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Convertir en devis
+      <button class="btn btn-primary" onclick="placeOrderFromCart()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Valider la commande
       </button>
     </div>
   </div>
@@ -2504,10 +2417,7 @@ select.form-ctrl option { background: var(--bg2); }
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
           Ajouter au panier
         </button>
-        <button class="btn btn-outline" id="pd-btn-quote" style="flex:1;min-width:140px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Demander un devis
-        </button>
+
       </div>
       <button class="pd-btn-back" onclick="closeProductDetail()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
@@ -2525,6 +2435,19 @@ select.form-ctrl option { background: var(--bg2); }
      JAVASCRIPT — MOTEUR DE L'APP
 ═══════════════════════════════════════════ -->
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ══════════════════════════════════════════════════════════════
+   SUPABASE — Initialisation
+   Connexion initiale uniquement. La logique localStorage reste
+   active et inchangée. Supabase sera branché progressivement.
+   ══════════════════════════════════════════════════════════════ */
+const SUPABASE_URL      = 'https://xtmnozfvxmfsxyoxvwke.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_lbVR9mN7j7cryd07XU90tQ_2WoJ02jR';
+
+// window.supabase = bibliothèque CDN ; sb = notre client instancié
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+
 /* ══════════════ DATA ══════════════ */
 /*
  * PRODUCTS — Catalogue SMDI
@@ -2561,6 +2484,8 @@ const PRODUCTS = [
       'pH neutre — préserve cires et protections carrosserie',
       'Biodégradable — conforme ICPE',
     ],
+    image: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Shampooing HP Concentré Pro — bidon 5L
+    gallery: [],
   },
   {
     id:'P02', ref:'ENT-CIRE-1L', name:'Cire de Finition Auto-Brillante',
@@ -2576,6 +2501,8 @@ const PRODUCTS = [
       'Film hydrophobe dès 10°C',
       'Résistant aux UV et aux shampoings répétés',
     ],
+    image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Cire de finition auto — flacon 1L
+    gallery: [],
   },
   {
     id:'P03', ref:'PCE-PMP-250B', name:'Pompe HP 250 Bar Triphasée',
@@ -2594,6 +2521,8 @@ const PRODUCTS = [
       'Compatibilité validée Kärcher, WashTec, Istobal, Nilfisk',
       'Certificat matière EN 10204 3.1 disponible sur demande',
     ],
+    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Pompe HP industrielle
+    gallery: [],
   },
   {
     id:'P04', ref:'EAU-OSM-500', name:'Osmoseur Industriel 500 L/h',
@@ -2610,6 +2539,8 @@ const PRODUCTS = [
       'Séchage sans trace sur vitres',
       'Rinçage auto programmable — préserve les membranes',
     ],
+    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Osmoseur industriel — traitement eau
+    gallery: [],
   },
   {
     id:'P05', ref:'REG-BRN-CB05', name:'Borne Paiement CB + NFC',
@@ -2627,6 +2558,8 @@ const PRODUCTS = [
       'IP65 + IK10 — résistance eau et vandalisme',
       'Dashboard télémaintenance web inclus 12 mois',
     ],
+    image: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Borne paiement CB NFC
+    gallery: [],
   },
   {
     id:'P06', ref:'ASP-IND-1600', name:'Aspirateur Industriel 1600W Pro',
@@ -2644,6 +2577,8 @@ const PRODUCTS = [
       'HEPA classe H — rétention poussières et allergènes',
       'Châssis inox 304 — résistance milieux humides',
     ],
+    image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Aspirateur industriel 1600W
+    gallery: [],
   },
   {
     id:'P07', ref:'PCE-LNC-40IN', name:'Lance HP Inox 40 cm QC',
@@ -2661,6 +2596,8 @@ const PRODUCTS = [
       'Inox 316L — résistance chlorures et chimiques',
       'Compatible Kärcher, Nilfisk, WashTec, Istobal',
     ],
+    image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Lance HP inox 40cm QC
+    gallery: [],
   },
   {
     id:'P08', ref:'EQP-GNF-DIG', name:'Gonfleur Numérique Auto-Stop',
@@ -2678,6 +2615,8 @@ const PRODUCTS = [
       'Auto-stop à la pression cible — sécurité garantie',
       'Multi-unités — bar, PSI, kPa, kg/cm²',
     ],
+    image: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Gonfleur numérique auto-stop
+    gallery: [],
   },
   {
     id:'P09', ref:'EAU-ADC-600', name:'Adoucisseur Résine 600 L/h',
@@ -2695,6 +2634,8 @@ const PRODUCTS = [
       'Élimine le tartre dans tous les équipements HP',
       'Bypass intégré — continuité pendant régénération',
     ],
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Adoucisseur résine 600L/h
+    gallery: [],
   },
   {
     id:'P10', ref:'ENT-DGR-JNT', name:'Dégraissant Jantes HP 5L',
@@ -2711,6 +2652,8 @@ const PRODUCTS = [
       'Dissout poussières de freins et huiles',
       'Compatible jantes alliage laquées et chromées',
     ],
+    image: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Dégraissant jantes HP 5L
+    gallery: [],
   },
   {
     id:'P11', ref:'REG-PRE-NUM', name:'Régulateur de Pression Numérique',
@@ -2729,6 +2672,8 @@ const PRODUCTS = [
       'Sortie 4–20 mA — compatible tous automates industriels',
       "IP67 — résistance jets d'eau haute pression",
     ],
+    image: 'https://images.unsplash.com/photo-1565087804785-9d9c94a5f54a?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Régulateur pression numérique IP67
+    gallery: [],
   },
   {
     id:'P12', ref:'ASP-DBL-T2800', name:'Module Aspirateur Double Turbine',
@@ -2746,6 +2691,8 @@ const PRODUCTS = [
       'Turbines brushless — durée de vie 3× supérieure',
       'Antiblocage automatique — maintenance réduite',
     ],
+    image: 'https://images.unsplash.com/photo-1581094651181-35942459ef62?w=600&h=600&fit=crop&q=80',  // PREP SIMAX — Module aspirateur double turbine
+    gallery: [],
   },
 ];
 
@@ -2760,7 +2707,6 @@ const DEMO_USERS = {
 let currentUser     = null;
 let currentView     = 'dashboard';
 let cartItems       = [];
-let quoteItems      = [];
 let catalogFilter   = 'all';
 let catalogViewMode = 'grid';
 
@@ -2771,6 +2717,464 @@ let catalogViewMode = 'grid';
  * @type {string|null}
  */
 let redirectAfterLogin = null;
+
+/* ══════════════════════════════════════════════════════════════
+   COUCHE LOCALSTORAGE — Persistance client-side
+   ───────────────────────────────────────────────────────────────
+   Patch non-destructif. Les fonctions existantes gardent leur nom
+   sauf celles explicitement remplacées ci-dessous (marquées REPLACED).
+   ══════════════════════════════════════════════════════════════ */
+
+// ── Clés localStorage ──────────────────────────────────────────
+const LS = {
+  USERS:   'smdi_users',
+  ORDERS:  'smdi_orders',
+  SESSION: 'smdi_session',
+  CART:    'smdi_cart',
+  SEEDED:  'smdi_seeded',
+};
+
+// ── Helpers de sérialisation (safe) ───────────────────────────
+function getUsers()       { try { return JSON.parse(localStorage.getItem(LS.USERS)  || '[]'); } catch(e) { return []; } }
+function saveUsers(u)     { localStorage.setItem(LS.USERS,  JSON.stringify(u)); }
+function getOrders()      { try { return JSON.parse(localStorage.getItem(LS.ORDERS) || '[]'); } catch(e) { return []; } }
+function saveOrders(o)    { localStorage.setItem(LS.ORDERS, JSON.stringify(o)); }
+function getQuotes()      { try { return JSON.parse(localStorage.getItem(LS.QUOTES) || '[]'); } catch(e) { return []; } }
+function saveQuotes(q)    { localStorage.setItem(LS.QUOTES, JSON.stringify(q)); }
+function getCurrentUser() { try { return JSON.parse(localStorage.getItem(LS.SESSION) || 'null'); } catch(e) { return null; } }
+function setCurrentUser(u){ u ? localStorage.setItem(LS.SESSION, JSON.stringify(u)) : localStorage.removeItem(LS.SESSION); }
+function getCart()        { try { return JSON.parse(localStorage.getItem(LS.CART)   || '[]'); } catch(e) { return []; } }
+function saveCart(c)      { localStorage.setItem(LS.CART, JSON.stringify(c)); }
+
+// ── Générateur d'IDs uniques ───────────────────────────────────
+function genId(prefix) {
+  const ts  = Date.now().toString(36).toUpperCase();
+  const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}-${ts}-${rnd}`;
+}
+
+// ── Formatage date ─────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' }); }
+  catch(e) { return '—'; }
+}
+
+// ── Badge CSS selon tier ───────────────────────────────────────
+function getTierBadgeClass(tier) {
+  return { bronze:'badge-muted', silver:'badge-muted', gold:'badge-orange', platinum:'badge-blue' }[tier] || 'badge-muted';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SEED — Compte admin + comptes démo au premier lancement
+   Exécuté une seule fois (flag smdi_seeded dans localStorage).
+   ══════════════════════════════════════════════════════════════ */
+function seedDemoUsersIfNeeded() {
+  if (localStorage.getItem(LS.SEEDED)) return;
+
+  const users = [
+    {
+      id:        'usr-admin',
+      email:     'admin@smdi.fr',
+      pwd:       'admin123',
+      role:      'admin',
+      status:    'approved',
+      tier:      null,
+      name:      'Admin SMDI',
+      company:   'SMDI',
+      siret:     '000 000 000 00000',
+      createdAt: new Date('2024-01-01').toISOString(),
+    },
+    {
+      id:        'usr-demo-gold',
+      email:     'pro@demo.fr',
+      pwd:       'demo123',
+      role:      'customer',
+      status:    'approved',
+      tier:      'gold',
+      name:      'Station Soleil Vert',
+      company:   'Station Soleil Vert SAS',
+      siret:     '552 100 554 03297',
+      createdAt: new Date('2024-06-01').toISOString(),
+      validatedAt: new Date('2024-06-02').toISOString(),
+    },
+    {
+      id:        'usr-demo-pending',
+      email:     'pending@demo.fr',
+      pwd:       'demo123',
+      role:      'customer',
+      status:    'pending',
+      tier:      null,
+      name:      'Garage Martin',
+      company:   'Garage Martin SARL',
+      siret:     '712 345 678 00012',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+  saveUsers(users);
+
+  // Commandes démo liées au compte Gold
+  const orders = [
+    {
+      id:         'CMD-2025-0087',
+      userId:     'usr-demo-gold',
+      clientName: 'Station Soleil Vert SAS',
+      items: [
+        { name:'Pompe HP 250 Bar Triphasée',  ref:'PCE-PMP-250B', qty:1, unitPrice:612 },
+        { name:'Shampooing HP Concentré Pro', ref:'ENT-HP90-5L',  qty:4, unitPrice:40  },
+      ],
+      total:     772,
+      status:    'invoiced',
+      createdAt: new Date('2025-03-12').toISOString(),
+    },
+    {
+      id:         'CMD-2025-0081',
+      userId:     'usr-demo-gold',
+      clientName: 'Station Soleil Vert SAS',
+      items: [
+        { name:'Osmoseur Industriel 500 L/h', ref:'EAU-OSM-500', qty:1, unitPrice:2880 },
+      ],
+      total:     2880,
+      status:    'processing',
+      createdAt: new Date('2025-03-05').toISOString(),
+    },
+    {
+      id:         'CMD-2025-0076',
+      userId:     'usr-demo-gold',
+      clientName: 'Station Soleil Vert SAS',
+      items: [
+        { name:'Cire de Finition Auto-Brillante', ref:'ENT-CIRE-1L',  qty:6, unitPrice:25 },
+        { name:'Dégraissant Jantes HP 5L',        ref:'ENT-DGR-JNT',  qty:4, unitPrice:34 },
+      ],
+      total:     350,
+      status:    'invoiced',
+      createdAt: new Date('2025-02-28').toISOString(),
+    },
+  ];
+  saveOrders(orders);
+
+  localStorage.setItem(LS.SEEDED, '1');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER — Dashboard KPIs + tableau commandes récentes
+   ══════════════════════════════════════════════════════════════ */
+function renderDashboardStats() {
+  if (!currentUser) return;
+  const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  const isAdmin = currentUser.role === 'admin';
+
+  if (isAdmin) {
+    const allOrders = getOrders();
+    const allUsers  = getUsers().filter(u => u.role === 'customer');
+    const ca        = allOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const pending   = allUsers.filter(u => u.status === 'pending').length;
+
+    _set('kpi-orders', allOrders.length);
+    _set('kpi-pending-orders', allOrders.filter(o => o.status === 'pending').length);
+    _set('kpi-ca',     fmt(ca) + ' €');
+
+    const dOrders = document.getElementById('kpi-orders-delta');
+    const dCA     = document.getElementById('kpi-ca-delta');
+    if (dOrders) dOrders.textContent = 'Total toutes commandes';
+    if (dCA)     dCA.textContent     = 'CA total brut';
+  } else {
+    const myOrders = getOrders().filter(o => o.userId === currentUser.id);
+    const myQuotes = getQuotes().filter(q => q.userId === currentUser.id);
+    const ca       = myOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const pending  = myQuotes.filter(q => q.status === 'pending').length;
+
+    // Commandes ce mois
+    const now   = new Date();
+    const month = myOrders.filter(o => {
+      const d = new Date(o.createdAt);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+
+    _set('kpi-orders', month);
+    _set('kpi-pending-orders', myOrders.filter(o => ['pending','processing'].includes(o.status)).length);
+    _set('kpi-ca',     fmt(ca) + ' €');
+  }
+
+  renderDashboardRecentOrders();
+}
+
+function renderDashboardRecentOrders() {
+  const tbody = document.getElementById('dash-orders-tbody');
+  if (!tbody || !currentUser) return;
+
+  const isAdmin = currentUser.role === 'admin';
+  let orders = isAdmin
+    ? getOrders()
+    : getOrders().filter(o => o.userId === currentUser.id);
+
+  orders = orders
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
+  if (!orders.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Aucune commande pour l\'instant.</td></tr>';
+    return;
+  }
+
+  const statusMap = {
+    pending:    { label:'En attente',    cls:'badge-yellow' },
+    processing: { label:'En traitement', cls:'badge-blue'   },
+    validated:  { label:'Validée',       cls:'badge-orange' },
+    invoiced:   { label:'Facturée',      cls:'badge-green'  },
+  };
+
+  tbody.innerHTML = orders.map(o => {
+    const s       = statusMap[o.status] || { label: o.status, cls:'badge-muted' };
+    const summary = (o.items || []).map(i => i.name).slice(0, 2).join(', ') || '—';
+    const client  = isAdmin ? `<div class="td-ref">${o.clientName || '—'}</div>` : '';
+    return `<tr>
+      <td><div class="td-name">#${o.id}</div>${client}</td>
+      <td style="color:var(--muted);font-size:12px;">${fmtDate(o.createdAt)}</td>
+      <td style="font-size:12px;color:var(--muted)">${summary}</td>
+      <td class="td-amount">${fmt(o.total || 0)} €</td>
+      <td><span class="badge ${s.cls}">${s.label}</span></td>
+      <td class="td-action"><button class="btn btn-outline btn-sm" onclick="openOrderDetail('${o.id}')">Détail</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER — Vue "Mes commandes" (client) ou toutes (admin)
+   ══════════════════════════════════════════════════════════════ */
+function renderUserOrders() {
+  if (!currentUser) return;
+
+  const isAdmin  = currentUser.role === 'admin';
+  const myOrders = isAdmin
+    ? getOrders()
+    : getOrders().filter(o => o.userId === currentUser.id);
+
+  const sorted = [...myOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Stats mini
+  const total      = sorted.length;
+  const ca         = sorted.reduce((s, o) => s + (o.total || 0), 0);
+  const invoiced   = sorted.filter(o => o.status === 'invoiced').length;
+  const processing = sorted.filter(o => ['processing', 'pending'].includes(o.status)).length;
+
+  const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  _set('ord-stat-total',      total);
+  _set('ord-stat-invoiced',   invoiced);
+  _set('ord-stat-processing', processing);
+  _set('ord-stat-ca',         fmt(ca) + ' €');
+
+  // Liste des commandes
+  const listEl = document.getElementById('orders-list');
+  if (!listEl) return;
+
+  if (!sorted.length) {
+    listEl.innerHTML = `<div style="padding:48px;text-align:center;color:var(--muted);border:1px dashed var(--border2);">
+      <div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:8px;">Aucune commande</div>
+      <div style="font-size:13px;margin-bottom:20px;">Vos commandes passées via le panier apparaîtront ici.</div>
+      <button class="btn btn-primary" onclick="navigate('catalog')">Explorer le catalogue</button>
+    </div>`;
+    return;
+  }
+
+  listEl.innerHTML = sorted.map(o => renderOrderCard(o, isAdmin)).join('');
+}
+
+function renderOrderCard(o, showClient) {
+  const statusMap = {
+    pending:    { label:'En attente',    cls:'badge-yellow' },
+    processing: { label:'En traitement', cls:'badge-blue'   },
+    validated:  { label:'Validée',       cls:'badge-orange' },
+    invoiced:   { label:'Facturée',      cls:'badge-green'  },
+  };
+  const s           = statusMap[o.status] || { label: o.status, cls:'badge-muted' };
+  const itemSummary = (o.items || []).map(i => i.name).slice(0, 2).join(', ');
+  const clientInfo  = showClient ? `<div class="td-ref">${o.clientName || ''}</div>` : '';
+
+  // Si admin : sélecteur de statut inline
+  const statusCtrl = showClient
+    ? `<select onchange="updateOrderStatus('${o.id}', this.value)" class="form-ctrl"
+         style="width:150px;font-size:12px;padding:5px 8px;" onclick="event.stopPropagation()">
+        ${['pending','processing','validated','invoiced'].map(st =>
+          `<option value="${st}" ${o.status === st ? 'selected' : ''}>${
+            {pending:'En attente',processing:'En traitement',validated:'Validée',invoiced:'Facturée'}[st]
+          }</option>`
+        ).join('')}
+       </select>`
+    : `<span class="badge ${s.cls}">${s.label}</span>`;
+
+  return `<div class="order-card" id="ocard-${o.id}">
+    <div class="order-card-head" onclick="toggleOrder(this)">
+      <div><div class="order-num">#${o.id}</div>${clientInfo}</div>
+      <div>
+        <div class="td-name">${(o.items||[]).length} article${(o.items||[]).length>1?'s':''} — ${itemSummary}</div>
+        <div class="order-date">${fmtDate(o.createdAt)}</div>
+      </div>
+      ${statusCtrl}
+      <div class="td-amount">${fmt(o.total || 0)} €</div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="order-body">
+      <div class="order-products">
+        ${(o.items || []).map(i => `
+          <div class="order-product">
+            <div class="order-product-name">${i.name}</div>
+            <div class="order-product-qty">× ${i.qty}</div>
+            <div class="order-product-amt">${fmt((i.qty || 1) * (i.unitPrice || 0))} €</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-outline btn-sm">Télécharger BL</button>
+        ${o.status === 'invoiced' ? '<button class="btn btn-outline btn-sm">Facture PDF</button>' : ''}
+        <button class="btn btn-ghost btn-sm" onclick="reorderItems('${o.id}')">Recommander</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Mettre à jour le statut d'une commande (admin uniquement)
+function updateOrderStatus(orderId, newStatus) {
+  const orders = getOrders();
+  const idx    = orders.findIndex(o => o.id === orderId);
+  if (idx === -1) return;
+  orders[idx].status = newStatus;
+  saveOrders(orders);
+  const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée' };
+  showToast(`Commande #${orderId} → ${labels[newStatus] || newStatus}`, 'ok');
+  // Rafraîchir le dashboard si visible
+  if (currentView === 'dashboard') renderDashboardStats();
+}
+
+// Recommander les articles d'une commande passée
+function reorderItems(orderId) {
+  const order = getOrders().find(o => o.id === orderId);
+  if (!order) return;
+  let added = 0;
+  (order.items || []).forEach(i => {
+    const p = PRODUCTS.find(x => x.ref === i.ref || x.name === i.name);
+    if (p) { addToCart(p.id); added++; }
+  });
+  showToast(added ? `${added} article(s) ajouté(s) au panier.` : 'Produits introuvables dans le catalogue.', added ? 'ok' : 'warn');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER — Vue admin : comptes pending + table comptes validés
+   ══════════════════════════════════════════════════════════════ */
+function renderAdminView() {
+  const users    = getUsers().filter(u => u.role === 'customer');
+  const pending  = users.filter(u => u.status === 'pending');
+  const approved = users.filter(u => u.status === 'approved');
+  const rejected = users.filter(u => u.status === 'rejected');
+
+  const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  // Stats
+  _set('admin-stat-pending',  pending.length);
+  _set('admin-stat-approved', approved.length);
+  _set('admin-stat-rejected', rejected.length);
+  _set('admin-stat-total',    users.length);
+  const badge = document.getElementById('admin-pending-badge');
+  if (badge) badge.textContent = pending.length + ' en attente';
+
+  // Liste pending
+  const pendingEl = document.getElementById('admin-pending-list');
+  if (pendingEl) {
+    pendingEl.innerHTML = pending.length
+      ? pending.map(u => renderAdminPendingCard(u)).join('')
+      : '<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">✓ Aucun compte en attente de validation.</div>';
+  }
+
+  // Table comptes validés
+  const tbodyEl = document.getElementById('admin-all-users-tbody');
+  if (tbodyEl) {
+    tbodyEl.innerHTML = approved.length
+      ? approved.map(u => {
+          const ca      = getOrders().filter(o => o.userId === u.id).reduce((s, o) => s + (o.total || 0), 0);
+          const tierCls = getTierBadgeClass(u.tier);
+          return `<tr>
+            <td><div class="td-name">${u.company || u.name}</div></td>
+            <td><div class="td-ref">${u.siret || '—'}</div></td>
+            <td><span class="badge ${tierCls}">${getTierLabel(u.tier) || '—'}</span></td>
+            <td class="td-amount">${fmt(ca)} €</td>
+            <td style="font-size:12px;color:var(--muted)">${fmtDate(u.validatedAt || u.createdAt)}</td>
+            <td><span class="badge badge-green">Actif</span></td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Aucun compte validé.</td></tr>';
+  }
+}
+
+// Génère la carte d'une demande en attente
+function renderAdminPendingCard(u) {
+  const initial = (u.company || u.name || '?')[0].toUpperCase();
+  const palette = ['var(--orange)','var(--blue)','var(--green)','var(--yellow)','var(--muted2)'];
+  const color   = palette[u.id.charCodeAt(u.id.length - 1) % palette.length];
+
+  return `<div class="admin-pending-card" id="apc-${u.id}">
+    <div style="width:40px;height:40px;background:${color};display:flex;align-items:center;justify-content:center;
+         font-family:var(--ft);font-size:16px;font-weight:800;color:#000;flex-shrink:0;">${initial}</div>
+    <div>
+      <div class="admin-company">${u.company || u.name}</div>
+      <div class="admin-siret">SIRET : ${u.siret || '—'}</div>
+      <div class="admin-email">${u.email} · <span style="color:var(--muted);font-size:11px;">Créé le ${fmtDate(u.createdAt)}</span></div>
+    </div>
+    <div>
+      <label style="font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted2);display:block;margin-bottom:4px;">Niveau</label>
+      <select id="tier-select-${u.id}" class="form-ctrl" style="width:120px;font-size:12px;padding:6px 10px;">
+        <option value="bronze">Bronze</option>
+        <option value="silver">Silver</option>
+        <option value="gold" selected>Gold</option>
+        <option value="platinum">Platinum</option>
+      </select>
+    </div>
+    <div class="admin-actions">
+      <button class="btn btn-primary btn-sm" onclick="adminValidateUser('${u.id}')">✓ Valider</button>
+      <button class="btn btn-danger btn-sm"  onclick="adminRefuseUser('${u.id}')">✗ Refuser</button>
+    </div>
+  </div>`;
+}
+
+// Valider un compte (admin)
+function adminValidateUser(userId) {
+  const users  = getUsers();
+  const idx    = users.findIndex(u => u.id === userId);
+  if (idx === -1) return;
+  const tier   = document.getElementById('tier-select-' + userId)?.value || 'bronze';
+  users[idx].status      = 'approved';
+  users[idx].tier        = tier;
+  users[idx].validatedAt = new Date().toISOString();
+  saveUsers(users);
+  showToast(`✓ "${users[idx].company || users[idx].name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
+  renderAdminView();
+}
+
+// Refuser un compte (admin)
+function adminRefuseUser(userId) {
+  const users = getUsers();
+  const idx   = users.findIndex(u => u.id === userId);
+  if (idx === -1) return;
+  users[idx].status     = 'rejected';
+  users[idx].rejectedAt = new Date().toISOString();
+  saveUsers(users);
+  showToast(`Compte "${users[idx].company || users[idx].name}" refusé.`, 'warn');
+  renderAdminView();
+}
+
+/* Helper : détecte si la page est ouverte en file:// (Supabase fetch bloqué) */
+function isFileProtocol() {
+  return window.location.protocol === 'file:';
+}
+
+/* Détecte une erreur réseau / CORS Supabase */
+function isFetchNetworkError(err) {
+  if (!err) return false;
+  const msg = (err.message || '').toLowerCase();
+  return err instanceof TypeError ||
+         msg.includes('failed to fetch') ||
+         msg.includes('network') ||
+         msg.includes('cors');
+}
 
 /* ══════════════ AUTH ══════════════ */
 function switchAuthTab(tab) {
@@ -2785,65 +3189,163 @@ function setDemo(email, pwd, status) {
   document.getElementById('l-email').dataset.status = status;
 }
 
-function doLogin() {
-  const email = document.getElementById('l-email').value.trim();
+/* ── doLogin — migré Supabase Auth ────────────────────────────
+   Auth = Supabase (signInWithPassword).
+   Profil utilisateur (role, tier, status) = encore localStorage.
+   Mode hybride : Supabase valide le mot de passe,
+   le reste du portail lit currentUser comme avant.
+/* ── doLogin — Supabase Auth exclusif ─────────────────────────
+   Auth = Supabase uniquement (signInWithPassword).
+   Profil applicatif (role, tier, status) = localStorage.
+   Aucun fallback par mot de passe local.
+   ─────────────────────────────────────────────────────────── */
+async function doLogin() {
+  // Garde file:// — Supabase inaccessible sans HTTP
+  if (isFileProtocol()) {
+    showToast('Ouvrez la page via http://localhost — Supabase ne fonctionne pas en file://.', 'err');
+    return;
+  }
+
+  const email = document.getElementById('l-email').value.trim().toLowerCase();
   const pwd   = document.getElementById('l-pwd').value;
 
-  if (!email || !pwd) {
-    showToast('Remplissez email et mot de passe.', 'warn');
+  if (!email || !pwd) { showToast('Remplissez email et mot de passe.', 'warn'); return; }
+
+  // Auth Supabase — seule source de vérité
+  let data, error;
+  try {
+    const res = await sb.auth.signInWithPassword({ email, password: pwd });
+    data  = res.data;
+    error = res.error;
+  } catch (err) {
+    const msg = isFetchNetworkError(err)
+      ? 'Connexion Supabase impossible. Vérifiez votre réseau.'
+      : 'Erreur inattendue lors de la connexion.';
+    showToast(msg, 'err');
     return;
   }
 
-  const u = DEMO_USERS[email];
-  if (!u || u.pwd !== pwd) {
-    showToast('Identifiants incorrects.', 'err');
-    return;
+  if (error) { showToast('Identifiants incorrects.', 'err'); return; }
+  if (!data || !data.user) { showToast('Connexion incomplète. Réessayez.', 'err'); return; }
+
+  // Profil applicatif local — rapprochement par email uniquement
+  const users   = getUsers();
+  const profile = users.find(u => u.email.toLowerCase() === email);
+
+  if (profile) {
+    currentUser = { ...profile };
+  } else {
+    currentUser = {
+      id:        data.user.id,
+      email:     data.user.email,
+      role:      'customer',
+      status:    'pending',
+      tier:      null,
+      name:      data.user.email.split('@')[0],
+      company:   '',
+      siret:     '',
+      createdAt: data.user.created_at,
+    };
+    const allUsers = getUsers();
+    allUsers.push(currentUser);
+    saveUsers(allUsers);
   }
 
-  currentUser = { email, ...u };
-
-  // ── Redirection post-login ─────────────────────────────────────
-  // bootApp() consomme redirectAfterLogin si défini (par le hash routing).
-  // Sinon, l'utilisateur atterrit sur le dashboard par défaut.
+  setCurrentUser(currentUser);
   bootApp();
 }
+async function doRegister() {
+  // Garde file:// — Supabase inaccessible sans HTTP
+  if (isFileProtocol()) {
+    showToast('Ouvrez la page via http://localhost — Supabase ne fonctionne pas en file://.', 'err');
+    return;
+  }
 
-function doRegister() {
   const pwd  = document.getElementById('r-pwd').value;
   const pwd2 = document.getElementById('r-pwd2').value;
 
-  if (pwd.length < 8) {
-    showToast('Mot de passe trop court (min. 8 car.).', 'warn');
-    return;
+  if (pwd.length < 8) { showToast('Mot de passe trop court (min. 8 car.).', 'warn'); return; }
+  if (pwd !== pwd2)   { showToast('Les mots de passe ne correspondent pas.', 'err'); return; }
+
+  const email = (document.getElementById('r-email').value || '').trim().toLowerCase();
+  if (!email)         { showToast('Email requis.', 'warn'); return; }
+
+  // Doublon profil local
+  const users = getUsers();
+  if (users.find(u => u.email.toLowerCase() === email)) {
+    showToast('Cet email est déjà utilisé.', 'err'); return;
   }
-  if (pwd !== pwd2) {
-    showToast('Les mots de passe ne correspondent pas.', 'err');
+
+  // Appel Supabase Auth
+  let data, error;
+  try {
+    const res = await sb.auth.signUp({ email, password: pwd });
+    data  = res.data;
+    error = res.error;
+    console.log('[doRegister] SUPABASE SIGNUP DATA', data);
+    console.log('[doRegister] SUPABASE SIGNUP ERROR', error);
+  } catch (err) {
+    console.error('[doRegister] NETWORK ERROR', err);
+    const msg = isFetchNetworkError(err)
+      ? 'Connexion Supabase impossible. Ouvrez la page via http://localhost.'
+      : 'Erreur réseau lors de la création du compte.';
+    showToast(msg, 'err');
     return;
   }
 
-  // Simulation : compte créé en statut "pending" (validation manuelle requise)
-  currentUser = {
-    email:   document.getElementById('r-email').value || 'nouveau@demo.fr',
-    status:  'pending',
-    tier:    'bronze',
-    name:    (document.getElementById('r-prenom').value + ' ' + document.getElementById('r-nom').value).trim() || 'Nouveau Pro',
-    company: document.getElementById('r-company').value || 'Votre Société',
-    siret:   document.getElementById('r-siret').value  || '000 000 000 00000',
+  // Garde 1 : erreur Supabase explicite
+  if (error) {
+    showToast(error.message || 'Erreur lors de la création du compte.', 'err');
+    return;
+  }
+
+  // Garde 2 : data.user absent = faux succès bloqué
+  // (email déjà dans Supabase Auth, ou confirmation email active sans session)
+  if (!data || !data.user) {
+    console.warn('[doRegister] data.user absent', data);
+    showToast('Création Supabase incomplète : utilisateur non créé.', 'err');
+    return;
+  }
+
+  console.log('[doRegister] user.id', data.user.id, 'email', data.user.email);
+
+  // Profil applicatif local — créé uniquement après validation data.user
+  const newUser = {
+    id:        data.user.id,
+    email:     data.user.email,
+    role:      'customer',
+    status:    'pending',
+    tier:      null,
+    name:      ((document.getElementById('r-prenom')?.value || '') + ' ' +
+                (document.getElementById('r-nom')?.value || '')).trim() || 'Nouveau Pro',
+    company:   document.getElementById('r-company')?.value || 'Votre Société',
+    siret:     document.getElementById('r-siret')?.value   || '000 000 000 00000',
+    createdAt: data.user.created_at || new Date().toISOString(),
   };
 
-  showToast('Compte créé ! Validation sous 24–48h ouvrées.', 'ok');
+  users.push(newUser);
+  saveUsers(users);
 
-  // ── Post-register : bootApp() gère redirectAfterLogin ─────────
-  // Note : un compte "pending" aura accès limité au catalogue.
-  // redirectAfterLogin est ignoré si le compte est pending (vue vide).
-  bootApp();
+  // Session et boot
+  if (data.session) {
+    currentUser = { ...newUser };
+    setCurrentUser(currentUser);
+    showToast('Compte créé ! Validation sous 24–48h ouvées.', 'ok');
+    bootApp();
+  } else {
+    // Confirmation email requise — ne pas appeler bootApp()
+    showToast('Compte Auth créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
+  }
 }
-
 function doLogout() {
+  sb.auth.signOut(); // déconnexion Supabase (non bloquant)
   currentUser = null;
+  setCurrentUser(null);
+  cartItems   = [];
+  saveCart([]);
   document.getElementById('app-shell').classList.remove('active');
   document.getElementById('auth-screen').classList.add('active');
-  showToast('Vous êtes déconnecté.','info');
+  showToast('Vous êtes déconnecté.', 'info');
 }
 
 function bootApp() {
@@ -2876,9 +3378,9 @@ function bootApp() {
   const pendingBanner = document.getElementById('pending-banner');
   if (pendingBanner) pendingBanner.style.display = u.status === 'pending' ? 'flex' : 'none';
 
-  // ── Section admin (visible uniquement pour les admins) ────────
+  // ── Section admin (visible uniquement pour les admins — role=admin) ────
   const adminSection = document.getElementById('admin-section');
-  if (adminSection) adminSection.style.display = u.status === 'admin' ? 'block' : 'none';
+  if (adminSection) adminSection.style.display = u.role === 'admin' ? 'block' : 'none';
 
   if (u.status === 'pending') {
     const accStatus = document.getElementById('acc-status');
@@ -2892,6 +3394,9 @@ function bootApp() {
   const discMap = { bronze: 'Standard', silver: '–5%', gold: '–10%', platinum: '–15%' };
   _set('dash-tier-badge', discMap[u.tier] || 'Pro');
 
+  // ── KPIs dynamiques depuis localStorage ───────────────────────
+  renderDashboardStats();
+
   // ── Navigation post-authentification ──────────────────────────
   // Priorité 1 : redirectAfterLogin défini par le hash routing
   //   Ex : l'utilisateur vient de portal.html#quote via index.html
@@ -2904,7 +3409,7 @@ function bootApp() {
     const dest = redirectAfterLogin;
     redirectAfterLogin = null; // Consommé — ne s'applique qu'une fois
 
-    const PENDING_BLOCKED = ['quote', 'catalog', 'catalogue']; // vues avec prix = bloquées pour pending
+    const PENDING_BLOCKED = ['catalog', 'catalogue']; // vues avec prix = bloquées pour pending
     if (u.status === 'pending' && PENDING_BLOCKED.includes(dest)) {
       // Compte non encore validé : on atterrit sur le dashboard
       // avec le banner "validation en cours" déjà visible.
@@ -2946,7 +3451,6 @@ function navigate(view) {
   const titles = {
     dashboard: 'Tableau de bord',
     catalog:   'Catalogue',
-    quotes:    'Mes devis',
     orders:    'Commandes',
     services:  'Services',
     docs:      'Documents',
@@ -2960,6 +3464,8 @@ function navigate(view) {
 
   currentView = resolvedView;
   if (resolvedView === 'catalog') renderCatalog();
+  if (resolvedView === 'orders')  renderUserOrders();
+  if (resolvedView === 'admin')   renderAdminView();
   window.scrollTo(0, 0);
 }
 
@@ -3039,13 +3545,20 @@ function renderProdCard(p, tier, disc) {
   const price    = rawPrice;
   const canSee   = currentUser?.status === 'validated' || currentUser?.status === 'admin';
   const desc     = p.shortDesc || p.desc; // STEP 2 : shortDesc si disponible, sinon desc
+  // Image : p.image si disponible, sinon SVG placeholder — même rendu pour tous les produits
+  const imgContent = p.image
+    ? `<img src="${p.image}" alt="${p.name} — ${p.ref}" loading="lazy" decoding="async"
+         style="width:100%;height:100%;object-fit:cover;" />`
+    : `<svg viewBox="0 0 64 64" fill="none" stroke="var(--orange)" stroke-width="1">
+         <circle cx="32" cy="32" r="24"/><rect x="20" y="20" width="24" height="24" rx="2"/>
+       </svg>`;
   return `<div class="prod-card" data-cat="${p.cat}"
     onclick="openProductDetail('${p.id}')"
     style="cursor:pointer;"
     title="Voir la fiche produit">
     <div class="prod-img">
       <span class="prod-cat-badge"><span class="badge badge-muted">${catLabel(p.cat)}</span></span>
-      <svg viewBox="0 0 64 64" fill="none" stroke="var(--orange)" stroke-width="1"><circle cx="32" cy="32" r="24"/><rect x="20" y="20" width="24" height="24" rx="2"/></svg>
+      ${imgContent}
     </div>
     <div class="prod-body">
       <div class="prod-ref">${p.ref}</div>
@@ -3063,7 +3576,7 @@ function renderProdCard(p, tier, disc) {
       <button class="btn btn-primary btn-sm btn-full"
         onclick="event.stopPropagation(); addToCart('${p.id}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
-        ${canSee ? 'Ajouter au panier' : 'Demander devis'}
+        ${canSee ? 'Ajouter au panier' : 'Se connecter'}
       </button>
       <button class="btn btn-outline btn-sm btn-full" style="margin-top:6px;"
         onclick="event.stopPropagation(); openProductDetail('${p.id}')">
@@ -3080,8 +3593,15 @@ function renderProdRow(p, tier, disc) {
   const price  = p.prices[tier];
   const canSee = currentUser?.status === 'validated' || currentUser?.status === 'admin';
   const desc   = p.shortDesc || p.desc; // STEP 2 : shortDesc si disponible, sinon desc
+  // Miniature : p.image si disponible, sinon SVG placeholder
+  const thumbContent = p.image
+    ? `<img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async"
+         style="width:100%;height:100%;object-fit:cover;" />`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.5">
+         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/>
+       </svg>`;
   return `<div class="prod-row" data-cat="${p.cat}">
-    <div class="prod-row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/></svg></div>
+    <div class="prod-row-thumb">${thumbContent}</div>
     <div>
       <div style="font-family:var(--fm);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${p.ref}</div>
       <div style="font-family:var(--ft);font-size:14px;font-weight:700;color:var(--text);">${p.name}</div>
@@ -3295,18 +3815,6 @@ function openProductDetail(productId) {
     }
   }
 
-  // ── Bouton devis ───────────────────────────────────────────────
-  const btnQuote = document.getElementById('pd-btn-quote');
-  if (btnQuote) {
-    btnQuote.onclick = function(e) {
-      e.stopPropagation();
-      closeProductDetail();
-      navigate('quotes');
-      openNewQuote();
-      addQuoteItemDirect(p.id, parseInt(document.getElementById('pd-qty')?.value) || 1);
-    };
-  }
-
   // ── Afficher la modale + bloquer le scroll ────────────────────
   openModal('modal-product-detail');
   document.body.style.overflow = 'hidden';
@@ -3353,6 +3861,7 @@ function addToCart(pid) {
   const existing = cartItems.find(x=>x.id===pid);
   if (existing) existing.qty++;
   else cartItems.push({ ...p, qty:1, unitPrice: p.prices[tier] });
+  saveCart(cartItems); // persister dans localStorage
   const total = cartItems.reduce((a,x)=>a+x.qty,0);
   document.getElementById('cart-count').textContent = total;
   showToast(`✓ ${p.name} ajouté au panier`,'ok');
@@ -3389,108 +3898,69 @@ function changeCartQty(pid, delta) {
   if (!item) return;
   item.qty += delta;
   if (item.qty <= 0) cartItems = cartItems.filter(x=>x.id!==pid);
+  saveCart(cartItems); // persister
   document.getElementById('cart-count').textContent = cartItems.reduce((a,x)=>a+x.qty,0);
   openCartModal();
 }
 function removeFromCart(pid) {
   cartItems = cartItems.filter(x=>x.id!==pid);
+  saveCart(cartItems); // persister
   document.getElementById('cart-count').textContent = cartItems.reduce((a,x)=>a+x.qty,0);
   openCartModal();
 }
-function convertCartToQuote() {
-  quoteItems = cartItems.map(x=>({...x}));
-  cartItems  = [];
+
+/* ══════════════ COMMANDE — Validation panier ══════════════
+   Flux unique : panier → validation → commande stockée.
+   Remplace le double tunnel devis/commande.
+   ════════════════════════════════════════════════════════ */
+function placeOrderFromCart() {
+  if (!cartItems.length) { showToast('Votre panier est vide.', 'warn'); return; }
+  if (!currentUser)       { showToast('Connectez-vous pour passer une commande.', 'err'); return; }
+
+  const tier  = currentUser.tier || 'bronze';
+  const total = cartItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
+
+  const order = {
+    id:         genId('CMD'),
+    userId:     currentUser.id,
+    clientName: currentUser.company || currentUser.name,
+    items:      cartItems.map(i => ({
+      name:      i.name,
+      ref:       i.ref,
+      qty:       i.qty,
+      unitPrice: i.unitPrice,
+    })),
+    total,
+    status:    'pending',
+    createdAt: new Date().toISOString(),
+  };
+
+  const orders = getOrders();
+  orders.push(order);
+  saveOrders(orders);
+
+  // Vider le panier
+  cartItems = [];
+  saveCart([]);
   document.getElementById('cart-count').textContent = '0';
   closeModal('modal-cart');
-  navigate('quotes');
-  openNewQuote();
-  quoteItems.forEach(i => addQuoteItemDirect(i.id, i.qty));
+
+  showToast(`✓ Commande #${order.id} enregistrée — SMDI vous confirmera sous 4h ouvrées.`, 'ok');
+
+  // Rafraîchir si dashboard visible
+  if (currentView === 'dashboard') renderDashboardStats();
+  // Naviguer vers Mes commandes
+  navigate('orders');
 }
 
-/* ══════════════ DEVIS BUILDER ══════════════ */
-function openNewQuote() {
-  document.getElementById('quote-builder-panel').style.display = 'block';
-}
-function closeNewQuote() {
-  document.getElementById('quote-builder-panel').style.display = 'none';
-  quoteItems = [];
-  refreshQuoteSummary();
-}
-function openAddProduct() {
-  renderModalProducts('');
-  openModal('modal-add-product');
-}
-function filterModalProducts(q) { renderModalProducts(q); }
-function renderModalProducts(q) {
-  const list = PRODUCTS.filter(p => !q || p.name.toLowerCase().includes(q.toLowerCase()) || p.ref.toLowerCase().includes(q.toLowerCase()));
-  const tier = currentUser?.tier || 'bronze';
-  document.getElementById('modal-products-list').innerHTML = list.slice(0,8).map(p => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);cursor:pointer;border:1px solid transparent;transition:border-color .2s" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='transparent'" onclick="addQuoteItemDirect('${p.id}',1);closeModal('modal-add-product')">
-      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">${p.name}</div><div style="font-family:var(--fm);font-size:10px;color:var(--muted);">${p.ref}</div></div>
-      <div style="font-family:var(--ft);font-size:14px;font-weight:800;color:var(--orange);">${fmt(p.prices[tier])} €</div>
-    </div>`).join('');
-}
-function addQuoteItemDirect(pid, qty) {
-  const p    = PRODUCTS.find(x=>x.id===pid);
-  const tier = currentUser?.tier || 'bronze';
-  if (!p) return;
-  const ex = quoteItems.find(x=>x.id===pid);
-  if (ex) ex.qty += qty;
-  else quoteItems.push({ ...p, qty, unitPrice: p.prices[tier] });
-  renderQuoteItems();
-  refreshQuoteSummary();
-}
-function renderQuoteItems() {
-  const el = document.getElementById('quote-items');
-  if (!quoteItems.length) {
-    el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;background:var(--bg3);border:1px dashed var(--border2);">Cliquez "Ajouter un produit" pour démarrer votre devis</div>';
-    return;
-  }
-  el.innerHTML = quoteItems.map(i => `
-    <div class="quote-item">
-      <div><div class="qi-name">${i.name}</div><div class="qi-ref">${i.ref}</div></div>
-      <div class="qi-qty"><input type="number" min="1" value="${i.qty}" style="width:80px;text-align:center;" class="form-ctrl" onchange="updateQuoteQty('${i.id}',+this.value)"/></div>
-      <div class="qi-total">${fmt(i.unitPrice*i.qty)} €</div>
-      <div class="qi-del" onclick="removeQuoteItem('${i.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
-    </div>`).join('');
-}
-function updateQuoteQty(pid, qty) {
-  const item = quoteItems.find(x=>x.id===pid);
-  if (item && qty>0) { item.qty=qty; refreshQuoteSummary(); }
-}
-function removeQuoteItem(pid) {
-  quoteItems = quoteItems.filter(x=>x.id!==pid);
-  renderQuoteItems();
-  refreshQuoteSummary();
-}
-function refreshQuoteSummary() {
-  const tier  = currentUser?.tier || 'bronze';
-  const disc  = { bronze:0, silver:5, gold:10, platinum:15 }[tier] || 0;
-  const sub   = quoteItems.reduce((a,x)=>a+x.qty*x.unitPrice, 0);
-  const discAmt = sub * disc / 100;
-  const ht    = sub - discAmt;
-  const tva   = ht * 0.20;
-  const ttc   = ht + tva;
-  document.getElementById('qs-subtotal').textContent = fmt(sub)+' €';
-  document.getElementById('qs-disc-pct').textContent = disc+'%';
-  document.getElementById('qs-discount').textContent = '— '+fmt(discAmt)+' €';
-  document.getElementById('qs-tva').textContent      = fmt(tva)+' €';
-  document.getElementById('qs-ttc').textContent      = fmt(ttc)+' €';
-  document.getElementById('qs-total').textContent    = fmt(ht)+' €';
-}
-function submitQuote() {
-  if (!quoteItems.length) { showToast('Ajoutez au moins un produit.','warn'); return; }
-  closeNewQuote();
-  showToast('✓ Devis envoyé à SMDI — Réponse sous 4h ouvrées.','ok');
-}
 
 /* ══════════════ COMMANDES ══════════════ */
 function toggleOrder(head) {
   const body = head.nextElementSibling;
   body.classList.toggle('open');
 }
-function openOrderDetail(id) { showToast(`Commande #${id} — Vue détail disponible en V2.`,'info'); }
-function reorderAll() { showToast('Tous les articles ont été ajoutés au panier.','ok'); }
+function openOrderDetail(id) { showToast(`Commande #${id} — Vue détail bientôt disponible.`,'info'); }
+function reorderAll() { showToast('Recommandez via le bouton "Recommander" sur chaque commande.','info'); }
 
 /* ══════════════ SERVICES ══════════════ */
 function openServiceModal(type) {
@@ -3504,18 +3974,9 @@ function submitService() {
 }
 
 /* ══════════════ ADMIN ══════════════ */
-function validateAccount(btn, name) {
-  const card = btn.closest('.admin-pending-card');
-  card.style.transition='opacity .4s';
-  card.style.opacity='0';
-  setTimeout(()=>{ card.remove(); showToast(`✓ Compte "${name}" validé — email envoyé.`,'ok'); },400);
-}
-function refuseAccount(btn) {
-  const card = btn.closest('.admin-pending-card');
-  card.style.transition='opacity .4s';
-  card.style.opacity='0';
-  setTimeout(()=>{ card.remove(); showToast('Compte refusé. Notification envoyée.','warn'); },400);
-}
+// Compatibilité ascendante — redirige vers les fonctions localStorage
+function validateAccount(btn, name) { showToast('Utilisez la vue Administration pour valider les comptes.', 'info'); }
+function refuseAccount(btn)         { showToast('Utilisez la vue Administration pour refuser les comptes.', 'info'); }
 
 /* ══════════════ TOAST ══════════════ */
 function showToast(msg, type = 'info') {
@@ -3543,7 +4004,43 @@ function fmt(n) {
 }
 
 /* ══════════════ INIT DE BASE ══════════════ */
-// Afficher la date du jour dans le dashboard
+
+// 1. Seeder les comptes démo au premier lancement
+seedDemoUsersIfNeeded();
+
+// 2. Restaurer la session — Supabase en priorité, localStorage en fallback
+(async function restoreSession() {
+  // Supabase Auth en priorité — seule source d'authentification valide
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+
+    if (session) {
+      const users   = getUsers();
+      const profile = users.find(u => u.email.toLowerCase() === session.user.email.toLowerCase());
+      currentUser   = profile ? { ...profile } : {
+        id:      session.user.id,
+        email:   session.user.email,
+        role:    'customer',
+        status:  'pending',
+        tier:    null,
+        name:    session.user.email.split('@')[0],
+        company: '', siret: '', createdAt: session.user.created_at,
+      };
+      setCurrentUser(currentUser);
+      cartItems = getCart();
+      bootApp();
+      return;
+    }
+  } catch (err) {
+    console.log('[restoreSession] getSession indisponible', err.message);
+  }
+
+  // Pas de session Supabase active — écran de connexion.
+  // Aucun fallback sur session localStorage non validée par Supabase.
+  cartItems = getCart();  // panier restauré (non-auth)
+})();
+
+// 3. Afficher la date du jour dans le dashboard
 const _dateEl = document.getElementById('dash-date');
 if (_dateEl) {
   _dateEl.textContent = new Date().toLocaleDateString('fr-FR', {
@@ -3596,7 +4093,7 @@ if (_dateEl) {
   }
 
   // ── Vues protégées (nécessitent un compte connecté) ──────────
-  const PROTECTED_VIEWS = ['quote', 'catalog', 'catalogue', 'dashboard', 'orders', 'quotes', 'account', 'services', 'docs'];
+  const PROTECTED_VIEWS = ['catalog', 'catalogue', 'dashboard', 'orders', 'account', 'services', 'docs'];
 
   if (PROTECTED_VIEWS.includes(hash)) {
     if (currentUser) {
@@ -3612,11 +4109,9 @@ if (_dateEl) {
 
       // Message d'information contextuel (affiché après le chargement du DOM)
       const CONTEXT_MESSAGES = {
-        quote:     '🔒 Connectez-vous pour accéder à votre espace devis.',
         catalog:   '🔒 Connectez-vous pour accéder au catalogue professionnel.',
         dashboard: '🔒 Connectez-vous pour accéder à votre tableau de bord.',
         orders:    '🔒 Connectez-vous pour consulter vos commandes.',
-        quotes:    '🔒 Connectez-vous pour consulter vos devis.',
         account:   '🔒 Connectez-vous pour accéder à votre compte.',
         services:  '🔒 Connectez-vous pour planifier une intervention.',
         docs:      '🔒 Connectez-vous pour accéder aux documents techniques.',
