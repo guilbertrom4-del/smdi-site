@@ -2859,7 +2859,7 @@ function seedDemoUsersIfNeeded() {
 /* ══════════════════════════════════════════════════════════════
    RENDER — Dashboard KPIs + tableau commandes récentes
    ══════════════════════════════════════════════════════════════ */
-function renderDashboardStats() {
+async function renderDashboardStats() {
   if (!currentUser) return;
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
@@ -2867,9 +2867,17 @@ function renderDashboardStats() {
 
   if (isAdmin) {
     const allOrders = getOrders();
-    const allUsers  = getUsers().filter(u => u.role === 'customer');
     const ca        = allOrders.reduce((s, o) => s + (o.total || 0), 0);
-    const pending   = allUsers.filter(u => u.status === 'pending').length;
+
+    // Compter les pending depuis Supabase (source de vérité)
+    let pendingCount = 0;
+    try {
+      const { count } = await sb
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      pendingCount = count || 0;
+    } catch (e) { /* Supabase indisponible — KPI pending affiché à 0 */ }
 
     _set('kpi-orders', allOrders.length);
     _set('kpi-pending-orders', allOrders.filter(o => o.status === 'pending').length);
@@ -2883,7 +2891,6 @@ function renderDashboardStats() {
     const myOrders = getOrders().filter(o => o.userId === currentUser.id);
     const myQuotes = getQuotes().filter(q => q.userId === currentUser.id);
     const ca       = myOrders.reduce((s, o) => s + (o.total || 0), 0);
-    const pending  = myQuotes.filter(q => q.status === 'pending').length;
 
     // Commandes ce mois
     const now   = new Date();
