@@ -2151,7 +2151,7 @@ select.form-ctrl option { background: var(--bg2); }
         </div>
         <div class="account-grid">
           <div class="account-card">
-            <div class="account-card-head"><div class="account-card-title">Informations société</div><button class="btn btn-ghost btn-sm" onclick="showToast('Mode édition activé.','info')">Modifier</button></div>
+            <div class="account-card-head"><div class="account-card-title">Informations société</div><button class="btn btn-ghost btn-sm" onclick="openEditProfileModal()">Modifier</button></div>
             <div class="account-card-body">
               <div class="profile-block">
                 <div class="profile-avatar-lg" id="acc-avatar">P</div>
@@ -2427,6 +2427,47 @@ select.form-ctrl option { background: var(--bg2); }
 
   </div><!-- /modal -->
 </div><!-- /modal-overlay -->
+
+<!-- MODAL : Édition profil client -->
+<div class="modal-overlay" id="modal-edit-profile">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <div class="modal-title">Modifier mon profil</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-profile')">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">Nom complet</label>
+        <input type="text" class="form-ctrl" id="edit-name" placeholder="Votre nom"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Société</label>
+        <input type="text" class="form-ctrl" id="edit-company" placeholder="Nom de société"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SIRET</label>
+        <input type="text" class="form-ctrl" id="edit-siret" placeholder="000 000 000 00000"/>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-edit-profile')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveProfileChanges()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Détail commande -->
+<div class="modal-overlay" id="modal-order-detail">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head">
+      <div class="modal-title" id="order-detail-title">Commande</div>
+      <button class="modal-close" onclick="closeModal('modal-order-detail')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="order-detail-body" style="display:flex;flex-direction:column;gap:18px;">
+      <div style="text-align:center;color:var(--muted);padding:24px;">Chargement...</div>
+    </div>
+  </div>
+</div>
 
 <!-- Toast -->
 <div id="toast-wrap"></div>
@@ -2924,7 +2965,11 @@ function renderOrderCard(o, showClient) {
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
         <button class="btn btn-outline btn-sm">Télécharger BL</button>
-        ${o.status === 'invoiced' ? '<button class="btn btn-outline btn-sm">Facture PDF</button>' : ''}
+        ${o.status === 'invoiced'
+          ? (showClient
+              ? `<button class="btn btn-primary btn-sm" onclick="generateInvoice('${o.id}')">Generer facture</button>`
+              : `<button class="btn btn-outline btn-sm" onclick="downloadInvoice('${o.id}')">Facture PDF</button>`)
+          : ''}
         <button class="btn btn-ghost btn-sm" onclick="reorderItems('${o.id}')">Recommander</button>
       </div>
     </div>
@@ -2941,8 +2986,13 @@ async function updateOrderStatus(orderId, newStatus) {
     return;
   }
 
-  const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée' };
+  const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée', cancelled:'Annulée' };
   showToast('Statut mis à jour → ' + (labels[newStatus] || newStatus), 'ok');
+
+  if (newStatus === 'invoiced') {
+    setTimeout(() => showToast('Pensez à générer la facture PDF.', 'info'), 800);
+  }
+
   if (currentView === 'dashboard') renderDashboardStats();
   if (currentView === 'orders')    renderUserOrders();
 }
@@ -3368,6 +3418,79 @@ function bootApp() {
 
 function getTierLabel(t) {
   return { bronze:'Bronze', silver:'Silver', gold:'Gold', platinum:'Platinum' }[t] || t;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FACTURATION — Edge Function + téléchargement
+   ══════════════════════════════════════════════════════════════ */
+
+/* Admin : génère le PDF via Edge Function Supabase */
+async function generateInvoice(orderId) {
+  showToast('Génération de la facture en cours...', 'info');
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showToast('Session expirée. Reconnectez-vous.', 'err'); return; }
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/generate-invoice`,
+      {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ order_id: orderId }),
+      }
+    );
+
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      console.error('[generateInvoice]', json);
+      showToast('Erreur génération PDF : ' + (json.error || res.status), 'err');
+      return;
+    }
+
+    showToast('Facture ' + json.invoice_number + ' générée !', 'ok');
+    if (json.pdf_url) window.open(json.pdf_url, '_blank');
+    if (currentView === 'orders') renderUserOrders();
+
+  } catch (err) {
+    console.error('[generateInvoice] network error', err);
+    showToast('Erreur réseau lors de la génération.', 'err');
+  }
+}
+
+/* Client : télécharge la facture existante */
+async function downloadInvoice(orderId) {
+  const { data: inv, error } = await sb
+    .from('invoices')
+    .select('pdf_url, invoice_number')
+    .eq('order_id', orderId)
+    .maybeSingle();
+
+  if (error || !inv) {
+    showToast('Facture non disponible. Contactez SMDI.', 'warn');
+    return;
+  }
+
+  if (inv.pdf_url) {
+    window.open(inv.pdf_url, '_blank');
+  } else {
+    showToast('Facture en cours de préparation.', 'info');
+  }
+}
+
+/* Historique des statuts d'une commande */
+async function fetchStatusHistory(orderId) {
+  const { data, error } = await sb
+    .from('order_status_history')
+    .select('old_status, new_status, created_at')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true });
+
+  return (error || !data) ? [] : data;
 }
 
 /* ══════════════ ROUTER ══════════════ */
@@ -3914,8 +4037,170 @@ function toggleOrder(head) {
   const body = head.nextElementSibling;
   body.classList.toggle('open');
 }
-function openOrderDetail(id) { showToast(`Commande #${id} — Vue détail bientôt disponible.`,'info'); }
+async function openOrderDetail(orderId) {
+  openModal('modal-order-detail');
+  document.getElementById('order-detail-title').textContent = 'Commande';
+  const body = document.getElementById('order-detail-body');
+  body.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">Chargement...</div>';
+
+  // Charger commande + historique en parallèle
+  const [orderRes, historyRes, invoiceRes] = await Promise.all([
+    sb.from('orders').select('*').eq('id', orderId).single(),
+    sb.from('order_status_history').select('old_status, new_status, created_at').eq('order_id', orderId).order('created_at', { ascending: true }),
+    sb.from('invoices').select('invoice_number, pdf_url, issued_at').eq('order_id', orderId).maybeSingle(),
+  ]);
+
+  const o   = orderRes.data;
+  const hist = historyRes.data || [];
+  const inv  = invoiceRes.data;
+  const isAdmin = currentUser?.role === 'admin';
+
+  if (!o) {
+    body.innerHTML = '<div style="color:var(--err);padding:24px;">Commande introuvable.</div>';
+    return;
+  }
+
+  const n = normalizeOrder(o);
+  document.getElementById('order-detail-title').textContent = '#' + (n.orderNum || orderId.slice(0,8));
+
+  const statusMap = {
+    pending:    { label:'En attente',    cls:'badge-yellow' },
+    processing: { label:'En traitement', cls:'badge-blue'   },
+    validated:  { label:'Validée',    cls:'badge-orange' },
+    invoiced:   { label:'Facturée',   cls:'badge-green'  },
+    cancelled:  { label:'Annulée',    cls:'badge-muted'  },
+  };
+  const st = statusMap[n.status] || { label: n.status, cls: 'badge-muted' };
+
+  // Timeline historique
+  const timelineHtml = hist.length
+    ? hist.map(h => {
+        const stFrom = statusMap[h.old_status]?.label || h.old_status || '—';
+        const stTo   = statusMap[h.new_status]?.label || h.new_status;
+        return `<div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--orange);margin-top:5px;flex-shrink:0;"></div>
+          <div><span style="color:var(--muted)">${fmtDate(h.created_at)}</span>
+          &nbsp;${stFrom} &rarr; <strong>${stTo}</strong></div>
+        </div>`;
+      }).join('')
+    : '<div style="color:var(--muted);font-size:12px;">Aucun historique.</div>';
+
+  // Lignes articles
+  const itemsHtml = (n.items || []).map(i => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <div>
+        <div style="font-weight:600;color:var(--text)">${i.name}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm)">${i.ref || ''}</div>
+      </div>
+      <div style="text-align:right;white-space:nowrap;">
+        <span style="color:var(--muted)">x${i.qty}</span>
+        &nbsp;&times;&nbsp;${fmt(i.unit_price || 0)} €
+        &nbsp;=&nbsp;<strong>${fmt((i.qty||1)*(i.unit_price||0))} €</strong>
+      </div>
+    </div>`).join('');
+
+  // Facture
+  const invoiceHtml = inv
+    ? `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:6px;">
+         <div>
+           <div style="font-weight:600;font-size:13px;">${inv.invoice_number}</div>
+           <div style="font-size:11px;color:var(--muted);">Émise le ${fmtDate(inv.issued_at)}</div>
+         </div>
+         ${inv.pdf_url ? `<a href="${inv.pdf_url}" target="_blank" class="btn btn-outline btn-sm">Télécharger PDF</a>` : '<span style="font-size:12px;color:var(--muted)">En préparation</span>'}
+       </div>`
+    : isAdmin
+    ? `<button class="btn btn-primary btn-sm" onclick="generateInvoice('${orderId}');closeModal('modal-order-detail');">Générer la facture</button>`
+    : '<div style="color:var(--muted);font-size:12px;">Aucune facture émise.</div>';
+
+  body.innerHTML = `
+    <!-- Statut + méta -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:12px;color:var(--muted);font-family:var(--fm);">CMD ${n.orderNum || orderId.slice(0,8)}</div>
+        <div style="font-size:12px;color:var(--muted);">Passée le ${fmtDate(n.createdAt)}</div>
+        ${isAdmin ? `<div style="font-size:12px;color:var(--muted);">Client : ${n.clientName}</div>` : ''}
+      </div>
+      <span class="badge ${st.cls}" style="font-size:12px;">${st.label}</span>
+    </div>
+
+    <!-- Articles -->
+    <div>
+      <div style="font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Articles</div>
+      ${itemsHtml}
+      <div style="display:flex;justify-content:flex-end;padding-top:10px;font-size:14px;font-weight:700;color:var(--orange);">
+        Total : ${fmt(n.total)} €
+      </div>
+    </div>
+
+    <!-- Historique statuts -->
+    <div>
+      <div style="font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Historique</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${timelineHtml}</div>
+    </div>
+
+    <!-- Facture -->
+    <div>
+      <div style="font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Facture</div>
+      ${invoiceHtml}
+    </div>`;
+}
 function reorderAll() { showToast('Recommandez via le bouton "Recommander" sur chaque commande.','info'); }
+
+/* ══════════════ PROFIL ══════════════ */
+
+/* Ouvre le modal d'édition pré-rempli avec les données courantes */
+function openEditProfileModal() {
+  document.getElementById('edit-name').value    = currentUser?.name    || '';
+  document.getElementById('edit-company').value = currentUser?.company || '';
+  document.getElementById('edit-siret').value   = currentUser?.siret   || '';
+  openModal('modal-edit-profile');
+}
+
+/* Sauvegarde les modifications du profil dans Supabase */
+async function saveProfileChanges() {
+  const name    = document.getElementById('edit-name').value.trim();
+  const company = document.getElementById('edit-company').value.trim();
+  const siret   = document.getElementById('edit-siret').value.trim();
+
+  if (!name && !company) {
+    showToast('Remplissez au moins le nom ou la société.', 'warn');
+    return;
+  }
+
+  const { data: updated, error } = await sb
+    .from('profiles')
+    .update({ name, company, siret })
+    .eq('id', currentUser.id)
+    .select('*')
+    .single();
+
+  if (error || !updated) {
+    console.error('[saveProfileChanges]', error?.message);
+    showToast('Erreur lors de la mise à jour du profil.', 'err');
+    return;
+  }
+
+  // Mettre à jour currentUser et le cache de session
+  currentUser = { ...currentUser, ...updated };
+  setCurrentUser(currentUser);
+
+  // Rafraîchir l'UI de la vue account
+  const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  _set('acc-name',    updated.name    || '');
+  _set('acc-company', updated.company || '');
+  _set('acc-siret',   updated.siret   || '');
+
+  // Rafraîchir sidebar
+  if (updated.name) {
+    const initials = updated.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    _set('sidebar-user-name', updated.name);
+    _set('sidebar-avatar-txt', initials);
+    _set('acc-avatar', initials);
+  }
+
+  closeModal('modal-edit-profile');
+  showToast('Profil mis à jour avec succès.', 'ok');
+}
 
 /* ══════════════ SERVICES ══════════════ */
 function openServiceModal(type) {
