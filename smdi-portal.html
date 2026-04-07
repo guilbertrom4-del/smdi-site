@@ -3428,8 +3428,16 @@ function getTierLabel(t) {
 async function generateInvoice(orderId) {
   showToast('Génération de la facture en cours...', 'info');
 
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { showToast('Session expirée. Reconnectez-vous.', 'err'); return; }
+  // Récupérer la session active
+  const { data: { session }, error: sessionErr } = await sb.auth.getSession();
+  if (sessionErr || !session) {
+    showToast('Session expirée. Reconnectez-vous.', 'err');
+    console.error('[generateInvoice] No session:', sessionErr);
+    return;
+  }
+
+  console.log('[generateInvoice] Calling Edge Function for order:', orderId);
+  console.log('[generateInvoice] Token preview:', session.access_token.slice(0, 20) + '...');
 
   try {
     const res = await fetch(
@@ -3444,21 +3452,36 @@ async function generateInvoice(orderId) {
       }
     );
 
-    const json = await res.json();
+    let json;
+    try { json = await res.json(); }
+    catch (_) { json = {}; }
+
+    console.log('[generateInvoice] Response status:', res.status, json);
 
     if (!res.ok || !json.success) {
-      console.error('[generateInvoice]', json);
-      showToast('Erreur génération PDF : ' + (json.error || res.status), 'err');
+      // Message utilisateur propre — détail technique en console uniquement
+      const userMsg = res.status === 403
+        ? 'Accès refusé. Droits admin requis.'
+        : res.status === 404
+        ? 'Commande introuvable.'
+        : 'Impossible de générer la facture. Réessayez.';
+      showToast(userMsg, 'err');
+      console.error('[generateInvoice] Error:', res.status, json);
       return;
     }
 
-    showToast('Facture ' + json.invoice_number + ' générée !', 'ok');
+    showToast(`Facture ${json.invoice_number} générée avec succès !`, 'ok');
+    console.log('[generateInvoice] Success — invoice:', json.invoice_number, '| path:', json.pdf_path);
+
+    // Ouvrir le PDF dans un nouvel onglet
     if (json.pdf_url) window.open(json.pdf_url, '_blank');
+
+    // Rafraîchir la vue
     if (currentView === 'orders') renderUserOrders();
 
   } catch (err) {
-    console.error('[generateInvoice] network error', err);
-    showToast('Erreur réseau lors de la génération.', 'err');
+    console.error('[generateInvoice] Network error:', err);
+    showToast('Erreur réseau. Vérifiez votre connexion.', 'err');
   }
 }
 
