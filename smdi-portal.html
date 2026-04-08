@@ -2214,8 +2214,14 @@ select.form-ctrl option { background: var(--bg2); }
       <div id="view-admin" class="view" style="display:none;">
         <div class="page-header">
           <div class="page-header-top">
-            <div><h1 class="page-title">Administration — Validation comptes</h1><p class="page-sub">Validez ou refusez les demandes d'accès professionnel</p></div>
-            <span class="badge badge-yellow" id="admin-pending-badge" style="font-size:12px;padding:6px 14px;">— en attente</span>
+            <div><h1 class="page-title">Administration</h1><p class="page-sub">Validation comptes — Gestion catalogue</p></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="badge badge-yellow" id="admin-pending-badge" style="font-size:12px;padding:6px 14px;">— en attente</span>
+              <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un produit
+              </button>
+            </div>
           </div>
         </div>
         <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
@@ -2264,24 +2270,79 @@ select.form-ctrl option { background: var(--bg2); }
 
 <!-- Modal : Panier -->
 <div class="modal-overlay" id="modal-cart">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Mon panier</div><button class="modal-close" onclick="closeModal('modal-cart')">✕</button></div>
-    <div class="modal-body">
-      <div id="cart-items-list"></div>
-      <div style="padding:16px 0;border-top:1px solid var(--border);margin-top:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text)">Total HT</span>
-          <span style="font-family:var(--ft);font-size:22px;font-weight:800;color:var(--orange)" id="cart-total-disp">0,00 €</span>
+  <div class="modal" style="max-width:520px;">
+
+    <!-- Étape 1 : Récap panier -->
+    <div id="cart-step-1">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Mon panier</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:2px;">Étape 1 sur 2 — Vérification</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-cart')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="cart-items-list"></div>
+        <div style="padding:16px 0;border-top:1px solid var(--border);margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:var(--ft);font-size:15px;font-weight:700;color:var(--text)">Total HT estimé</span>
+            <span style="font-family:var(--ft);font-size:22px;font-weight:800;color:var(--orange)" id="cart-total-disp">0,00 €</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">TVA applicable selon conditions tarifaires SMDI.</div>
         </div>
       </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-cart')">Continuer les achats</button>
+        <button class="btn btn-primary" onclick="goToCheckout()" id="btn-go-checkout">
+          Passer commande →
+        </button>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-cart')">Continuer</button>
-      <button class="btn btn-primary" onclick="placeOrderFromCart()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
-        Valider la commande
-      </button>
+
+    <!-- Étape 2 : Checkout -->
+    <div id="cart-step-2" style="display:none;">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Confirmer la commande</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:2px;">Étape 2 sur 2 — Confirmation</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-cart')">✕</button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+        <!-- Recap mini -->
+        <div style="background:var(--bg3);padding:12px 14px;border-left:3px solid var(--orange);">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;font-family:var(--fm);">RÉCAPITULATIF</div>
+          <div id="checkout-recap" style="font-size:13px;color:var(--text);"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+            <span style="font-size:13px;font-weight:700;">Total HT</span>
+            <span style="font-size:16px;font-weight:800;color:var(--orange);" id="checkout-total">0,00 €</span>
+          </div>
+        </div>
+        <!-- Infos client (pré-remplies, non modifiables ici) -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);text-transform:uppercase;letter-spacing:.08em;">Livraison / facturation</div>
+          <div id="checkout-client-info" style="font-size:13px;color:var(--text2);background:var(--bg3);padding:10px 14px;line-height:1.8;"></div>
+        </div>
+        <!-- Notes commande -->
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:11px;">Notes / Instructions particulières <span style="color:var(--muted)">(optionnel)</span></label>
+          <textarea class="form-ctrl" id="checkout-notes" rows="3" placeholder="Ex : livraison urgente, référence interne, commentaire pour SMDI..." style="resize:vertical;font-size:13px;"></textarea>
+        </div>
+        <!-- Mention paiement futur -->
+        <div style="background:var(--bg3);padding:10px 14px;border-radius:4px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Votre commande sera validée par notre équipe avant tout traitement. Paiement à réception de facture.
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button class="btn btn-ghost" onclick="backToCart()">← Modifier le panier</button>
+        <button class="btn btn-primary" onclick="placeOrderFromCart()" id="btn-place-order">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirmer la commande
+        </button>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -2428,6 +2489,72 @@ select.form-ctrl option { background: var(--bg2); }
   </div><!-- /modal -->
 </div><!-- /modal-overlay -->
 
+<!-- MODAL : Ajout produit (admin) -->
+<div class="modal-overlay" id="modal-add-product">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head">
+      <div class="modal-title">Ajouter un produit au catalogue</div>
+      <button class="modal-close" onclick="closeModal('modal-add-product')">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Nom <span class="req">*</span></label>
+          <input type="text" class="form-ctrl" id="ap-name" placeholder="Ex : Shampooing HP Pro"/>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Référence <span class="req">*</span></label>
+          <input type="text" class="form-ctrl" id="ap-ref" placeholder="Ex : ENT-HP90-5L"/>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Catégorie <span class="req">*</span></label>
+          <select class="form-ctrl" id="ap-cat">
+            <option value="entretien">Entretien</option>
+            <option value="eau">Eau</option>
+            <option value="aspirateurs">Aspirateurs</option>
+            <option value="equipement">Équipement</option>
+            <option value="pieces">Pièces</option>
+            <option value="regulation">Régulation</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Unité</label>
+          <input type="text" class="form-ctrl" id="ap-unit" placeholder="bidon, unité, kit..."/>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Prix HT par niveau</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Bronze</label><input type="number" class="form-ctrl" id="ap-price-bronze" placeholder="0" min="0" step="0.01"/></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Silver</label><input type="number" class="form-ctrl" id="ap-price-silver" placeholder="0" min="0" step="0.01"/></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Gold</label><input type="number" class="form-ctrl" id="ap-price-gold" placeholder="0" min="0" step="0.01"/></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" style="font-size:11px;">Platinum</label><input type="number" class="form-ctrl" id="ap-price-platinum" placeholder="0" min="0" step="0.01"/></div>
+        </div>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Description courte</label>
+        <input type="text" class="form-ctrl" id="ap-short-desc" placeholder="Résumé en une ligne"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Description complète</label>
+        <textarea class="form-ctrl" id="ap-desc" rows="3" placeholder="Description détaillée..." style="resize:vertical;font-size:13px;"></textarea>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">URL image</label>
+        <input type="url" class="form-ctrl" id="ap-image" placeholder="https://..."/>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="ap-active" checked style="width:16px;height:16px;accent-color:var(--orange);"/>
+        <label for="ap-active" style="font-size:13px;cursor:pointer;">Produit actif (visible dans le catalogue)</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-product')">Annuler</button>
+      <button class="btn btn-primary" onclick="adminSaveProduct()">Enregistrer le produit</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL : Édition profil client -->
 <div class="modal-overlay" id="modal-edit-profile">
   <div class="modal" style="max-width:480px;">
@@ -2469,6 +2596,40 @@ select.form-ctrl option { background: var(--bg2); }
   </div>
 </div>
 
+<!-- MODAL : Confirmation commande -->
+<div class="modal-overlay" id="modal-order-confirm">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-body" style="padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;">
+      <div style="width:56px;height:56px;background:rgba(34,197,94,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;">Commande enregistrée !</div>
+        <div style="font-family:var(--fm);font-size:13px;color:var(--orange);font-weight:700;letter-spacing:.05em;" id="confirm-order-number"></div>
+      </div>
+      <div id="confirm-order-recap" style="width:100%;background:var(--bg3);padding:12px 14px;text-align:left;font-size:13px;border-left:3px solid var(--orange);line-height:1.8;"></div>
+      <div style="width:100%;display:flex;flex-direction:column;gap:10px;text-align:left;">
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
+          <span style="width:22px;height:22px;min-width:22px;background:var(--orange);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;">1</span>
+          <span>Notre équipe valide votre commande sous <strong>4h ouvées</strong></span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
+          <span style="width:22px;height:22px;min-width:22px;background:var(--border2);color:var(--text);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;">2</span>
+          <span>Vous recevez une <strong>facture PDF</strong> dès validation</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
+          <span style="width:22px;height:22px;min-width:22px;background:var(--border2);color:var(--text);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;">3</span>
+          <span>Paiement à réception de facture — aucune avance requise</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;width:100%;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('modal-order-confirm')">Fermer</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="closeModal('modal-order-confirm');navigate('orders');">Voir mes commandes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast-wrap"></div>
 
@@ -2488,6 +2649,58 @@ const SUPABASE_ANON_KEY = 'sb_publishable_lbVR9mN7j7cryd07XU90tQ_2WoJ02jR';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
+
+/* ══════════════════════════════════════════════════════════════
+   CATALOGUE — chargement dynamique Supabase + fallback JS
+   ══════════════════════════════════════════════════════════════ */
+
+let PRODUCTS_CACHE = null; // invalider avec PRODUCTS_CACHE = null pour forcer rechargement
+
+/* Normalise produit Supabase OU produit PRODUCTS JS → même structure */
+function normalizeProduct(p) {
+  const prices = p.prices
+    ? p.prices
+    : { bronze: Number(p.price_bronze||0), silver: Number(p.price_silver||0),
+        gold:   Number(p.price_gold||0),   platinum: Number(p.price_platinum||0) };
+  return {
+    id:        p.ref  || p.id,
+    dbId:      p.id   || null,
+    ref:       p.ref  || '',
+    name:      p.name || '',
+    desc:      p.description || p.desc || p.short_description || '',
+    shortDesc: p.short_description || p.shortDesc || p.desc || '',
+    longDesc:  p.description || p.longDesc || '',
+    cat:       p.category || p.cat || '',
+    unit:      p.unit || '',
+    prices,
+    image:    p.image_url || p.image || '',
+    gallery:  Array.isArray(p.gallery)  ? p.gallery  : [],
+    specs:    Array.isArray(p.specs)    ? p.specs    : [],
+    benefits: Array.isArray(p.benefits) ? p.benefits : [],
+    active:   p.active !== false,
+    sortOrder: p.sort_order || p.sortOrder || 0,
+  };
+}
+
+/* Charge depuis Supabase — fallback PRODUCTS JS si erreur ou vide */
+async function fetchProducts(forceReload) {
+  if (PRODUCTS_CACHE && !forceReload) return PRODUCTS_CACHE;
+  try {
+    const { data, error } = await sb
+      .from('products').select('*').eq('active', true).order('sort_order');
+    if (error || !data?.length) {
+      console.warn('[fetchProducts] fallback PRODUCTS JS', error?.message);
+      PRODUCTS_CACHE = PRODUCTS.map(normalizeProduct);
+    } else {
+      PRODUCTS_CACHE = data.map(normalizeProduct);
+      console.log('[fetchProducts] ' + PRODUCTS_CACHE.length + ' produits Supabase');
+    }
+  } catch(err) {
+    console.warn('[fetchProducts] exception, fallback', err.message);
+    PRODUCTS_CACHE = PRODUCTS.map(normalizeProduct);
+  }
+  return PRODUCTS_CACHE;
+}
 
 /* ══════════════ DATA ══════════════ */
 /*
@@ -2864,10 +3077,11 @@ async function renderDashboardRecentOrders() {
   }
 
   const SM = {
-    pending:    { label:'En attente',    cls:'badge-yellow' },
+    pending:    { label:'En attente',    cls:'badge-muted'  },
     processing: { label:'En traitement', cls:'badge-blue'   },
     validated:  { label:'Validée',    cls:'badge-orange' },
     invoiced:   { label:'Facturée',   cls:'badge-green'  },
+    cancelled:  { label:'Annulée',    cls:'badge-red'    },
   };
 
   tbody.innerHTML = orders.map(o => {
@@ -2922,10 +3136,11 @@ async function renderUserOrders() {
 
 function renderOrderCard(o, showClient) {
   const statusMap = {
-    pending:    { label:'En attente',    cls:'badge-yellow' },
+    pending:    { label:'En attente',    cls:'badge-muted'  },
     processing: { label:'En traitement', cls:'badge-blue'   },
-    validated:  { label:'Validée',       cls:'badge-orange' },
-    invoiced:   { label:'Facturée',      cls:'badge-green'  },
+    validated:  { label:'Validée',    cls:'badge-orange' },
+    invoiced:   { label:'Facturée',   cls:'badge-green'  },
+    cancelled:  { label:'Annulée',    cls:'badge-red'    },
   };
   const s           = statusMap[o.status] || { label: o.status, cls:'badge-muted' };
   const itemSummary = (o.items || []).map(i => i.name).slice(0, 2).join(', ');
@@ -2933,7 +3148,7 @@ function renderOrderCard(o, showClient) {
 
   // Si admin : sélecteur de statut inline
   const statusCtrl = showClient
-    ? `<select onchange="updateOrderStatus('${o.id}', this.value)" class="form-ctrl"
+    ? `<select onchange="changeOrderStatus('${o.id}', this.value)" class="form-ctrl"
          style="width:150px;font-size:12px;padding:5px 8px;" onclick="event.stopPropagation()">
         ${['pending','processing','validated','invoiced'].map(st =>
           `<option value="${st}" ${o.status === st ? 'selected' : ''}>${
@@ -2964,49 +3179,68 @@ function renderOrderCard(o, showClient) {
           </div>`).join('')}
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-        <button class="btn btn-outline btn-sm">Télécharger BL</button>
+        
         ${o.status === 'invoiced'
           ? (showClient
               ? `<button class="btn btn-primary btn-sm" onclick="generateInvoice('${o.id}')">Generer facture</button>`
-              : `<button class="btn btn-outline btn-sm" onclick="downloadInvoice('${o.id}')">Facture PDF</button>`)
+              : `<button class="btn btn-outline btn-sm" onclick="downloadInvoice('${o.id}')">Télécharger facture</button>`)
           : ''}
         <button class="btn btn-ghost btn-sm" onclick="reorderItems('${o.id}')">Recommander</button>
+        ${showClient && o.adminNote ? `<div style="margin-top:10px;padding:8px 10px;background:rgba(255,77,0,.06);border-left:2px solid var(--orange);font-size:11px;color:var(--muted2);">Note : ${o.adminNote}</div>` : ''}
       </div>
     </div>
   </div>`;
 }
 
 // Mettre à jour le statut d'une commande (admin uniquement)
-async function updateOrderStatus(orderId, newStatus) {
-  const { error } = await sb.from('orders').update({ status: newStatus }).eq('id', orderId);
+/* changeOrderStatus — point d'entrée UI admin.
+   Demande une note pour les statuts importants,
+   délègue à adminUpdateOrderStatus (note + historique automatique). */
+async function changeOrderStatus(orderId, newStatus) {
+  const noteStatuses = ['validated', 'invoiced', 'cancelled'];
+  let note = '';
 
-  if (error) {
-    console.error('[updateOrderStatus]', error.message);
-    showToast('Erreur lors de la mise à jour du statut.', 'err');
-    return;
+  if (noteStatuses.includes(newStatus)) {
+    const labels = { validated:'Validée', invoiced:'Facturée', cancelled:'Annulée' };
+    const input = prompt(
+      `Statut → ${labels[newStatus] || newStatus}\nNote admin (optionnel — laisser vide si aucune) :`,
+      ''
+    );
+    if (input === null) return; // l'admin a annulé
+    note = input.trim();
   }
 
-  const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée', cancelled:'Annulée' };
-  showToast('Statut mis à jour → ' + (labels[newStatus] || newStatus), 'ok');
+  const ok = await adminUpdateOrderStatus(orderId, newStatus, note);
+  if (!ok) return;
 
+  // FIX 3 — auto-génération facture si statut → invoiced
   if (newStatus === 'invoiced') {
-    setTimeout(() => showToast('Pensez à générer la facture PDF.', 'info'), 800);
+    const { data: existing } = await sb
+      .from('invoices').select('id').eq('order_id', orderId).maybeSingle();
+    if (!existing) {
+      setTimeout(() => generateInvoice(orderId), 400);
+    }
   }
 
   if (currentView === 'dashboard') renderDashboardStats();
   if (currentView === 'orders')    renderUserOrders();
 }
 
+/* updateOrderStatus — alias conservé pour compatibilité */
+async function updateOrderStatus(orderId, newStatus) {
+  return changeOrderStatus(orderId, newStatus);
+}
+
 // Recommander les articles d'une commande passée
 async function reorderItems(orderId) {
-  const { data: order, error } = await sb
-    .from('orders').select('items').eq('id', orderId).single();
-
+  const { data: order, error } = await sb.from('orders').select('items').eq('id', orderId).single();
   if (error || !order) { showToast('Impossible de recharger les articles.', 'warn'); return; }
-
+  const items    = Array.isArray(order.items) ? order.items : [];
+  const products = PRODUCTS_CACHE || PRODUCTS;
   let added = 0;
-  (Array.isArray(order.items) ? order.items : []).forEach(i => {
-    const p = PRODUCTS.find(x => x.ref === i.ref || x.name === i.name);
+  items.forEach(i => {
+    let p = products.find(x => x.ref === i.ref);
+    if (!p) p = products.find(x => x.name === i.name);
     if (p) { addToCart(p.id); added++; }
   });
   showToast(added ? `${added} article(s) ajouté(s) au panier.` : 'Produits introuvables.', added ? 'ok' : 'warn');
@@ -3421,6 +3655,70 @@ function getTierLabel(t) {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   HELPERS MÉTIER — wrappers Supabase réutilisables
+   ══════════════════════════════════════════════════════════════ */
+
+/* Profil frais depuis Supabase (utile après modification) */
+async function getCurrentProfile() {
+  if (!currentUser?.id) return null;
+  const { data, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (error) { console.error('[getCurrentProfile]', error.message); return null; }
+  return data;
+}
+
+/* Commandes du client courant */
+async function fetchMyOrders() {
+  const { data, error } = await sb
+    .from('orders').select('*').order('created_at', { ascending: false });
+  if (error) { console.error('[fetchMyOrders]', error.message); return []; }
+  return (data || []).map(normalizeOrder);
+}
+
+/* Toutes les commandes (admin) */
+async function fetchAllOrdersAdmin() {
+  if (currentUser?.role !== 'admin') return [];
+  const { data, error } = await sb
+    .from('orders').select('*').order('created_at', { ascending: false });
+  if (error) { console.error('[fetchAllOrdersAdmin]', error.message); return []; }
+  return data || [];
+}
+
+/* Changement de statut admin avec note optionnelle */
+async function adminUpdateOrderStatus(orderId, newStatus, note = '') {
+  const payload = { status: newStatus };
+  if (note) payload.admin_notes = note;
+
+  const { error } = await sb.from('orders').update(payload).eq('id', orderId);
+  if (error) {
+    console.error('[adminUpdateOrderStatus]', error.message);
+    showToast('Erreur lors de la mise à jour.', 'err');
+    return false;
+  }
+
+  // Ajouter une ligne historique avec la note
+  if (note) {
+    await sb.from('order_status_history').insert({
+      order_id:   orderId,
+      new_status: newStatus,
+      note,
+      changed_by: currentUser?.id || null,
+    });
+  }
+
+  const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée', cancelled:'Annulée' };
+  showToast('Statut mis à jour → ' + (labels[newStatus] || newStatus), 'ok');
+  return true;
+}
+
+/* Factures d'une commande */
+async function fetchOrderInvoices(orderId) {
+  const { data, error } = await sb
+    .from('invoices').select('*').eq('order_id', orderId).order('created_at', { ascending: false });
+  if (error) { console.error('[fetchOrderInvoices]', error.message); return []; }
+  return data || [];
+}
+
+/* ══════════════════════════════════════════════════════════════
    FACTURATION — Edge Function + téléchargement
    ══════════════════════════════════════════════════════════════ */
 
@@ -3470,7 +3768,7 @@ async function generateInvoice(orderId) {
       return;
     }
 
-    showToast(`Facture ${json.invoice_number} générée avec succès !`, 'ok');
+    showToast(`Facture ${json.invoice_number} générée — ouverture en cours...`, 'ok');
     console.log('[generateInvoice] Success — invoice:', json.invoice_number, '| path:', json.pdf_path);
 
     // Ouvrir le PDF dans un nouvel onglet
@@ -3489,7 +3787,7 @@ async function generateInvoice(orderId) {
 async function downloadInvoice(orderId) {
   const { data: inv, error } = await sb
     .from('invoices')
-    .select('pdf_url, invoice_number')
+    .select('pdf_path, invoice_number')  // pdf_path = chemin stable, jamais l'URL expirable
     .eq('order_id', orderId)
     .maybeSingle();
 
@@ -3498,11 +3796,24 @@ async function downloadInvoice(orderId) {
     return;
   }
 
-  if (inv.pdf_url) {
-    window.open(inv.pdf_url, '_blank');
-  } else {
+  if (!inv.pdf_path) {
     showToast('Facture en cours de préparation.', 'info');
+    return;
   }
+
+  // Générer une signed URL fraîche à la demande (valide 1h)
+  const { data: signed, error: signErr } = await sb.storage
+    .from('invoices')
+    .createSignedUrl(inv.pdf_path, 3600);
+
+  if (signErr || !signed?.signedUrl) {
+    console.error('[downloadInvoice] createSignedUrl error', signErr?.message);
+    showToast('Impossible de générer le lien de téléchargement.', 'err');
+    return;
+  }
+
+  console.log('[downloadInvoice] Signed URL générée pour', inv.invoice_number);
+  window.open(signed.signedUrl, '_blank');
 }
 
 /* Historique des statuts d'une commande */
@@ -3514,6 +3825,40 @@ async function fetchStatusHistory(orderId) {
     .order('created_at', { ascending: true });
 
   return (error || !data) ? [] : data;
+}
+
+async function adminSaveProduct() {
+  const name   = document.getElementById('ap-name')?.value.trim();
+  const ref    = document.getElementById('ap-ref')?.value.trim().toUpperCase();
+  const cat    = document.getElementById('ap-cat')?.value;
+  const unit   = document.getElementById('ap-unit')?.value.trim();
+  const pB     = parseFloat(document.getElementById('ap-price-bronze')?.value)   || 0;
+  const pS     = parseFloat(document.getElementById('ap-price-silver')?.value)   || 0;
+  const pG     = parseFloat(document.getElementById('ap-price-gold')?.value)     || 0;
+  const pP     = parseFloat(document.getElementById('ap-price-platinum')?.value) || 0;
+  const sdesc  = document.getElementById('ap-short-desc')?.value.trim();
+  const desc   = document.getElementById('ap-desc')?.value.trim();
+  const image  = document.getElementById('ap-image')?.value.trim();
+  const active = document.getElementById('ap-active')?.checked ?? true;
+
+  if (!name || !ref || !cat) { showToast('Nom, référence et catégorie sont obligatoires.', 'warn'); return; }
+
+  const { data, error } = await sb.from('products').insert({
+    ref, name, category: cat, unit: unit || null,
+    short_description: sdesc || null, description: desc || null,
+    price_bronze: pB, price_silver: pS, price_gold: pG, price_platinum: pP,
+    image_url: image || null, active,
+  }).select('id, ref, name').single();
+
+  if (error) {
+    const msg = error.message.includes('unique') ? 'Cette référence existe déjà.' : 'Erreur lors de la création.';
+    showToast(msg, 'err'); console.error('[adminSaveProduct]', error.message); return;
+  }
+  showToast('“' + data.name + '” créé avec succès !', 'ok');
+  console.log('[adminSaveProduct]', data.ref, data.id);
+  closeModal('modal-add-product');
+  PRODUCTS_CACHE = null; // invalider cache
+  if (currentView === 'catalog') renderCatalog();
 }
 
 /* ══════════════ ROUTER ══════════════ */
@@ -3607,23 +3952,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ══════════════ CATALOGUE ══════════════ */
-function renderCatalog(filter) {
+async function renderCatalog(filter) {
   if (filter !== undefined) catalogFilter = filter;
   const tier = currentUser?.tier || 'bronze';
   const disc = { bronze:0, silver:5, gold:10, platinum:15 }[tier] || 0;
-  const list  = PRODUCTS.filter(p => catalogFilter==='all' || p.cat===catalogFilter);
-  const grid  = document.getElementById('catalog-grid');
-  if (!grid) return;
-  if (catalogViewMode==='list') {
-    grid.className = 'products-list';
-    grid.innerHTML = list.map(p => renderProdRow(p, tier, disc)).join('');
-  } else {
-    grid.className = 'products-grid-4';
-    grid.innerHTML = list.map(p => renderProdCard(p, tier, disc)).join('');
-  }
-  // Update filter buttons
-  document.querySelectorAll('.cat-filter').forEach(b => b.classList.toggle('active', b.dataset.cf===catalogFilter));
-  renderPagination();
+  const products = await fetchProducts();
+  const list = products.filter(p => catalogFilter === 'all' || p.cat === catalogFilter);
+  const grid = document.getElementById('prod-grid');
+  const tbl  = document.getElementById('prod-table-body');
+  if (grid) grid.innerHTML = list.length
+    ? list.map(p => renderProdCard(p, tier, disc)).join('')
+    : '<div style="padding:40px;text-align:center;color:var(--muted);">Aucun produit dans cette catégorie.</div>';
+  if (tbl) tbl.innerHTML = list.length
+    ? list.map(p => renderProdRow(p, tier, disc)).join('')
+    : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Aucun produit.</td></tr>';
 }
 
 function renderProdCard(p, tier, disc) {
@@ -3728,7 +4070,8 @@ document.addEventListener('keydown', e => {
 // specs, benefits, compat, docs, prix dans la barre sticky, boutons.
 // Ne modifie pas PRODUCTS, renderCatalog, addToCart ni le routing.
 function openProductDetail(productId) {
-  const p      = PRODUCTS.find(x => x.id === productId);
+  const products = PRODUCTS_CACHE || PRODUCTS;
+  const p      = products.find(x => x.id === productId || x.ref === productId);
   if (!p) return;
 
   const canSee = currentUser?.status === 'validated' || currentUser?.status === 'admin';
@@ -3941,23 +4284,32 @@ document.addEventListener('click', e => {
 
 /* ══════════════ PANIER ══════════════ */
 function addToCart(pid) {
-  const p = PRODUCTS.find(x=>x.id===pid);
+  const products = PRODUCTS_CACHE || PRODUCTS;
+  const p = products.find(x => x.id === pid || x.ref === pid);
   if (!p) return;
   const tier = currentUser?.tier || 'bronze';
-  const existing = cartItems.find(x=>x.id===pid);
+  const existing = cartItems.find(x => x.id === pid);
   if (existing) existing.qty++;
-  else cartItems.push({ ...p, qty:1, unitPrice: p.prices[tier] });
-  saveCart(cartItems); // persister dans localStorage
-  const total = cartItems.reduce((a,x)=>a+x.qty,0);
+  else cartItems.push({ ...p, qty: 1, unitPrice: p.prices[tier] });
+  saveCart(cartItems);
+  const total = cartItems.reduce((a,x) => a + x.qty, 0);
   document.getElementById('cart-count').textContent = total;
-  showToast(`✓ ${p.name} ajouté au panier`,'ok');
+  showToast('✓ ' + p.name + ' ajouté au panier', 'ok');
 }
 
 function openCartModal() {
+  // Toujours repartir de l'étape 1 à l'ouverture
+  const step1 = document.getElementById('cart-step-1');
+  const step2 = document.getElementById('cart-step-2');
+  if (step1) step1.style.display = '';
+  if (step2) step2.style.display = 'none';
+
   const el = document.getElementById('cart-items-list');
   if (!cartItems.length) {
-    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Votre panier est vide</div>';
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Votre panier est vide</div>';
     document.getElementById('cart-total-disp').textContent = '0,00 €';
+    const btn = document.getElementById('btn-go-checkout');
+    if (btn) btn.disabled = true;
   } else {
     el.innerHTML = cartItems.map(i => `
       <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);margin-bottom:6px;">
@@ -3975,6 +4327,8 @@ function openCartModal() {
       </div>`).join('');
     const total = cartItems.reduce((a,x)=>a+x.qty*x.unitPrice,0);
     document.getElementById('cart-total-disp').textContent = fmt(total)+' €';
+    const btn = document.getElementById('btn-go-checkout');
+    if (btn) btn.disabled = false;
   }
   openModal('modal-cart');
 }
@@ -4003,23 +4357,36 @@ async function placeOrderFromCart() {
   if (!cartItems.length) { showToast('Votre panier est vide.', 'warn'); return; }
   if (!currentUser)       { showToast('Connectez-vous pour passer une commande.', 'err'); return; }
 
+  // Désactiver le bouton pendant la création
+  const btn = document.getElementById('btn-place-order');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement...'; }
+
   const total = cartItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
+  const notes = document.getElementById('checkout-notes')?.value?.trim() || null;
 
   const { data: order, error } = await sb
     .from('orders')
     .insert({
       user_id:          currentUser.id,
       profile_id:       currentUser.id,
-      customer_name:    currentUser.company || currentUser.name || null,
-      customer_email:   currentUser.email   || null,
-      customer_company: currentUser.company || null,
-      items: cartItems.map(i => ({ name: i.name, ref: i.ref, qty: i.qty, unit_price: i.unitPrice })),
+      customer_name:    currentUser.company || currentUser.name   || null,
+      customer_email:   currentUser.email                         || null,
+      customer_company: currentUser.company                       || null,
+      items: cartItems.map(i => ({
+        name:       i.name,
+        ref:        i.ref,
+        qty:        i.qty,
+        unit_price: i.unitPrice,
+      })),
       cart_total: total,
       status:     'pending',
       source:     'portal',
+      notes,
     })
     .select('id, order_number')
     .single();
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Confirmer la commande'; }
 
   if (error || !order) {
     console.error('[placeOrderFromCart] insert error', error?.message);
@@ -4027,14 +4394,18 @@ async function placeOrderFromCart() {
     return;
   }
 
+  // Vider le panier
   cartItems = [];
   saveCart([]);
   document.getElementById('cart-count').textContent = '0';
   closeModal('modal-cart');
 
-  showToast('✓ Commande ' + order.order_number + ' enregistrée — SMDI vous confirmera sous 4h ouvées.', 'ok');
+  // Modal de confirmation
+  const _n = document.getElementById('confirm-order-number');
+  if (_n) _n.textContent = order.order_number;
+  openModal('modal-order-confirm');
+  console.log('[placeOrderFromCart] Success:', order.order_number);
   if (currentView === 'dashboard') renderDashboardStats();
-  navigate('orders');
 }
 
 
@@ -4052,7 +4423,60 @@ function normalizeOrder(o) {
     total:      Number(o.cart_total) || 0,
     status:     o.status,
     createdAt:  o.created_at,
+    notes:      o.notes       || null,
+    adminNote:  o.admin_notes || null,
   };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHECKOUT — navigation 2 étapes du panier
+   ══════════════════════════════════════════════════════════════ */
+
+/* Passer de l'étape 1 (panier) à l'étape 2 (checkout) */
+function goToCheckout() {
+  if (!cartItems.length) { showToast('Votre panier est vide.', 'warn'); return; }
+  if (!currentUser)       { showToast('Connectez-vous pour commander.', 'err'); return; }
+
+  // Masquer step 1, afficher step 2
+  document.getElementById('cart-step-1').style.display = 'none';
+  document.getElementById('cart-step-2').style.display = '';
+
+  // Remplir le récap
+  const recap = document.getElementById('checkout-recap');
+  if (recap) {
+    const lines = cartItems.map(i =>
+      `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+        <span>${i.name} <span style="color:var(--muted)">× ${i.qty}</span></span>
+        <span style="font-weight:600;">${fmt(i.qty * i.unitPrice)} €</span>
+      </div>`
+    ).join('');
+    recap.innerHTML = lines;
+  }
+
+  const total = cartItems.reduce((a,x) => a + x.qty * x.unitPrice, 0);
+  const totalEl = document.getElementById('checkout-total');
+  if (totalEl) totalEl.textContent = fmt(total) + ' €';
+
+  // Infos client
+  const clientEl = document.getElementById('checkout-client-info');
+  if (clientEl && currentUser) {
+    clientEl.innerHTML = [
+      currentUser.company && `<strong>${currentUser.company}</strong>`,
+      currentUser.name,
+      currentUser.email,
+      currentUser.siret && `SIRET : ${currentUser.siret}`,
+    ].filter(Boolean).join('<br>');
+  }
+
+  // Réinitialiser les notes
+  const notesEl = document.getElementById('checkout-notes');
+  if (notesEl) notesEl.value = '';
+}
+
+/* Retour à l'étape 1 depuis le checkout */
+function backToCart() {
+  document.getElementById('cart-step-1').style.display = '';
+  document.getElementById('cart-step-2').style.display = 'none';
 }
 
 /* ══════════════ COMMANDES ══════════════ */
@@ -4091,7 +4515,7 @@ async function openOrderDetail(orderId) {
     processing: { label:'En traitement', cls:'badge-blue'   },
     validated:  { label:'Validée',    cls:'badge-orange' },
     invoiced:   { label:'Facturée',   cls:'badge-green'  },
-    cancelled:  { label:'Annulée',    cls:'badge-muted'  },
+    cancelled:  { label:'Annulée',    cls:'badge-red'    },
   };
   const st = statusMap[n.status] || { label: n.status, cls: 'badge-muted' };
 
