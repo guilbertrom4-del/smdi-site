@@ -3752,30 +3752,40 @@ async function fetchOrderInvoices(orderId) {
 
 /* ══════════════════════════════════════════════════════════════
    EMAILS TRANSACTIONNELS — helper front
-   Appel non bloquant vers send-account-emails.
+   Utilise sb.functions.invoke() (gère Authorization + apikey).
    Toujours appelé avec .catch() — n'interrompt jamais le flow.
    ══════════════════════════════════════════════════════════════ */
 
 async function sendAccountEmail(eventType, profileId) {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    console.warn('[sendAccountEmail] pas de session — email non envoyé');
+  console.log('[sendAccountEmail] appel:', eventType, '| profileId:', profileId);
+
+  // Vérifier qu'on a bien un profileId valide
+  if (!profileId) {
+    console.warn('[sendAccountEmail] profileId manquant — annulé');
     return;
   }
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/send-account-emails`,
-    {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ event_type: eventType, profile_id: profileId }),
-    }
-  );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`send-account-emails ${res.status}: ${JSON.stringify(data)}`);
-  console.log('[sendAccountEmail]', eventType, '| résultats:', data.results);
+
+  // Vérifier la session (sb.functions.invoke utilise la session courante)
+  const { data: sessionData } = await sb.auth.getSession();
+  if (!sessionData?.session) {
+    // Peut arriver si confirmation email activée lors du signUp
+    console.warn('[sendAccountEmail] pas de session active — email différé');
+    return;
+  }
+
+  console.log('[sendAccountEmail] session OK, invocation en cours...');
+
+  // sb.functions.invoke() gère automatiquement Authorization + apikey
+  const { data, error } = await sb.functions.invoke('send-account-emails', {
+    body: { event_type: eventType, profile_id: profileId },
+  });
+
+  if (error) {
+    console.error('[sendAccountEmail] erreur invoke:', error.message, error);
+    throw new Error(`send-account-emails: ${error.message}`);
+  }
+
+  console.log('[sendAccountEmail] succès:', eventType, '| résultats:', data?.results);
 }
 
 /* ══════════════════════════════════════════════════════════════
