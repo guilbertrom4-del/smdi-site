@@ -3344,7 +3344,13 @@ function renderAdminPendingCard(u) {
 
 // Valider un compte (admin)
 async function adminValidateUser(userId) {
+  if (currentUser?.role !== 'admin') {
+    showToast('Action réservée à l\'admin.', 'err');
+    return;
+  }
+
   const tier = document.getElementById('tier-select-' + userId)?.value || 'bronze';
+  console.log('[adminValidateUser] userId:', userId, '| tier:', tier);
 
   const { data, error } = await sb
     .from('profiles')
@@ -3353,8 +3359,11 @@ async function adminValidateUser(userId) {
     .select('*')
     .single();
 
+  console.log('[adminValidateUser] update result:', data);
+  console.log('[adminValidateUser] update error:', error?.message);
+
   if (error || !data) {
-    console.error('[adminValidateUser] update error', error?.message);
+    console.error('[adminValidateUser] ÉCHEC:', error?.message || 'aucune ligne retournée');
     showToast('Erreur lors de la validation du compte.', 'err');
     return;
   }
@@ -3365,6 +3374,13 @@ async function adminValidateUser(userId) {
 
 // Refuser un compte (admin)
 async function adminRefuseUser(userId) {
+  if (currentUser?.role !== 'admin') {
+    showToast('Action réservée à l\'admin.', 'err');
+    return;
+  }
+
+  console.log('[adminRefuseUser] userId:', userId);
+
   const { data, error } = await sb
     .from('profiles')
     .update({ status: 'rejected', rejected_at: new Date().toISOString() })
@@ -3372,8 +3388,11 @@ async function adminRefuseUser(userId) {
     .select('*')
     .single();
 
+  console.log('[adminRefuseUser] update result:', data);
+  console.log('[adminRefuseUser] update error:', error?.message);
+
   if (error || !data) {
-    console.error('[adminRefuseUser] update error', error?.message);
+    console.error('[adminRefuseUser] ÉCHEC:', error?.message || 'aucune ligne retournée');
     showToast('Erreur lors du refus du compte.', 'err');
     return;
   }
