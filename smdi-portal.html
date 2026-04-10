@@ -3369,6 +3369,12 @@ async function adminValidateUser(userId) {
   }
 
   showToast(`✓ "${data.company || data.name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
+
+  // Envoyer l'email de confirmation au client (non bloquant)
+  sendAccountEmail('account_validated', userId).catch(err =>
+    console.warn('[adminValidateUser] email non envoyé (non bloquant):', err.message)
+  );
+
   renderAdminView();
 }
 
@@ -3569,12 +3575,18 @@ async function doRegister() {
     showToast('Compte Auth créé, mais le profil applicatif sera finalisé à la première connexion.', 'warn');
   }
 
+  // Envoyer les emails de bienvenue (non bloquant)
+  // Appelé que le profil ait été inséré ou non — l'Edge Function relit la DB
+  sendAccountEmail('account_created', data.user.id).catch(err =>
+    console.warn('[doRegister] email non envoyé (non bloquant):', err.message)
+  );
+
   if (data.session) {
     const { data: profile } = await sb
       .from('profiles').select('*').eq('id', data.user.id).single();
     currentUser = profile || { id: data.user.id, email, role: 'customer', status: 'pending', tier: null };
     setCurrentUser(currentUser);
-    showToast('Compte créé ! Validation sous 24–48h ouvées.', 'ok');
+    showToast('Compte créé ! Validation sous 24–48h ouvrées.', 'ok');
     bootApp();
   } else {
     showToast('Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
@@ -3735,6 +3747,35 @@ async function fetchOrderInvoices(orderId) {
     .from('invoices').select('*').eq('order_id', orderId).order('created_at', { ascending: false });
   if (error) { console.error('[fetchOrderInvoices]', error.message); return []; }
   return data || [];
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   EMAILS TRANSACTIONNELS — helper front
+   Appel non bloquant vers send-account-emails.
+   Toujours appelé avec .catch() — n'interrompt jamais le flow.
+   ══════════════════════════════════════════════════════════════ */
+
+async function sendAccountEmail(eventType, profileId) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    console.warn('[sendAccountEmail] pas de session — email non envoyé');
+    return;
+  }
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/send-account-emails`,
+    {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ event_type: eventType, profile_id: profileId }),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`send-account-emails ${res.status}: ${JSON.stringify(data)}`);
+  console.log('[sendAccountEmail]', eventType, '| résultats:', data.results);
 }
 
 /* ══════════════════════════════════════════════════════════════
