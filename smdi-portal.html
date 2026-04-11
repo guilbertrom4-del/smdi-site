@@ -4060,7 +4060,10 @@ function renderProdCard(p, tier, disc) {
       <div class="prod-price-row">
         <div class="prod-price">
           ${canSee
-            ? `<div class="prod-price-val">${fmt(price)} €</div><div class="prod-price-unit">HT / ${p.unit}</div>`
+            ? (() => { const bref=p.prices['bronze']; const hs=tier!=='bronze'&&bref>price;
+               return hs
+                 ? `<div class="prod-price-val">${fmt(price)} €</div><div style="text-decoration:line-through;color:var(--muted2);font-size:11px;margin-top:2px;">${fmt(bref)} € tarif bronze</div><div class="prod-price-unit">HT / ${p.unit}</div>`
+                 : `<div class="prod-price-val">${fmt(price)} €</div><div class="prod-price-unit">HT / ${p.unit}</div>`; })()
             : `<div class="prod-price-val locked">Prix pro</div><div class="prod-price-unit">Connecté requis</div>`
           }
         </div>
@@ -4101,7 +4104,11 @@ function renderProdRow(p, tier, disc) {
       <div style="font-size:12px;color:var(--muted);">${desc}</div>
     </div>
     <div style="text-align:right;">
-      ${canSee ? `<div style="font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text);">${fmt(price)} €</div><div style="font-size:11px;color:var(--muted2);">HT / ${p.unit}</div>` : '<div style="font-size:12px;color:var(--muted);">Prix pro</div>'}
+      ${canSee ? (() => { const bref=p.prices['bronze']; const hs=tier!=='bronze'&&bref>price;
+        return (hs ? `<div style="text-decoration:line-through;font-size:11px;color:var(--muted2);">${fmt(bref)} € (bronze)</div>` : '')
+          + `<div style="font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text);">${fmt(price)} €</div>`
+          + `<div style="font-size:11px;color:var(--muted2);">HT / ${p.unit}</div>`; })()
+      : '<div style="font-size:12px;color:var(--muted);">Prix pro</div>'}
     </div>
     ${disc > 0 && canSee ? `<div class="prod-price-discount" style="white-space:nowrap;">–${disc}%</div>` : '<div></div>'}
     <div style="display:flex;gap:6px;">
@@ -4273,9 +4280,12 @@ function openProductDetail(productId) {
   const ctaPrice = document.getElementById('pd-cta-price');
   if (ctaPrice) {
     if (canSee) {
-      const price = p.prices[tier];
+      const price     = p.prices[tier];
+      const bref4     = p.prices['bronze'];
+      const hasSav4   = tier !== 'bronze' && bref4 > price;
       ctaPrice.innerHTML = `
         <div class="pd-cta-price-val">${fmt(price)} €</div>
+        ${hasSav4 ? `<div style="text-decoration:line-through;color:var(--muted2);font-size:12px;margin-top:2px;">${fmt(bref4)} € (tarif bronze)</div>` : ''}
         <div class="pd-cta-price-sub">
           HT / ${p.unit}
           ${disc > 0 ? `&nbsp;·&nbsp;<span style="color:var(--green);">–${disc}% ${tier.toUpperCase()}</span>` : ''}
@@ -4355,7 +4365,7 @@ function addToCart(pid) {
   const tier = currentUser?.tier || 'bronze';
   const existing = cartItems.find(x => x.id === pid);
   if (existing) existing.qty++;
-  else cartItems.push({ ...p, qty: 1, unitPrice: p.prices[tier] });
+  else cartItems.push({ ...p, qty: 1, unitPrice: p.prices[tier], bronzePrice: p.prices['bronze'] });
   saveCart(cartItems);
   const total = cartItems.reduce((a,x) => a + x.qty, 0);
   document.getElementById('cart-count').textContent = total;
@@ -4387,7 +4397,12 @@ function openCartModal() {
           <span style="font-family:var(--fm);font-size:13px;font-weight:700;min-width:24px;text-align:center;">${i.qty}</span>
           <button onclick="changeCartQty('${i.id}',1)" style="width:24px;height:24px;background:var(--border2);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:16px;">+</button>
         </div>
-        <div style="font-family:var(--ft);font-size:14px;font-weight:800;color:var(--orange);min-width:80px;text-align:right;">${fmt(i.unitPrice*i.qty)} €</div>
+        <div style="text-align:right;min-width:90px;">
+          ${i.bronzePrice && i.bronzePrice > i.unitPrice
+            ? `<div style="text-decoration:line-through;color:var(--muted2);font-size:10px;">${fmt(i.bronzePrice*i.qty)} €</div>`
+            : ''}
+          <div style="font-family:var(--ft);font-size:14px;font-weight:800;color:var(--orange);">${fmt(i.unitPrice*i.qty)} €</div>
+        </div>
         <button onclick="removeFromCart('${i.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:16px;" title="Supprimer">✕</button>
       </div>`).join('');
     const total = cartItems.reduce((a,x)=>a+x.qty*x.unitPrice,0);
@@ -4509,12 +4524,18 @@ function goToCheckout() {
   // Remplir le récap
   const recap = document.getElementById('checkout-recap');
   if (recap) {
-    const lines = cartItems.map(i =>
-      `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
-        <span>${i.name} <span style="color:var(--muted)">× ${i.qty}</span></span>
-        <span style="font-weight:600;">${fmt(i.qty * i.unitPrice)} €</span>
-      </div>`
-    ).join('');
+    const lines = cartItems.map(i => {
+      const sv = i.bronzePrice && i.bronzePrice > i.unitPrice;
+      const pct = sv ? Math.round((1 - i.unitPrice / i.bronzePrice) * 100) : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);">
+        <span style="flex:1;">${i.name} <span style="color:var(--muted)">× ${i.qty}</span></span>
+        <span style="text-align:right;">
+          ${sv ? `<span style="display:block;text-decoration:line-through;color:var(--muted2);font-size:10px;">${fmt(i.bronzePrice*i.qty)} €</span>` : ''}
+          <span style="font-weight:700;color:var(--orange);">${fmt(i.qty * i.unitPrice)} €</span>
+          ${sv ? `<span style="display:block;font-size:10px;color:var(--green);">–${pct}%</span>` : ''}
+        </span>
+      </div>`;
+    }).join('');
     recap.innerHTML = lines;
   }
 
