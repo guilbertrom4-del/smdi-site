@@ -3008,9 +3008,7 @@ function fmtDate(iso) {
 }
 
 // ── Badge CSS selon tier ───────────────────────────────────────
-function getTierBadgeClass(tier) {
-  return { bronze:'badge-muted', silver:'badge-muted', gold:'badge-orange', platinum:'badge-blue' }[tier] || 'badge-muted';
-}
+function getTierBadgeClass(tier) { return getTierCfg(tier).badge || 'badge-muted'; }
 
 /* ══════════════════════════════════════════════════════════════
    SEED — Compte admin + comptes démo au premier lancement
@@ -3604,6 +3602,7 @@ function doLogout() {
 }
 
 function bootApp() {
+  loadTierConfig(); // charge tier_config depuis DB (non bloquant)
   // ── Afficher l'app shell, masquer l'écran auth ─────────────────
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app-shell').classList.add('active');
@@ -3646,7 +3645,7 @@ function bootApp() {
   }
 
   // ── Badge de remise selon le tier ─────────────────────────────
-  const discMap = { bronze: 'Standard', silver: '–5%', gold: '–10%', platinum: '–15%' };
+  const discMap = Object.fromEntries(Object.entries(TIER_DEFAULTS).map(([k,v]) => [k, v.discount_pct > 0 ? `-${v.discount_pct}%` : 'Standard']));
   _set('dash-tier-badge', discMap[u.tier] || 'Pro');
 
   // ── KPIs dynamiques depuis localStorage ───────────────────────
@@ -3681,9 +3680,49 @@ function bootApp() {
   }
 }
 
-function getTierLabel(t) {
-  return { bronze:'Bronze', silver:'Silver', gold:'Gold', platinum:'Platinum' }[t] || t;
+/* ══════════════════════════════════════════════════════════════
+   TIER CONFIG — chargé depuis public.tier_config (Supabase)
+   Remplace les maps hardcodées bronze/silver/gold/platinum
+   Fallback sur valeurs par défaut si la DB ne répond pas.
+   ══════════════════════════════════════════════════════════════ */
+
+let TIER_CONFIG = null;
+
+const TIER_DEFAULTS = {
+  bronze:   { label:'Bronze',   discount_pct:0,  badge:'badge-muted',  sort_order:1 },
+  silver:   { label:'Silver',   discount_pct:5,  badge:'badge-muted',  sort_order:2 },
+  gold:     { label:'Gold',     discount_pct:10, badge:'badge-orange', sort_order:3 },
+  platinum: { label:'Platinum', discount_pct:15, badge:'badge-blue',   sort_order:4 },
+};
+
+async function loadTierConfig() {
+  if (TIER_CONFIG) return TIER_CONFIG;
+  try {
+    const { data, error } = await sb.from('tier_config').select('*').order('sort_order');
+    if (error || !data?.length) throw new Error(error?.message || 'empty');
+    TIER_CONFIG = {};
+    data.forEach(t => {
+      TIER_CONFIG[t.tier] = {
+        label:        t.label,
+        discount_pct: t.discount_pct,
+        badge:        TIER_DEFAULTS[t.tier]?.badge || 'badge-muted',
+        sort_order:   t.sort_order,
+      };
+    });
+    console.log('[tierConfig] chargé:', Object.keys(TIER_CONFIG));
+  } catch(err) {
+    console.warn('[tierConfig] fallback defaults:', err.message);
+    TIER_CONFIG = { ...TIER_DEFAULTS };
+  }
+  return TIER_CONFIG;
 }
+
+// Helper synchrone — TIER_CONFIG si chargé, sinon TIER_DEFAULTS
+function getTierCfg(tier) {
+  return (TIER_CONFIG || TIER_DEFAULTS)[tier] || TIER_DEFAULTS['bronze'];
+}
+
+function getTierLabel(t) { return getTierCfg(t).label || t || '—'; }
 
 /* ══════════════════════════════════════════════════════════════
    HELPERS MÉTIER — wrappers Supabase réutilisables
@@ -4016,7 +4055,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function renderCatalog(filter) {
   if (filter !== undefined) catalogFilter = filter;
   const tier = currentUser?.tier || 'bronze';
-  const disc = { bronze:0, silver:5, gold:10, platinum:15 }[tier] || 0;
+  const disc = getTierCfg(tier).discount_pct ?? 0;
   const products = await fetchProducts();
   const list = products.filter(p => catalogFilter === 'all' || p.cat === catalogFilter);
 
@@ -4146,9 +4185,13 @@ function openProductDetail(productId) {
   const p      = products.find(x => x.id === productId || x.ref === productId);
   if (!p) return;
 
+  // S'assurer que TIER_CONFIG est chargé (peut être null si bootApp vient de s'exécuter)
+  if (!TIER_CONFIG) loadTierConfig().then(() => openProductDetail(productId));
+  if (!TIER_CONFIG) return; // sera rappelé par le then() ci-dessus
+
   const canSee = currentUser?.status === 'validated' || currentUser?.status === 'admin';
   const tier   = currentUser?.tier || 'bronze';
-  const disc   = { bronze: 0, silver: 5, gold: 10, platinum: 15 }[tier] || 0;
+  const disc   = getTierCfg(tier).discount_pct ?? 0; // source unique : tier_config DB
 
   // ── Helpers internes ─────────────────────────────────────────
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
