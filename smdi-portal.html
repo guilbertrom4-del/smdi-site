@@ -3752,6 +3752,20 @@ function getTierLabel(t) {
   return { bronze:'Bronze', silver:'Silver', gold:'Gold', platinum:'Platinum' }[t] || t;
 }
 
+const TIER_DEFAULTS = {
+  bronze:   { tier:'bronze',   label:'Bronze',   discount_pct:0 },
+  silver:   { tier:'silver',   label:'Silver',   discount_pct:5 },
+  gold:     { tier:'gold',     label:'Gold',     discount_pct:10 },
+  platinum: { tier:'platinum', label:'Platinum', discount_pct:15 },
+};
+
+function getTierCfg(tier) {
+  const key = tier || 'bronze';
+  const cfg = window.TIER_CONFIG;
+  if (Array.isArray(cfg)) return cfg.find(t => t.tier === key) || TIER_DEFAULTS[key] || TIER_DEFAULTS.bronze;
+  return cfg?.[key] || TIER_DEFAULTS[key] || TIER_DEFAULTS.bronze;
+}
+
 /* ══════════════════════════════════════════════════════════════
    HELPERS MÉTIER — wrappers Supabase réutilisables
    ══════════════════════════════════════════════════════════════ */
