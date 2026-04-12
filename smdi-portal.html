@@ -2225,6 +2225,8 @@ select.form-ctrl option { background: var(--bg2); }
           </div>
         </div>
         <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+          <!-- Alerte factures manquantes — remplie dynamiquement par renderAdminView() -->
+          <div id="admin-invoice-alert" style="display:none;width:100%;background:rgba(255,77,0,.08);border:1px solid var(--orange);border-left:4px solid var(--orange);padding:12px 16px;font-size:13px;color:var(--text);margin-bottom:4px;"></div>
           <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><div class="stat-mini-val" id="admin-stat-pending" style="color:var(--yellow)">—</div><div class="stat-mini-label">En attente validation</div></div></div>
           <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-mini-val" id="admin-stat-approved" style="color:var(--green)">—</div><div class="stat-mini-label">Comptes validés</div></div></div>
           <div class="stat-mini" style="flex:1;"><div class="stat-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="stat-mini-val" id="admin-stat-rejected" style="color:var(--red)">—</div><div class="stat-mini-label">Refusés (30j)</div></div></div>
@@ -3008,7 +3010,9 @@ function fmtDate(iso) {
 }
 
 // ── Badge CSS selon tier ───────────────────────────────────────
-function getTierBadgeClass(tier) { return getTierCfg(tier).badge || 'badge-muted'; }
+function getTierBadgeClass(tier) {
+  return { bronze:'badge-muted', silver:'badge-muted', gold:'badge-orange', platinum:'badge-blue' }[tier] || 'badge-muted';
+}
 
 /* ══════════════════════════════════════════════════════════════
    SEED — Compte admin + comptes démo au premier lancement
@@ -3148,9 +3152,9 @@ function renderOrderCard(o, showClient) {
   const statusCtrl = showClient
     ? `<select onchange="changeOrderStatus('${o.id}', this.value)" class="form-ctrl"
          style="width:150px;font-size:12px;padding:5px 8px;" onclick="event.stopPropagation()">
-        ${['pending','processing','validated','invoiced'].map(st =>
+        ${['pending','processing','validated','invoiced','cancelled'].map(st =>
           `<option value="${st}" ${o.status === st ? 'selected' : ''}>${
-            {pending:'En attente',processing:'En traitement',validated:'Validée',invoiced:'Facturée'}[st]
+            {pending:'En attente',processing:'En traitement',validated:'Validée',invoiced:'Facturée',cancelled:'Annulée'}[st]
           }</option>`
         ).join('')}
        </select>`
@@ -3195,6 +3199,29 @@ function renderOrderCard(o, showClient) {
    Demande une note pour les statuts importants,
    délègue à adminUpdateOrderStatus (note + historique automatique). */
 async function changeOrderStatus(orderId, newStatus) {
+  // Transitions valides : empêche les sauts aberrants (ex: invoiced → pending)
+  const VALID_TRANSITIONS = {
+    pending:    ['processing', 'validated', 'invoiced', 'cancelled'],
+    processing: ['validated', 'invoiced', 'cancelled'],
+    validated:  ['invoiced', 'cancelled'],
+    invoiced:   ['cancelled'],
+    cancelled:  [],
+  };
+
+  // Vérifier la transition avant tout
+  const { data: current } = await sb.from('orders').select('status').eq('id', orderId).single();
+  const currentStatus = current?.status || 'pending';
+  const allowed = VALID_TRANSITIONS[currentStatus] || [];
+
+  if (!allowed.includes(newStatus)) {
+    showToast(`Transition impossible : ${currentStatus} → ${newStatus}`, 'err');
+    console.warn('[changeOrderStatus] transition refusée:', currentStatus, '→', newStatus);
+    // Remettre le select sur la valeur actuelle
+    const sel = document.querySelector(`select[onchange*="${orderId}"]`);
+    if (sel) sel.value = currentStatus;
+    return;
+  }
+
   const noteStatuses = ['validated', 'invoiced', 'cancelled'];
   let note = '';
 
@@ -3204,14 +3231,23 @@ async function changeOrderStatus(orderId, newStatus) {
       `Statut → ${labels[newStatus] || newStatus}\nNote admin (optionnel — laisser vide si aucune) :`,
       ''
     );
-    if (input === null) return; // l'admin a annulé
+    if (input === null) {
+      // Admin a annulé — remettre le select sur la valeur actuelle
+      const sel = document.querySelector(`select[onchange*="${orderId}"]`);
+      if (sel) sel.value = currentStatus;
+      return;
+    }
     note = input.trim();
   }
 
   const ok = await adminUpdateOrderStatus(orderId, newStatus, note);
-  if (!ok) return;
+  if (!ok) {
+    const sel = document.querySelector(`select[onchange*="${orderId}"]`);
+    if (sel) sel.value = currentStatus;
+    return;
+  }
 
-  // FIX 3 — auto-génération facture si statut → invoiced
+  // Auto-génération facture si statut → invoiced
   if (newStatus === 'invoiced') {
     const { data: existing } = await sb
       .from('invoices').select('id').eq('order_id', orderId).maybeSingle();
@@ -3290,6 +3326,24 @@ async function renderAdminView() {
       : '<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">✓ Aucun compte en attente de validation.</div>';
   }
 
+  // ── Alerte commandes invoiced sans facture ───────────────────
+  const { data: invoicedOrders } = await sb
+    .from('orders').select('id, order_number').eq('status', 'invoiced');
+  if (invoicedOrders?.length) {
+    const { data: invoices } = await sb
+      .from('invoices').select('order_id').in('order_id', invoicedOrders.map(o => o.id));
+    const invoicedIds = new Set((invoices || []).map(i => i.order_id));
+    const missing = invoicedOrders.filter(o => !invoicedIds.has(o.id));
+    if (missing.length) {
+      const alertEl = document.getElementById('admin-invoice-alert');
+      if (alertEl) {
+        alertEl.style.display = 'block';
+        alertEl.innerHTML = `<strong>⚠ ${missing.length} commande(s) facturées sans PDF</strong> : `
+          + missing.map(o => `<button class="btn btn-sm btn-primary" style="margin:2px;" onclick="generateInvoice('${o.id}');renderAdminView();">${o.order_number}</button>`).join('');
+      }
+    }
+  }
+
   // Table comptes validés
   const tbodyEl = document.getElementById('admin-all-users-tbody');
   if (tbodyEl) {
@@ -3342,13 +3396,7 @@ function renderAdminPendingCard(u) {
 
 // Valider un compte (admin)
 async function adminValidateUser(userId) {
-  if (currentUser?.role !== 'admin') {
-    showToast('Action réservée à l\'admin.', 'err');
-    return;
-  }
-
   const tier = document.getElementById('tier-select-' + userId)?.value || 'bronze';
-  console.log('[adminValidateUser] userId:', userId, '| tier:', tier);
 
   const { data, error } = await sb
     .from('profiles')
@@ -3357,34 +3405,18 @@ async function adminValidateUser(userId) {
     .select('*')
     .single();
 
-  console.log('[adminValidateUser] update result:', data);
-  console.log('[adminValidateUser] update error:', error?.message);
-
   if (error || !data) {
-    console.error('[adminValidateUser] ÉCHEC:', error?.message || 'aucune ligne retournée');
+    console.error('[adminValidateUser] update error', error?.message);
     showToast('Erreur lors de la validation du compte.', 'err');
     return;
   }
 
   showToast(`✓ "${data.company || data.name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
-
-  // Envoyer l'email de confirmation au client (non bloquant)
-  sendAccountEmail('account_validated', userId).catch(err =>
-    console.warn('[adminValidateUser] email non envoyé (non bloquant):', err.message)
-  );
-
   renderAdminView();
 }
 
 // Refuser un compte (admin)
 async function adminRefuseUser(userId) {
-  if (currentUser?.role !== 'admin') {
-    showToast('Action réservée à l\'admin.', 'err');
-    return;
-  }
-
-  console.log('[adminRefuseUser] userId:', userId);
-
   const { data, error } = await sb
     .from('profiles')
     .update({ status: 'rejected', rejected_at: new Date().toISOString() })
@@ -3392,11 +3424,8 @@ async function adminRefuseUser(userId) {
     .select('*')
     .single();
 
-  console.log('[adminRefuseUser] update result:', data);
-  console.log('[adminRefuseUser] update error:', error?.message);
-
   if (error || !data) {
-    console.error('[adminRefuseUser] ÉCHEC:', error?.message || 'aucune ligne retournée');
+    console.error('[adminRefuseUser] update error', error?.message);
     showToast('Erreur lors du refus du compte.', 'err');
     return;
   }
@@ -3573,18 +3602,12 @@ async function doRegister() {
     showToast('Compte Auth créé, mais le profil applicatif sera finalisé à la première connexion.', 'warn');
   }
 
-  // Envoyer les emails de bienvenue (non bloquant)
-  // Appelé que le profil ait été inséré ou non — l'Edge Function relit la DB
-  sendAccountEmail('account_created', data.user.id).catch(err =>
-    console.warn('[doRegister] email non envoyé (non bloquant):', err.message)
-  );
-
   if (data.session) {
     const { data: profile } = await sb
       .from('profiles').select('*').eq('id', data.user.id).single();
     currentUser = profile || { id: data.user.id, email, role: 'customer', status: 'pending', tier: null };
     setCurrentUser(currentUser);
-    showToast('Compte créé ! Validation sous 24–48h ouvrées.', 'ok');
+    showToast('Compte créé ! Validation sous 24–48h ouvées.', 'ok');
     bootApp();
   } else {
     showToast('Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
@@ -3602,7 +3625,6 @@ function doLogout() {
 }
 
 function bootApp() {
-  loadTierConfig(); // charge tier_config depuis DB (non bloquant)
   // ── Afficher l'app shell, masquer l'écran auth ─────────────────
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app-shell').classList.add('active');
@@ -3645,7 +3667,7 @@ function bootApp() {
   }
 
   // ── Badge de remise selon le tier ─────────────────────────────
-  const discMap = Object.fromEntries(Object.entries(TIER_DEFAULTS).map(([k,v]) => [k, v.discount_pct > 0 ? `-${v.discount_pct}%` : 'Standard']));
+  const discMap = { bronze: 'Standard', silver: '–5%', gold: '–10%', platinum: '–15%' };
   _set('dash-tier-badge', discMap[u.tier] || 'Pro');
 
   // ── KPIs dynamiques depuis localStorage ───────────────────────
@@ -3680,49 +3702,9 @@ function bootApp() {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   TIER CONFIG — chargé depuis public.tier_config (Supabase)
-   Remplace les maps hardcodées bronze/silver/gold/platinum
-   Fallback sur valeurs par défaut si la DB ne répond pas.
-   ══════════════════════════════════════════════════════════════ */
-
-let TIER_CONFIG = null;
-
-const TIER_DEFAULTS = {
-  bronze:   { label:'Bronze',   discount_pct:0,  badge:'badge-muted',  sort_order:1 },
-  silver:   { label:'Silver',   discount_pct:5,  badge:'badge-muted',  sort_order:2 },
-  gold:     { label:'Gold',     discount_pct:10, badge:'badge-orange', sort_order:3 },
-  platinum: { label:'Platinum', discount_pct:15, badge:'badge-blue',   sort_order:4 },
-};
-
-async function loadTierConfig() {
-  if (TIER_CONFIG) return TIER_CONFIG;
-  try {
-    const { data, error } = await sb.from('tier_config').select('*').order('sort_order');
-    if (error || !data?.length) throw new Error(error?.message || 'empty');
-    TIER_CONFIG = {};
-    data.forEach(t => {
-      TIER_CONFIG[t.tier] = {
-        label:        t.label,
-        discount_pct: t.discount_pct,
-        badge:        TIER_DEFAULTS[t.tier]?.badge || 'badge-muted',
-        sort_order:   t.sort_order,
-      };
-    });
-    console.log('[tierConfig] chargé:', Object.keys(TIER_CONFIG));
-  } catch(err) {
-    console.warn('[tierConfig] fallback defaults:', err.message);
-    TIER_CONFIG = { ...TIER_DEFAULTS };
-  }
-  return TIER_CONFIG;
+function getTierLabel(t) {
+  return { bronze:'Bronze', silver:'Silver', gold:'Gold', platinum:'Platinum' }[t] || t;
 }
-
-// Helper synchrone — TIER_CONFIG si chargé, sinon TIER_DEFAULTS
-function getTierCfg(tier) {
-  return (TIER_CONFIG || TIER_DEFAULTS)[tier] || TIER_DEFAULTS['bronze'];
-}
-
-function getTierLabel(t) { return getTierCfg(t).label || t || '—'; }
 
 /* ══════════════════════════════════════════════════════════════
    HELPERS MÉTIER — wrappers Supabase réutilisables
@@ -3755,9 +3737,14 @@ async function fetchAllOrdersAdmin() {
 
 /* Changement de statut admin avec note optionnelle */
 async function adminUpdateOrderStatus(orderId, newStatus, note = '') {
+  if (currentUser?.role !== 'admin') {
+    showToast('Action réservée à l\'admin.', 'err');
+    return false;
+  }
+
   const payload = { status: newStatus };
   if (note) payload.admin_notes = note;
-  // ERP : re-flagger pending sur les statuts qui nécessitent une synchro Simax
+  // ERP : re-flagger pending sur les statuts importants
   if (['validated', 'invoiced', 'cancelled'].includes(newStatus)) {
     payload.erp_sync_status = 'pending';
     payload.erp_synced_at   = null;
@@ -3769,16 +3756,9 @@ async function adminUpdateOrderStatus(orderId, newStatus, note = '') {
     showToast('Erreur lors de la mise à jour.', 'err');
     return false;
   }
-
-  // Ajouter une ligne historique avec la note
-  if (note) {
-    await sb.from('order_status_history').insert({
-      order_id:   orderId,
-      new_status: newStatus,
-      note,
-      changed_by: currentUser?.id || null,
-    });
-  }
+  // Le trigger trg_order_status_history s'est exécuté automatiquement
+  // et a capturé old_status + new_status + note (depuis admin_notes si changé)
+  // Pas de double-INSERT ici.
 
   const labels = { pending:'En attente', processing:'En traitement', validated:'Validée', invoiced:'Facturée', cancelled:'Annulée' };
   showToast('Statut mis à jour → ' + (labels[newStatus] || newStatus), 'ok');
@@ -3791,36 +3771,6 @@ async function fetchOrderInvoices(orderId) {
     .from('invoices').select('*').eq('order_id', orderId).order('created_at', { ascending: false });
   if (error) { console.error('[fetchOrderInvoices]', error.message); return []; }
   return data || [];
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   EMAILS TRANSACTIONNELS — helper front
-   verify_jwt: false côté Edge Function — auth via apikey anon.
-   sb.functions.invoke() envoie automatiquement apikey + auth.
-   Jamais bloquant — toujours appelé avec .catch()
-   ══════════════════════════════════════════════════════════════ */
-
-async function sendAccountEmail(eventType, profileId) {
-  console.log('[sendAccountEmail] event:', eventType, '| profileId:', profileId);
-
-  if (!profileId) {
-    console.warn('[sendAccountEmail] profileId manquant — annulé');
-    return;
-  }
-
-  // sb.functions.invoke() gère automatiquement apikey + Authorization
-  // verify_jwt:false côté fonction — auth basée sur apikey anon
-  const { data, error } = await sb.functions.invoke('send-account-emails', {
-    body: { event_type: eventType, profile_id: profileId },
-  });
-
-  if (error) {
-    console.error('[sendAccountEmail] invoke error:', error.message, error);
-    throw new Error(`send-account-emails: ${error.message}`);
-  }
-
-  console.log('[sendAccountEmail] invoke result:', JSON.stringify(data));
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -4060,21 +4010,17 @@ document.addEventListener('DOMContentLoaded', () => {
 async function renderCatalog(filter) {
   if (filter !== undefined) catalogFilter = filter;
   const tier = currentUser?.tier || 'bronze';
-  const disc = getTierCfg(tier).discount_pct ?? 0;
+  const disc = { bronze:0, silver:5, gold:10, platinum:15 }[tier] || 0;
   const products = await fetchProducts();
   const list = products.filter(p => catalogFilter === 'all' || p.cat === catalogFilter);
-
-  // FIX : l'ID réel dans le HTML est 'catalog-grid' (pas 'prod-grid')
-  const grid = document.getElementById('catalog-grid');
-
-  if (!grid) {
-    console.error('[renderCatalog] #catalog-grid introuvable dans le DOM');
-    return;
-  }
-
-  grid.innerHTML = list.length
+  const grid = document.getElementById('prod-grid');
+  const tbl  = document.getElementById('prod-table-body');
+  if (grid) grid.innerHTML = list.length
     ? list.map(p => renderProdCard(p, tier, disc)).join('')
-    : '<div style="padding:40px;text-align:center;color:var(--muted);">Aucun produit dans cette cat\u00e9gorie.</div>';
+    : '<div style="padding:40px;text-align:center;color:var(--muted);">Aucun produit dans cette catégorie.</div>';
+  if (tbl) tbl.innerHTML = list.length
+    ? list.map(p => renderProdRow(p, tier, disc)).join('')
+    : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Aucun produit.</td></tr>';
 }
 
 function renderProdCard(p, tier, disc) {
@@ -4104,10 +4050,7 @@ function renderProdCard(p, tier, disc) {
       <div class="prod-price-row">
         <div class="prod-price">
           ${canSee
-            ? (() => { const bref=p.prices['bronze']; const hs=tier!=='bronze'&&bref>price;
-               return hs
-                 ? `<div class="prod-price-val">${fmt(price)} €</div><div style="text-decoration:line-through;color:var(--muted2);font-size:11px;margin-top:2px;">${fmt(bref)} € tarif bronze</div><div class="prod-price-unit">HT / ${p.unit}</div>`
-                 : `<div class="prod-price-val">${fmt(price)} €</div><div class="prod-price-unit">HT / ${p.unit}</div>`; })()
+            ? `<div class="prod-price-val">${fmt(price)} €</div><div class="prod-price-unit">HT / ${p.unit}</div>`
             : `<div class="prod-price-val locked">Prix pro</div><div class="prod-price-unit">Connecté requis</div>`
           }
         </div>
@@ -4148,11 +4091,7 @@ function renderProdRow(p, tier, disc) {
       <div style="font-size:12px;color:var(--muted);">${desc}</div>
     </div>
     <div style="text-align:right;">
-      ${canSee ? (() => { const bref=p.prices['bronze']; const hs=tier!=='bronze'&&bref>price;
-        return (hs ? `<div style="text-decoration:line-through;font-size:11px;color:var(--muted2);">${fmt(bref)} € (bronze)</div>` : '')
-          + `<div style="font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text);">${fmt(price)} €</div>`
-          + `<div style="font-size:11px;color:var(--muted2);">HT / ${p.unit}</div>`; })()
-      : '<div style="font-size:12px;color:var(--muted);">Prix pro</div>'}
+      ${canSee ? `<div style="font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text);">${fmt(price)} €</div><div style="font-size:11px;color:var(--muted2);">HT / ${p.unit}</div>` : '<div style="font-size:12px;color:var(--muted);">Prix pro</div>'}
     </div>
     ${disc > 0 && canSee ? `<div class="prod-price-discount" style="white-space:nowrap;">–${disc}%</div>` : '<div></div>'}
     <div style="display:flex;gap:6px;">
@@ -4190,13 +4129,9 @@ function openProductDetail(productId) {
   const p      = products.find(x => x.id === productId || x.ref === productId);
   if (!p) return;
 
-  // S'assurer que TIER_CONFIG est chargé (peut être null si bootApp vient de s'exécuter)
-  if (!TIER_CONFIG) loadTierConfig().then(() => openProductDetail(productId));
-  if (!TIER_CONFIG) return; // sera rappelé par le then() ci-dessus
-
   const canSee = currentUser?.status === 'validated' || currentUser?.status === 'admin';
   const tier   = currentUser?.tier || 'bronze';
-  const disc   = getTierCfg(tier).discount_pct ?? 0; // source unique : tier_config DB
+  const disc   = { bronze: 0, silver: 5, gold: 10, platinum: 15 }[tier] || 0;
 
   // ── Helpers internes ─────────────────────────────────────────
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -4328,12 +4263,9 @@ function openProductDetail(productId) {
   const ctaPrice = document.getElementById('pd-cta-price');
   if (ctaPrice) {
     if (canSee) {
-      const price     = p.prices[tier];
-      const bref4     = p.prices['bronze'];
-      const hasSav4   = tier !== 'bronze' && bref4 > price;
+      const price = p.prices[tier];
       ctaPrice.innerHTML = `
         <div class="pd-cta-price-val">${fmt(price)} €</div>
-        ${hasSav4 ? `<div style="text-decoration:line-through;color:var(--muted2);font-size:12px;margin-top:2px;">${fmt(bref4)} € (tarif bronze)</div>` : ''}
         <div class="pd-cta-price-sub">
           HT / ${p.unit}
           ${disc > 0 ? `&nbsp;·&nbsp;<span style="color:var(--green);">–${disc}% ${tier.toUpperCase()}</span>` : ''}
@@ -4411,18 +4343,9 @@ function addToCart(pid) {
   const p = products.find(x => x.id === pid || x.ref === pid);
   if (!p) return;
   const tier = currentUser?.tier || 'bronze';
-  const disc = getTierCfg(tier).discount_pct ?? 0;
   const existing = cartItems.find(x => x.id === pid);
   if (existing) existing.qty++;
-  else cartItems.push({
-    ...p,
-    qty:          1,
-    unitPrice:    p.prices[tier],
-    bronzePrice:  p.prices['bronze'],
-    tierApplied:  tier,           // ERP : tier au moment de l'ajout
-    discountPct:  disc,           // ERP : remise %
-    erpProductId: p.dbId || null, // ERP : UUID Supabase produit
-  });
+  else cartItems.push({ ...p, qty: 1, unitPrice: p.prices[tier] });
   saveCart(cartItems);
   const total = cartItems.reduce((a,x) => a + x.qty, 0);
   document.getElementById('cart-count').textContent = total;
@@ -4454,12 +4377,7 @@ function openCartModal() {
           <span style="font-family:var(--fm);font-size:13px;font-weight:700;min-width:24px;text-align:center;">${i.qty}</span>
           <button onclick="changeCartQty('${i.id}',1)" style="width:24px;height:24px;background:var(--border2);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:16px;">+</button>
         </div>
-        <div style="text-align:right;min-width:90px;">
-          ${i.bronzePrice && i.bronzePrice > i.unitPrice
-            ? `<div style="text-decoration:line-through;color:var(--muted2);font-size:10px;">${fmt(i.bronzePrice*i.qty)} €</div>`
-            : ''}
-          <div style="font-family:var(--ft);font-size:14px;font-weight:800;color:var(--orange);">${fmt(i.unitPrice*i.qty)} €</div>
-        </div>
+        <div style="font-family:var(--ft);font-size:14px;font-weight:800;color:var(--orange);min-width:80px;text-align:right;">${fmt(i.unitPrice*i.qty)} €</div>
         <button onclick="removeFromCart('${i.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:16px;" title="Supprimer">✕</button>
       </div>`).join('');
     const total = cartItems.reduce((a,x)=>a+x.qty*x.unitPrice,0);
@@ -4510,20 +4428,14 @@ async function placeOrderFromCart() {
       customer_email:   currentUser.email                         || null,
       customer_company: currentUser.company                       || null,
       items: cartItems.map(i => ({
-        name:           i.name,
-        ref:            i.ref,
-        qty:            i.qty,
-        unit_price:     i.unitPrice,
-        tier_applied:   i.tierApplied  || null, // ERP : tier client
-        discount_pct:   i.discountPct  ?? null, // ERP : remise %
-        erp_product_id: i.erpProductId || null, // ERP : UUID Supabase produit
+        name:       i.name,
+        ref:        i.ref,
+        qty:        i.qty,
+        unit_price: i.unitPrice,
       })),
-      cart_total:           total,
-      tier_applied:         currentUser?.tier || null, // ERP : tier commande
-      discount_pct_applied: getTierCfg(currentUser?.tier || 'bronze').discount_pct ?? 0,
-      customer_company:     currentUser?.company || null,
-      status:               'pending',
-      source:               'portal',
+      cart_total: total,
+      status:     'pending',
+      source:     'portal',
       notes,
     })
     .select('id, order_number')
@@ -4587,18 +4499,12 @@ function goToCheckout() {
   // Remplir le récap
   const recap = document.getElementById('checkout-recap');
   if (recap) {
-    const lines = cartItems.map(i => {
-      const sv = i.bronzePrice && i.bronzePrice > i.unitPrice;
-      const pct = sv ? Math.round((1 - i.unitPrice / i.bronzePrice) * 100) : 0;
-      return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);">
-        <span style="flex:1;">${i.name} <span style="color:var(--muted)">× ${i.qty}</span></span>
-        <span style="text-align:right;">
-          ${sv ? `<span style="display:block;text-decoration:line-through;color:var(--muted2);font-size:10px;">${fmt(i.bronzePrice*i.qty)} €</span>` : ''}
-          <span style="font-weight:700;color:var(--orange);">${fmt(i.qty * i.unitPrice)} €</span>
-          ${sv ? `<span style="display:block;font-size:10px;color:var(--green);">–${pct}%</span>` : ''}
-        </span>
-      </div>`;
-    }).join('');
+    const lines = cartItems.map(i =>
+      `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+        <span>${i.name} <span style="color:var(--muted)">× ${i.qty}</span></span>
+        <span style="font-weight:600;">${fmt(i.qty * i.unitPrice)} €</span>
+      </div>`
+    ).join('');
     recap.innerHTML = lines;
   }
 
@@ -4702,7 +4608,7 @@ async function openOrderDetail(orderId) {
            <div style="font-weight:600;font-size:13px;">${inv.invoice_number}</div>
            <div style="font-size:11px;color:var(--muted);">Émise le ${fmtDate(inv.issued_at)}</div>
          </div>
-         ${inv.pdf_url ? `<a href="${inv.pdf_url}" target="_blank" class="btn btn-outline btn-sm">Télécharger PDF</a>` : '<span style="font-size:12px;color:var(--muted)">En préparation</span>'}
+         <button class="btn btn-outline btn-sm" onclick="downloadInvoice('${orderId}')">Télécharger PDF</button>
        </div>`
     : isAdmin
     ? `<button class="btn btn-primary btn-sm" onclick="generateInvoice('${orderId}');closeModal('modal-order-detail');">Générer la facture</button>`
