@@ -3757,6 +3757,11 @@ async function fetchAllOrdersAdmin() {
 async function adminUpdateOrderStatus(orderId, newStatus, note = '') {
   const payload = { status: newStatus };
   if (note) payload.admin_notes = note;
+  // ERP : re-flagger pending sur les statuts qui nécessitent une synchro Simax
+  if (['validated', 'invoiced', 'cancelled'].includes(newStatus)) {
+    payload.erp_sync_status = 'pending';
+    payload.erp_synced_at   = null;
+  }
 
   const { error } = await sb.from('orders').update(payload).eq('id', orderId);
   if (error) {
@@ -4406,9 +4411,18 @@ function addToCart(pid) {
   const p = products.find(x => x.id === pid || x.ref === pid);
   if (!p) return;
   const tier = currentUser?.tier || 'bronze';
+  const disc = getTierCfg(tier).discount_pct ?? 0;
   const existing = cartItems.find(x => x.id === pid);
   if (existing) existing.qty++;
-  else cartItems.push({ ...p, qty: 1, unitPrice: p.prices[tier], bronzePrice: p.prices['bronze'] });
+  else cartItems.push({
+    ...p,
+    qty:          1,
+    unitPrice:    p.prices[tier],
+    bronzePrice:  p.prices['bronze'],
+    tierApplied:  tier,           // ERP : tier au moment de l'ajout
+    discountPct:  disc,           // ERP : remise %
+    erpProductId: p.dbId || null, // ERP : UUID Supabase produit
+  });
   saveCart(cartItems);
   const total = cartItems.reduce((a,x) => a + x.qty, 0);
   document.getElementById('cart-count').textContent = total;
@@ -4496,14 +4510,20 @@ async function placeOrderFromCart() {
       customer_email:   currentUser.email                         || null,
       customer_company: currentUser.company                       || null,
       items: cartItems.map(i => ({
-        name:       i.name,
-        ref:        i.ref,
-        qty:        i.qty,
-        unit_price: i.unitPrice,
+        name:           i.name,
+        ref:            i.ref,
+        qty:            i.qty,
+        unit_price:     i.unitPrice,
+        tier_applied:   i.tierApplied  || null, // ERP : tier client
+        discount_pct:   i.discountPct  ?? null, // ERP : remise %
+        erp_product_id: i.erpProductId || null, // ERP : UUID Supabase produit
       })),
-      cart_total: total,
-      status:     'pending',
-      source:     'portal',
+      cart_total:           total,
+      tier_applied:         currentUser?.tier || null, // ERP : tier commande
+      discount_pct_applied: getTierCfg(currentUser?.tier || 'bronze').discount_pct ?? 0,
+      customer_company:     currentUser?.company || null,
+      status:               'pending',
+      source:               'portal',
       notes,
     })
     .select('id, order_number')
