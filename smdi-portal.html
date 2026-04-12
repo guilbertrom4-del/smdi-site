@@ -2217,7 +2217,7 @@ select.form-ctrl option { background: var(--bg2); }
             <div><h1 class="page-title">Administration</h1><p class="page-sub">Validation comptes — Gestion catalogue</p></div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <span class="badge badge-yellow" id="admin-pending-badge" style="font-size:12px;padding:6px 14px;">— en attente</span>
-              <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">
+              <button class="btn btn-primary btn-sm" onclick="openProductModal('create')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Ajouter un produit
               </button>
@@ -2236,6 +2236,37 @@ select.form-ctrl option { background: var(--bg2); }
           <div class="widget-head"><div class="widget-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Demandes en attente de validation</div></div>
           <div id="admin-pending-list">
           <!-- Rempli dynamiquement par renderAdminView() -->
+        </div>
+        </div>
+
+        <!-- Gestion produits -->
+        <div class="widget" style="margin-bottom:20px;">
+          <div class="widget-head" style="align-items:flex-start;gap:12px;">
+            <div class="widget-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg> Gestion produits</div>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="badge badge-muted" id="admin-products-count">— produits</span>
+              <button class="btn btn-outline btn-sm" onclick="renderAdminProducts(true)">Rafraîchir</button>
+              <button class="btn btn-primary btn-sm" onclick="openProductModal('create')">Ajouter</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>ERP</th>
+                  <th>Catégorie</th>
+                  <th>Prix tiers</th>
+                  <th>Tri</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Chargement des produits...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Tous les comptes -->
@@ -2491,14 +2522,15 @@ select.form-ctrl option { background: var(--bg2); }
   </div><!-- /modal -->
 </div><!-- /modal-overlay -->
 
-<!-- MODAL : Ajout produit (admin) -->
+<!-- MODAL : Ajout / edition produit (admin) -->
 <div class="modal-overlay" id="modal-add-product">
-  <div class="modal" style="max-width:640px;">
+  <div class="modal" style="max-width:760px;">
     <div class="modal-head">
-      <div class="modal-title">Ajouter un produit au catalogue</div>
+      <div class="modal-title" id="product-modal-title">Ajouter un produit au catalogue</div>
       <button class="modal-close" onclick="closeModal('modal-add-product')">&#x2715;</button>
     </div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+      <input type="hidden" id="ap-db-id"/>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group" style="margin:0;">
           <label class="form-label">Nom <span class="req">*</span></label>
@@ -2507,6 +2539,10 @@ select.form-ctrl option { background: var(--bg2); }
         <div class="form-group" style="margin:0;">
           <label class="form-label">Référence <span class="req">*</span></label>
           <input type="text" class="form-ctrl" id="ap-ref" placeholder="Ex : ENT-HP90-5L"/>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">ID produit ERP</label>
+          <input type="text" class="form-ctrl" id="ap-erp-product-id" placeholder="Ex : ERP-000123"/>
         </div>
         <div class="form-group" style="margin:0;">
           <label class="form-label">Catégorie <span class="req">*</span></label>
@@ -2522,6 +2558,10 @@ select.form-ctrl option { background: var(--bg2); }
         <div class="form-group" style="margin:0;">
           <label class="form-label">Unité</label>
           <input type="text" class="form-ctrl" id="ap-unit" placeholder="bidon, unité, kit..."/>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Ordre de tri</label>
+          <input type="number" class="form-ctrl" id="ap-sort-order" placeholder="0" step="1"/>
         </div>
       </div>
       <div>
@@ -2552,7 +2592,7 @@ select.form-ctrl option { background: var(--bg2); }
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-product')">Annuler</button>
-      <button class="btn btn-primary" onclick="adminSaveProduct()">Enregistrer le produit</button>
+      <button class="btn btn-primary" id="product-modal-save-btn" onclick="adminSaveProduct()">Enregistrer le produit</button>
     </div>
   </div>
 </div>
@@ -2657,6 +2697,9 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    ══════════════════════════════════════════════════════════════ */
 
 let PRODUCTS_CACHE = null; // invalider avec PRODUCTS_CACHE = null pour forcer rechargement
+let ADMIN_PRODUCTS_CACHE = null;
+let ADMIN_PRODUCT_MODAL_MODE = 'create';
+let ADMIN_PRODUCT_EDIT_ID = null;
 
 /* Normalise produit Supabase OU produit PRODUCTS JS → même structure */
 function normalizeProduct(p) {
@@ -2668,6 +2711,7 @@ function normalizeProduct(p) {
     id:        p.ref  || p.id,
     dbId:      p.id   || null,
     ref:       p.ref  || '',
+    erpProductId: p.erp_product_id || p.erpProductId || '',
     name:      p.name || '',
     desc:      p.description || p.desc || p.short_description || '',
     shortDesc: p.short_description || p.shortDesc || p.desc || '',
@@ -3362,6 +3406,8 @@ async function renderAdminView() {
         }).join('')
       : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Aucun compte validé.</td></tr>';
   }
+
+  renderAdminProducts();
 }
 
 // Génère la carte d'une demande en attente
@@ -3882,7 +3928,240 @@ async function fetchStatusHistory(orderId) {
   return (error || !data) ? [] : data;
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+async function fetchAdminProducts(forceReload) {
+  if (ADMIN_PRODUCTS_CACHE && !forceReload) return ADMIN_PRODUCTS_CACHE;
+
+  const { data, error } = await sb
+    .from('products')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('[fetchAdminProducts]', error.message);
+    throw error;
+  }
+
+  ADMIN_PRODUCTS_CACHE = (data || []).map(normalizeProduct);
+  return ADMIN_PRODUCTS_CACHE;
+}
+
+async function renderAdminProducts(forceReload) {
+  const tbody = document.getElementById('admin-products-tbody');
+  const count = document.getElementById('admin-products-count');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Chargement des produits...</td></tr>';
+
+  try {
+    const products = await fetchAdminProducts(forceReload);
+    if (count) count.textContent = products.length + ' produit' + (products.length > 1 ? 's' : '');
+
+    tbody.innerHTML = products.length
+      ? products.map(renderAdminProductRow).join('')
+      : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">Aucun produit dans Supabase.</td></tr>';
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:24px;font-size:13px;">Erreur lors du chargement des produits.</td></tr>';
+    showToast('Erreur lors du chargement des produits.', 'err');
+  }
+}
+
+function renderAdminProductRow(p) {
+  const statusBadge = p.active
+    ? '<span class="badge badge-green">Actif</span>'
+    : '<span class="badge badge-muted">Inactif</span>';
+  const toggleBtn = p.active
+    ? `<button class="btn btn-danger btn-sm" onclick="adminDeactivateProduct('${p.dbId}')">Désactiver</button>`
+    : `<button class="btn btn-primary btn-sm" onclick="adminReactivateProduct('${p.dbId}')">Réactiver</button>`;
+
+  return `<tr>
+    <td>
+      <div class="td-name">${escapeHtml(p.name || '—')}</div>
+      <div class="td-ref">${escapeHtml(p.ref || '—')}</div>
+    </td>
+    <td><div class="td-ref">${escapeHtml(p.erpProductId || '—')}</div></td>
+    <td><span class="badge badge-muted">${escapeHtml(catLabel(p.cat) || '—')}</span></td>
+    <td style="font-family:var(--fm);font-size:11px;color:var(--muted);line-height:1.8;">
+      B ${fmt(p.prices.bronze || 0)} € · S ${fmt(p.prices.silver || 0)} €<br/>
+      G ${fmt(p.prices.gold || 0)} € · P ${fmt(p.prices.platinum || 0)} €
+    </td>
+    <td class="td-ref">${escapeHtml(p.sortOrder ?? 0)}</td>
+    <td>${statusBadge}</td>
+    <td>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="openProductModal('edit','${p.dbId}')">Modifier</button>
+        ${toggleBtn}
+      </div>
+    </td>
+  </tr>`;
+}
+
+function resetProductModal() {
+  [
+    'ap-db-id','ap-name','ap-ref','ap-erp-product-id','ap-unit','ap-sort-order',
+    'ap-price-bronze','ap-price-silver','ap-price-gold','ap-price-platinum',
+    'ap-short-desc','ap-desc','ap-image'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  const cat = document.getElementById('ap-cat');
+  if (cat) cat.value = 'entretien';
+  const active = document.getElementById('ap-active');
+  if (active) active.checked = true;
+}
+
+function setProductModalValue(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value ?? '';
+}
+
+function openProductModal(mode, productId) {
+  ADMIN_PRODUCT_MODAL_MODE = mode === 'edit' ? 'edit' : 'create';
+  ADMIN_PRODUCT_EDIT_ID = ADMIN_PRODUCT_MODAL_MODE === 'edit' ? productId : null;
+  resetProductModal();
+
+  const title = document.getElementById('product-modal-title');
+  const saveBtn = document.getElementById('product-modal-save-btn');
+  if (title) title.textContent = ADMIN_PRODUCT_MODAL_MODE === 'edit' ? 'Modifier le produit' : 'Ajouter un produit au catalogue';
+  if (saveBtn) saveBtn.textContent = ADMIN_PRODUCT_MODAL_MODE === 'edit' ? 'Enregistrer les modifications' : 'Enregistrer le produit';
+
+  if (ADMIN_PRODUCT_MODAL_MODE === 'edit') {
+    const p = (ADMIN_PRODUCTS_CACHE || []).find(x => x.dbId === productId);
+    if (!p) {
+      showToast('Produit introuvable. Rafraîchissez la liste.', 'warn');
+      return;
+    }
+
+    setProductModalValue('ap-db-id', p.dbId);
+    setProductModalValue('ap-name', p.name);
+    setProductModalValue('ap-ref', p.ref);
+    setProductModalValue('ap-erp-product-id', p.erpProductId);
+    setProductModalValue('ap-cat', p.cat);
+    setProductModalValue('ap-unit', p.unit);
+    setProductModalValue('ap-sort-order', p.sortOrder);
+    setProductModalValue('ap-price-bronze', p.prices.bronze);
+    setProductModalValue('ap-price-silver', p.prices.silver);
+    setProductModalValue('ap-price-gold', p.prices.gold);
+    setProductModalValue('ap-price-platinum', p.prices.platinum);
+    setProductModalValue('ap-short-desc', p.shortDesc);
+    setProductModalValue('ap-desc', p.longDesc);
+    setProductModalValue('ap-image', p.image);
+    const active = document.getElementById('ap-active');
+    if (active) active.checked = p.active;
+  }
+
+  openModal('modal-add-product');
+}
+
+function getProductPayloadFromModal() {
+  const text = id => document.getElementById(id)?.value?.trim() || '';
+  const num = id => parseFloat(document.getElementById(id)?.value) || 0;
+  const intVal = id => {
+    const raw = document.getElementById(id)?.value;
+    return raw === '' || raw === undefined ? 0 : parseInt(raw, 10) || 0;
+  };
+
+  const payload = {
+    ref: text('ap-ref').toUpperCase(),
+    erp_product_id: text('ap-erp-product-id') || null,
+    name: text('ap-name'),
+    category: text('ap-cat'),
+    unit: text('ap-unit') || null,
+    short_description: text('ap-short-desc') || null,
+    description: text('ap-desc') || null,
+    image_url: text('ap-image') || null,
+    sort_order: intVal('ap-sort-order'),
+    price_bronze: num('ap-price-bronze'),
+    price_silver: num('ap-price-silver'),
+    price_gold: num('ap-price-gold'),
+    price_platinum: num('ap-price-platinum'),
+    active: document.getElementById('ap-active')?.checked ?? true,
+  };
+
+  if (!payload.ref || !payload.name || !payload.category) {
+    showToast('Nom, référence et catégorie sont obligatoires.', 'warn');
+    return null;
+  }
+
+  return payload;
+}
+
+async function refreshProductsAfterAdminMutation() {
+  PRODUCTS_CACHE = null;
+  ADMIN_PRODUCTS_CACHE = null;
+  if (currentView === 'admin') await renderAdminProducts(true);
+  if (currentView === 'catalog') renderCatalog();
+}
+
 async function adminSaveProduct() {
+  const payload = getProductPayloadFromModal();
+  if (!payload) return;
+
+  const btn = document.getElementById('product-modal-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement...'; }
+
+  const dbId = document.getElementById('ap-db-id')?.value || ADMIN_PRODUCT_EDIT_ID;
+  const query = ADMIN_PRODUCT_MODAL_MODE === 'edit' && dbId
+    ? sb.from('products').update(payload).eq('id', dbId)
+    : sb.from('products').insert(payload);
+
+  const { data, error } = await query.select('id, ref, name, active').single();
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = ADMIN_PRODUCT_MODAL_MODE === 'edit' ? 'Enregistrer les modifications' : 'Enregistrer le produit';
+  }
+
+  if (error) {
+    const msg = error.message.includes('unique') ? 'Cette référence existe déjà.' : "Erreur lors de l'enregistrement du produit.";
+    showToast(msg, 'err');
+    console.error('[adminSaveProduct]', error.message);
+    return;
+  }
+
+  closeModal('modal-add-product');
+  showToast('"' + data.name + '" enregistré avec succès.', 'ok');
+  console.log('[adminSaveProduct]', data.ref, data.id);
+  await refreshProductsAfterAdminMutation();
+}
+
+async function adminDeactivateProduct(productId) {
+  const p = (ADMIN_PRODUCTS_CACHE || []).find(x => x.dbId === productId);
+  if (!p) { showToast('Produit introuvable.', 'warn'); return; }
+  if (!confirm('Désactiver "' + p.name + '" ? Il disparaîtra du catalogue mais restera dans Supabase.')) return;
+
+  const { error } = await sb.from('products').update({ active: false }).eq('id', productId);
+  if (error) {
+    console.error('[adminDeactivateProduct]', error.message);
+    showToast('Erreur lors de la désactivation.', 'err');
+    return;
+  }
+
+  showToast('Produit désactivé.', 'ok');
+  await refreshProductsAfterAdminMutation();
+}
+
+async function adminReactivateProduct(productId) {
+  const { error } = await sb.from('products').update({ active: true }).eq('id', productId);
+  if (error) {
+    console.error('[adminReactivateProduct]', error.message);
+    showToast('Erreur lors de la réactivation.', 'err');
+    return;
+  }
+
+  showToast('Produit réactivé.', 'ok');
+  await refreshProductsAfterAdminMutation();
+}
+
+async function adminSaveProductLegacy() {
   const name   = document.getElementById('ap-name')?.value.trim();
   const ref    = document.getElementById('ap-ref')?.value.trim().toUpperCase();
   const cat    = document.getElementById('ap-cat')?.value;
