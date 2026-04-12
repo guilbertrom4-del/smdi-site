@@ -3463,6 +3463,10 @@ async function adminValidateUser(userId) {
   }
 
   showToast(`✓ "${data.company || data.name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
+
+  // Email de validation (non bloquant)
+  sendAccountEmail('account_validated', userId).catch(() => {});
+
   renderAdminView();
 }
 
@@ -3659,6 +3663,8 @@ async function doRegister() {
     currentUser = profile || { id: data.user.id, email, role: 'customer', status: 'pending', tier: null };
     setCurrentUser(currentUser);
     showToast('Compte créé ! Validation sous 24–48h ouvées.', 'ok');
+    // Email de bienvenue (non bloquant)
+    sendAccountEmail('account_created', data.user.id).catch(() => {});
     bootApp();
   } else {
     showToast('Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
@@ -4758,6 +4764,41 @@ function previewDueDate(mode) {
   return new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Emails transactionnels — appel Edge Function send-account-emails
+   ══════════════════════════════════════════════════════════════ */
+async function sendAccountEmail(eventType, profileId, orderId = null) {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const body = { event_type: eventType, profile_id: profileId };
+    if (orderId) body.order_id = orderId;
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/send-account-emails`,
+      {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // verify_jwt:false sur cette fonction — pas besoin de Bearer
+          // mais on l'envoie quand même si disponible (bonne pratique)
+          ...(session?.access_token
+            ? { 'Authorization': `Bearer ${session.access_token}` }
+            : { 'apikey': SUPABASE_ANON_KEY }),
+        },
+        body: JSON.stringify(body),
+      }
+    );
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      console.warn('[sendAccountEmail] erreur:', res.status, json);
+    } else {
+      console.log('[sendAccountEmail] envoyé:', eventType, '→', json);
+    }
+  } catch(err) {
+    // Non-bloquant — on ne fait jamais échouer la commande à cause d'un email
+    console.warn('[sendAccountEmail] exception (non bloquant):', err.message);
+  }
+}
+
 async function placeOrderFromCart() {
   if (!cartItems.length) { showToast('Votre panier est vide.', 'warn'); return; }
   if (!currentUser)       { showToast('Connectez-vous pour passer une commande.', 'err'); return; }
@@ -4824,6 +4865,10 @@ async function placeOrderFromCart() {
   if (_n) _n.textContent = order.order_number;
   openModal('modal-order-confirm');
   console.log('[placeOrderFromCart] Success:', order.order_number);
+
+  // Email de confirmation commande (non bloquant)
+  sendAccountEmail('order_created', currentUser.id, order.id);
+
   if (currentView === 'dashboard') renderDashboardStats();
 }
 
