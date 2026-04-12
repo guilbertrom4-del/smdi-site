@@ -2356,11 +2356,6 @@ select.form-ctrl option { background: var(--bg2); }
           <div style="font-size:11px;color:var(--muted);font-family:var(--fm);text-transform:uppercase;letter-spacing:.08em;">Livraison / facturation</div>
           <div id="checkout-client-info" style="font-size:13px;color:var(--text2);background:var(--bg3);padding:10px 14px;line-height:1.8;"></div>
         </div>
-        <!-- Conditions de paiement — rempli par goToCheckout() -->
-        <div>
-          <label class="form-label" style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;">Conditions de paiement</label>
-          <div id="checkout-payment-section" style="margin-top:6px;"></div>
-        </div>
         <!-- Notes commande -->
         <div class="form-group" style="margin:0;">
           <label class="form-label" style="font-size:11px;">Notes / Instructions particulières <span style="color:var(--muted)">(optionnel)</span></label>
@@ -2369,7 +2364,7 @@ select.form-ctrl option { background: var(--bg2); }
         <!-- Mention paiement futur -->
         <div style="background:var(--bg3);padding:10px 14px;border-radius:4px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Votre commande sera validée par notre équipe avant tout traitement. Les conditions de paiement sont celles affichées ci-dessus.
+          Votre commande sera validée par notre équipe avant tout traitement. Paiement à réception de facture.
         </div>
       </div>
       <div class="modal-footer" style="justify-content:space-between;">
@@ -3463,10 +3458,6 @@ async function adminValidateUser(userId) {
   }
 
   showToast(`✓ "${data.company || data.name}" validé — Tier ${getTierLabel(tier)}`, 'ok');
-
-  // Email de validation (non bloquant)
-  sendAccountEmail('account_validated', userId).catch(() => {});
-
   renderAdminView();
 }
 
@@ -3663,8 +3654,6 @@ async function doRegister() {
     currentUser = profile || { id: data.user.id, email, role: 'customer', status: 'pending', tier: null };
     setCurrentUser(currentUser);
     showToast('Compte créé ! Validation sous 24–48h ouvées.', 'ok');
-    // Email de bienvenue (non bloquant)
-    sendAccountEmail('account_created', data.user.id).catch(() => {});
     bootApp();
   } else {
     showToast('Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous.', 'ok');
@@ -4649,18 +4638,9 @@ function addToCart(pid) {
   const p = products.find(x => x.id === pid || x.ref === pid);
   if (!p) return;
   const tier = currentUser?.tier || 'bronze';
-  const disc = getTierCfg(tier).discount_pct ?? 0;
   const existing = cartItems.find(x => x.id === pid);
   if (existing) existing.qty++;
-  else cartItems.push({
-    ...p,
-    qty:          1,
-    unitPrice:    p.prices[tier],
-    bronzePrice:  p.prices['bronze'],  // référence pour affichage barré + ERP
-    tierApplied:  tier,                // ERP : tier au moment de l'ajout
-    discountPct:  disc,                // ERP : remise appliquée
-    erpProductId: p.dbId || null,      // ERP : UUID Supabase produit
-  });
+  else cartItems.push({ ...p, qty: 1, unitPrice: p.prices[tier] });
   saveCart(cartItems);
   const total = cartItems.reduce((a,x) => a + x.qty, 0);
   document.getElementById('cart-count').textContent = total;
@@ -4723,79 +4703,15 @@ function removeFromCart(pid) {
    Flux unique : panier → validation → commande stockée.
    Remplace le double tunnel devis/commande.
    ════════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════════════
-   CONDITIONS DE PAIEMENT B2B — SMDI
-   Loi LME art. L.441-10 C.com : max 60 jours date facture
-   ══════════════════════════════════════════════════════════════ */
-
-// Règles d'accès par tier
-const PAYMENT_RULES = {
-  bronze:   ['immediate'],
-  silver:   ['immediate'],
-  gold:     ['immediate', 'net30_eom', 'net45_eom'],
-  platinum: ['immediate', 'net30_eom', 'net45_eom'],
-};
-
-const PAYMENT_LABELS = {
-  immediate:  'Paiement immédiat par carte bancaire',
-  net30_eom:  '30 jours fin de mois',
-  net45_eom:  '45 jours fin de mois',
-};
-
-// Calcul date d'échéance B2B
-// net30_eom : fin du mois courant + 30 jours
-// net45_eom : fin du mois courant + 45 jours
-// immediate : null (pas d'échéance)
-function computePaymentDueDate(mode, fromDate = new Date()) {
-  if (mode === 'immediate') return null;
-  const days = mode === 'net30_eom' ? 30 : 45;
-  const eom  = new Date(fromDate.getFullYear(), fromDate.getMonth() + 1, 0);
-  eom.setDate(eom.getDate() + days);
-  return eom.toISOString().slice(0, 10);
-}
-
-function getAllowedPaymentModes(tier) {
-  return PAYMENT_RULES[tier] || ['immediate'];
-}
-
-function previewDueDate(mode) {
-  const d = computePaymentDueDate(mode);
-  if (!d) return '';
-  return new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-}
-
-/* ══════════════════════════════════════════════════════════════
-   Emails transactionnels — appel Edge Function send-account-emails
-   ══════════════════════════════════════════════════════════════ */
 async function sendAccountEmail(eventType, profileId, orderId = null) {
   try {
-    const { data: { session } } = await sb.auth.getSession();
-    const body = { event_type: eventType, profile_id: profileId };
-    if (orderId) body.order_id = orderId;
-    const res = await fetch(
-      `${SUPABASE_URL}/functions/v1/send-account-emails`,
-      {
-        method:  'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // verify_jwt:false sur cette fonction — pas besoin de Bearer
-          // mais on l'envoie quand même si disponible (bonne pratique)
-          ...(session?.access_token
-            ? { 'Authorization': `Bearer ${session.access_token}` }
-            : { 'apikey': SUPABASE_ANON_KEY }),
-        },
-        body: JSON.stringify(body),
-      }
-    );
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      console.warn('[sendAccountEmail] erreur:', res.status, json);
-    } else {
-      console.log('[sendAccountEmail] envoyé:', eventType, '→', json);
-    }
-  } catch(err) {
-    // Non-bloquant — on ne fait jamais échouer la commande à cause d'un email
-    console.warn('[sendAccountEmail] exception (non bloquant):', err.message);
+    const payload = { event_type: eventType, profile_id: profileId };
+    if (orderId) payload.order_id = orderId;
+    const { error } = await sb.functions.invoke('send-account-emails', { body: payload });
+    if (error) console.error('[EMAIL ERROR]', error);
+    else       console.log('[EMAIL SENT]', payload);
+  } catch (err) {
+    console.error('[EMAIL CRASH]', err);
   }
 }
 
@@ -4810,38 +4726,24 @@ async function placeOrderFromCart() {
   const total = cartItems.reduce((s, i) => s + (i.qty * i.unitPrice), 0);
   const notes = document.getElementById('checkout-notes')?.value?.trim() || null;
 
-  // Conditions de paiement — lire le choix du client dans le checkout
-  const paymentMode  = document.getElementById('checkout-payment-mode')?.value || 'immediate';
-  const allowedModes = getAllowedPaymentModes(currentUser.tier || 'bronze');
-  const safeMode     = allowedModes.includes(paymentMode) ? paymentMode : 'immediate';
-  const paymentDue   = computePaymentDueDate(safeMode); // null si CB
-
   const { data: order, error } = await sb
     .from('orders')
     .insert({
-      user_id:              currentUser.id,
-      profile_id:           currentUser.id,
-      customer_name:        currentUser.company || currentUser.name   || null,
-      customer_email:       currentUser.email                         || null,
-      customer_company:     currentUser.company                       || null,
+      user_id:          currentUser.id,
+      profile_id:       currentUser.id,
+      customer_name:    currentUser.company || currentUser.name   || null,
+      customer_email:   currentUser.email                         || null,
+      customer_company: currentUser.company                       || null,
       items: cartItems.map(i => ({
-        name:           i.name,
-        ref:            i.ref,
-        qty:            i.qty,
-        unit_price:     i.unitPrice,
-        tier_applied:   i.tierApplied  || null,
-        discount_pct:   i.discountPct  ?? null,
-        erp_product_id: i.erpProductId || null,
+        name:       i.name,
+        ref:        i.ref,
+        qty:        i.qty,
+        unit_price: i.unitPrice,
       })),
-      cart_total:           total,
-      status:               'pending',
-      source:               'portal',
+      cart_total: total,
+      status:     'pending',
+      source:     'portal',
       notes,
-      payment_mode:         safeMode,
-      payment_status:       safeMode === 'immediate' ? 'pending' : 'awaiting',
-      payment_due_date:     paymentDue,
-      tier_applied:         currentUser.tier || null,
-      discount_pct_applied: getTierCfg(currentUser.tier || 'bronze').discount_pct ?? 0,
     })
     .select('id, order_number')
     .single();
@@ -4865,10 +4767,7 @@ async function placeOrderFromCart() {
   if (_n) _n.textContent = order.order_number;
   openModal('modal-order-confirm');
   console.log('[placeOrderFromCart] Success:', order.order_number);
-
-  // Email de confirmation commande (non bloquant)
-  sendAccountEmail('order_created', currentUser.id, order.id);
-
+  sendAccountEmail('order_created', currentUser.id, order.id); // non bloquant
   if (currentView === 'dashboard') renderDashboardStats();
 }
 
@@ -4935,54 +4834,6 @@ function goToCheckout() {
   // Réinitialiser les notes
   const notesEl = document.getElementById('checkout-notes');
   if (notesEl) notesEl.value = '';
-
-  // ── Bloc conditions de paiement ────────────────────────────
-  const paymentEl = document.getElementById('checkout-payment-section');
-  if (paymentEl && currentUser) {
-    const tier     = currentUser.tier || 'bronze';
-    const allowed  = getAllowedPaymentModes(tier);
-    // Pré-sélectionner la condition accordée au profil
-    const preferred    = currentUser.payment_terms || 'immediate';
-    const defaultMode  = allowed.includes(preferred) ? preferred : 'immediate';
-
-    if (allowed.length === 1) {
-      // Bronze / Silver — CB uniquement, pas de choix
-      paymentEl.innerHTML = `
-        <input type="hidden" id="checkout-payment-mode" value="immediate">
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;
-             background:var(--bg3);border-radius:4px;font-size:13px;color:var(--text2);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-          </svg>
-          Paiement immédiat par carte bancaire
-        </div>`;
-    } else {
-      // Gold / Platinum — choix multiple
-      const opts = allowed.map(mode => {
-        const dueStr = mode !== 'immediate' ? ` — échéance : ${previewDueDate(mode)}` : '';
-        const sub    = mode === 'immediate'
-          ? 'Règlement par carte bancaire'
-          : `Délai accordé selon vos conditions${dueStr}`;
-        return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;
-            background:var(--bg3);border:1px solid var(--border);border-radius:4px;
-            cursor:pointer;font-size:13px;margin-bottom:6px;">
-          <input type="radio" name="payment_mode_radio" value="${mode}"
-            ${mode === defaultMode ? 'checked' : ''}
-            onchange="document.getElementById('checkout-payment-mode').value=this.value;
-              const prev=document.getElementById('checkout-due-preview');
-              if(prev)prev.textContent=previewDueDate(this.value);"
-            style="margin-top:2px;accent-color:var(--orange);">
-          <div>
-            <div style="font-weight:600;color:var(--text);">${PAYMENT_LABELS[mode]}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${sub}</div>
-          </div>
-        </label>`;
-      }).join('');
-      paymentEl.innerHTML = `
-        <input type="hidden" id="checkout-payment-mode" value="${defaultMode}">
-        ${opts}`;
-    }
-  }
 }
 
 /* Retour à l'étape 1 depuis le checkout */
