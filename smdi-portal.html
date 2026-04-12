@@ -4289,7 +4289,8 @@ document.addEventListener('DOMContentLoaded', () => {
 async function renderCatalog(filter) {
   if (filter !== undefined) catalogFilter = filter;
   const tier = currentUser?.tier || 'bronze';
-  const disc = { bronze:0, silver:5, gold:10, platinum:15 }[tier] || 0;
+  const tierCfg = getTierCfg(tier);
+  const disc = tierCfg?.discount_pct || 0;
   const products = await fetchProducts();
   const list = products.filter(p => catalogFilter === 'all' || p.cat === catalogFilter);
   const grid = document.getElementById('catalog-grid');
