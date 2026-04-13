@@ -1095,6 +1095,23 @@
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+    /* --- Premium conversion additions --- */
+    .gp-panel{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;background:linear-gradient(140deg,#10151f,#0d1118);border:1px solid var(--border2);padding:38px;border-radius:14px;}
+    .gp-list{margin-top:22px;display:grid;gap:10px;}
+    .gp-item{padding:12px 14px;border:1px solid var(--border2);background:rgba(255,255,255,.01);font-size:13px;color:var(--text2);}
+    .gp-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .gp-stat{padding:18px;border:1px solid var(--border2);background:var(--bg3);display:flex;flex-direction:column;gap:6px;}
+    .gp-stat strong{font-family:var(--ff-title);font-size:1.7rem;color:var(--orange);line-height:1;}
+    .gp-stat span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2);}
+    .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+    .proof-card{background:var(--card);padding:28px;min-height:170px;}
+    .proof-card h3{font-family:var(--ff-title);font-size:18px;color:var(--text);margin-bottom:10px;}
+    .proof-card p{font-size:13px;color:var(--muted);line-height:1.7;}
+    @media(max-width:900px){.gp-panel{grid-template-columns:1fr}.proof-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:640px){.proof-grid{grid-template-columns:1fr;}}
+
 </style>
   <!-- Vercel Web Analytics -->
   <script>
@@ -1196,13 +1213,12 @@
         </div>
 
         <h1 class="hero-title reveal d1">
-          L'équipement pro<br>
-          pour vos <em>stations</em><br>
-          de lavage.
+          Pilotez vos stations avec un partenaire <em>industriel</em><br>
+          conçu pour les exploitants exigeants.
         </h1>
 
         <p class="hero-sub reveal d2">
-          <strong>+1 500 références sélectionnées</strong> pour les professionnels du lavage automobile et de la haute pression. Tarifs B2B personnalisés, livraison France &amp; Europe, interventions Île-de-France.
+          <strong>solutions techniques et pièces critiques</strong> pour sécuriser vos revenus d'exploitation. Accompagnement avant-vente, déploiement terrain, maintenance et suivi B2B premium.
         </p>
 
         <div class="hero-ctas reveal d3">
@@ -1211,7 +1227,7 @@
             Créer un compte pro
           </a>
           <a href="smdi-portal.html#login" class="btn btn-outline btn-lg" aria-label="Accéder à l'espace professionnel">
-            Connexion espace pro
+            Accéder au portail pro
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
@@ -1497,6 +1513,51 @@
         </div>
         <a href="#contact" class="btn btn-ghost btn-sm">Demander un audit</a>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     GRANDS PROJETS / RÉNOVATION
+══════════════════════════════════════════════════════ -->
+<section class="section" id="grands-projets" aria-labelledby="gp-title">
+  <div class="wrap">
+    <div class="gp-panel reveal">
+      <div>
+        <div class="eyebrow">Projets stratégiques</div>
+        <h2 class="section-title" id="gp-title">Rénovation complète, montée en gamme et <em>gros chantiers</em></h2>
+        <p class="section-sub">De la remise à niveau technique à la modernisation complète d'un site multi-pistes, SMDI structure votre projet de bout en bout : cadrage, budget, planning, exécution et suivi de performance.</p>
+        <div class="gp-list">
+          <div class="gp-item">Direction de projet dédiée pour sites à fort chiffre d'affaires</div>
+          <div class="gp-item">Planification en phases pour limiter les interruptions d'exploitation</div>
+          <div class="gp-item">Reporting clair pour vos équipes et vos investisseurs</div>
+        </div>
+      </div>
+      <div class="gp-stats">
+        <div class="gp-stat"><strong>48h</strong><span>Pré-cadrage technique</span></div>
+        <div class="gp-stat"><strong>1:1</strong><span>Chef de projet dédié</span></div>
+        <div class="gp-stat"><strong>ROI</strong><span>Scénarios d'optimisation chiffrés</span></div>
+        <div class="gp-stat"><strong>B2B</strong><span>Approche orientée exploitation</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     PREUVES & CRÉDIBILITÉ
+══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="preuves" aria-labelledby="preuves-title">
+  <div class="wrap">
+    <div class="section-header centered">
+      <div class="eyebrow" style="justify-content:center;">Crédibilité opérationnelle</div>
+      <h2 class="section-title" id="preuves-title">Une structure pensée pour des <em>enjeux élevés</em></h2>
+    </div>
+    <div class="proof-grid">
+      <article class="proof-card"><h3>Expertise terrain</h3><p>Techniciens habitués aux contraintes réelles des stations en exploitation continue.</p></article>
+      <article class="proof-card"><h3>Qualité de service</h3><p>Process d'intervention standardisés, communication proactive et suivi après action.</p></article>
+      <article class="proof-card"><h3>Capacité d'exécution</h3><p>Approvisionnement, maintenance et rénovation orchestrés dans une logique de continuité.</p></article>
+      <article class="proof-card"><h3>Portail client pro</h3><p>Tarifs personnalisés, commandes, devis et historique centralisés dans un espace robuste.</p></article>
     </div>
   </div>
 </section>
