@@ -245,6 +245,17 @@
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+    /* --- Global premium continuity layer --- */
+    .site-loader{position:fixed;inset:0;z-index:9999;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,106,26,.12),transparent 55%),rgba(6,8,13,.96);animation:loaderOut .9s 1.1s forwards;}
+    .site-loader::before{content:'SMDI';font-family:var(--ff-title,var(--ft));font-weight:800;letter-spacing:.26em;color:rgba(255,255,255,.86);font-size:clamp(18px,2.8vw,30px);}
+    .site-loader::after{content:'';position:absolute;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);animation:loaderSweep .95s ease-in-out infinite;}
+    @keyframes loaderSweep{0%{transform:translateX(-55px)}50%{transform:translateX(55px)}100%{transform:translateX(-55px)}}
+    @keyframes loaderOut{to{opacity:0;visibility:hidden}}
+    .btn,.nav-link,.toc-item,.faq-item,.svc-card,.value-card,.widget,.prod-card{transition:all .24s cubic-bezier(.22,.61,.36,1);}
+    .btn:hover{transform:translateY(-1px);}
+
 </style>
 
   <!-- Vercel Web Analytics -->
@@ -254,6 +265,7 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+<div class="site-loader" aria-hidden="true"></div>
 
 <!-- ═══ HEADER ═══ -->
 <header>
@@ -290,10 +302,10 @@
   <div class="wrap z1">
     <div class="eyebrow reveal">À propos de SMDI</div>
     <h1 class="section-title reveal d1" style="font-size:clamp(2.4rem,4.5vw,4rem);letter-spacing:-.03em;max-width:720px">
-      Partenaire technique des<br><em>stations de lavage</em><br>depuis plus de 20 ans.
+      Le partenaire terrain des<br><em>exploitants exigeants</em>.
     </h1>
     <p class="section-sub reveal d2" style="max-width:600px;font-size:16px">
-      SMDI accompagne les professionnels du lavage automobile et de la haute pression dans la sélection, la fourniture et la maintenance de leurs équipements — avec rigueur, réactivité et expertise sectorielle.
+      Une équipe structurée pour fiabiliser vos installations, accélérer vos projets et protéger votre performance.
     </p>
     <div class="reveal d3" style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap">
       <a href="smdi-portal.html#register" class="btn btn-primary btn-lg">

@@ -1641,6 +1641,17 @@ select.form-ctrl option { background: var(--bg2); }
 .cps-card span{font-size:12px;color:var(--muted);line-height:1.45;}
 @media(max-width:980px){.catalog-premium-strip{grid-template-columns:1fr;}}
 
+
+
+    /* --- Global premium continuity layer --- */
+    .site-loader{position:fixed;inset:0;z-index:9999;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,106,26,.12),transparent 55%),rgba(6,8,13,.96);animation:loaderOut .9s 1.1s forwards;}
+    .site-loader::before{content:'SMDI';font-family:var(--ff-title,var(--ft));font-weight:800;letter-spacing:.26em;color:rgba(255,255,255,.86);font-size:clamp(18px,2.8vw,30px);}
+    .site-loader::after{content:'';position:absolute;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);animation:loaderSweep .95s ease-in-out infinite;}
+    @keyframes loaderSweep{0%{transform:translateX(-55px)}50%{transform:translateX(55px)}100%{transform:translateX(-55px)}}
+    @keyframes loaderOut{to{opacity:0;visibility:hidden}}
+    .btn,.nav-link,.toc-item,.faq-item,.svc-card,.value-card,.widget,.prod-card{transition:all .24s cubic-bezier(.22,.61,.36,1);}
+    .btn:hover{transform:translateY(-1px);}
+
 </style>
 <!-- Supabase CDN — connexion initiale uniquement -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1652,6 +1663,7 @@ select.form-ctrl option { background: var(--bg2); }
 
 </head>
 <body>
+<div class="site-loader" aria-hidden="true"></div>
 
 <!-- ═══════════════════════════════════════════
      AUTH SCREEN
@@ -2161,7 +2173,7 @@ select.form-ctrl option { background: var(--bg2); }
           <div class="page-header-top">
             <div>
               <h1 class="page-title">Catalogue Professionnel</h1>
-              <p class="page-sub">Catalogue orienté exploitation : pièces critiques, équipements, consommables et accompagnement projet</p>
+              <p class="page-sub">Catalogue pro priorisé : pièces critiques, équipements et lots projet prêts à chiffrer</p>
             </div>
             <div style="display:flex;gap:8px;">
               <button class="btn btn-outline" onclick="openCartModal()">
@@ -2214,7 +2226,7 @@ select.form-ctrl option { background: var(--bg2); }
         <div class="page-header">
           <div class="page-header-top">
             <div>
-              <h1 class="page-title">Mes Commandes</h1>
+              <h1 class="page-title">Commandes & suivi</h1>
               <p class="page-sub">Historique complet de vos commandes professionnelles</p>
             </div>
             <button class="btn btn-primary" onclick="navigate('catalog')">
@@ -2239,7 +2251,7 @@ select.form-ctrl option { background: var(--bg2); }
       <!-- ═══ SERVICES ═══ -->
       <div id="view-services" class="view" style="display:none;">
         <div class="page-header">
-          <h1 class="page-title">Interventions &amp; Services</h1>
+          <h1 class="page-title">Services terrain</h1>
           <p class="page-sub">Planifiez vos interventions ou déclenchez un dépannage d'urgence</p>
         </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-bottom:24px;">
@@ -2281,7 +2293,7 @@ select.form-ctrl option { background: var(--bg2); }
       <!-- ═══ DOCUMENTS ═══ -->
       <div id="view-docs" class="view" style="display:none;">
         <div class="page-header">
-          <h1 class="page-title">Documents Techniques</h1>
+          <h1 class="page-title">Documents pro</h1>
           <p class="page-sub">Fiches produits, certificats, plans CAO — disponibles selon votre niveau de compte</p>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;">
@@ -2316,7 +2328,7 @@ select.form-ctrl option { background: var(--bg2); }
       <div id="view-account" class="view" style="display:none;">
         <div class="page-header">
           <div class="page-header-top">
-            <div><h1 class="page-title">Mon Compte Pro</h1><p class="page-sub">Gérez vos informations, vos accès et vos préférences</p></div>
+            <div><h1 class="page-title">Compte entreprise</h1><p class="page-sub">Gérez vos informations, vos accès et vos préférences</p></div>
             <button class="btn btn-outline" onclick="doLogout()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
               Déconnexion

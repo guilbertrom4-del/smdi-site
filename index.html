@@ -1129,6 +1129,17 @@
     .svc-card,.proof-card,.gp-stat,.step-card,.testi-card{box-shadow:0 12px 30px rgba(0,0,0,.2)}
     .section-header .section-sub{max-width:680px}
 
+
+
+    /* --- Global premium continuity layer --- */
+    .site-loader{position:fixed;inset:0;z-index:9999;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,106,26,.12),transparent 55%),rgba(6,8,13,.96);animation:loaderOut .9s 1.1s forwards;}
+    .site-loader::before{content:'SMDI';font-family:var(--ff-title,var(--ft));font-weight:800;letter-spacing:.26em;color:rgba(255,255,255,.86);font-size:clamp(18px,2.8vw,30px);}
+    .site-loader::after{content:'';position:absolute;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);animation:loaderSweep .95s ease-in-out infinite;}
+    @keyframes loaderSweep{0%{transform:translateX(-55px)}50%{transform:translateX(55px)}100%{transform:translateX(-55px)}}
+    @keyframes loaderOut{to{opacity:0;visibility:hidden}}
+    .btn,.nav-link,.toc-item,.faq-item,.svc-card,.value-card,.widget,.prod-card{transition:all .24s cubic-bezier(.22,.61,.36,1);}
+    .btn:hover{transform:translateY(-1px);}
+
 </style>
   <!-- Vercel Web Analytics -->
   <script>
@@ -1138,6 +1149,7 @@
 
 </head>
 <body>
+<div class="site-loader" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════════════════════════════
      NAVIGATION STICKY
@@ -1432,7 +1444,7 @@
       <h2 class="section-title reveal d1" id="prest-title">
         Interventions &amp; Services pro<br><em>Île-de-France</em>
       </h2>
-      <p class="section-sub reveal d2">Un dispositif terrain conçu pour réduire vos arrêts et sécuriser votre chiffre d'affaires.</p>
+      <p class="section-sub reveal d2">Un dispositif terrain pensé pour réduire vos arrêts, accélérer vos décisions et protéger votre marge.</p>
     </div>
 
     <div class="services-grid reveal d1">

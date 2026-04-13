@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Prestations SMDI — Dépannage urgent, entretien préventif, installation et audit pour stations de lavage. Interventions Île-de-France &lt;4h." />
+  <meta name="description" content="Prestations SMDI — Demander une intervention, entretien préventif, installation et audit pour stations de lavage. Interventions Île-de-France &lt;4h." />
   <title>Prestations — SMDI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -249,6 +249,17 @@
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+    /* --- Global premium continuity layer --- */
+    .site-loader{position:fixed;inset:0;z-index:9999;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,106,26,.12),transparent 55%),rgba(6,8,13,.96);animation:loaderOut .9s 1.1s forwards;}
+    .site-loader::before{content:'SMDI';font-family:var(--ff-title,var(--ft));font-weight:800;letter-spacing:.26em;color:rgba(255,255,255,.86);font-size:clamp(18px,2.8vw,30px);}
+    .site-loader::after{content:'';position:absolute;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);animation:loaderSweep .95s ease-in-out infinite;}
+    @keyframes loaderSweep{0%{transform:translateX(-55px)}50%{transform:translateX(55px)}100%{transform:translateX(-55px)}}
+    @keyframes loaderOut{to{opacity:0;visibility:hidden}}
+    .btn,.nav-link,.toc-item,.faq-item,.svc-card,.value-card,.widget,.prod-card{transition:all .24s cubic-bezier(.22,.61,.36,1);}
+    .btn:hover{transform:translateY(-1px);}
+
 </style>
 
   <!-- Vercel Web Analytics -->
@@ -258,6 +269,7 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+<div class="site-loader" aria-hidden="true"></div>
 
 <!-- ═══ HEADER ═══ -->
 <header>
@@ -296,12 +308,12 @@
       <em>Nous en prenons soin.</em>
     </h1>
     <p class="section-sub reveal d2" style="max-width:620px;font-size:16px">
-      Dépannage urgent, entretien préventif, installation et audit — SMDI accompagne les professionnels du lavage automobile sur toute l'Île-de-France avec des techniciens certifiés et réactifs.
+      Intervention, maintenance et rénovation pilotées pour limiter les arrêts et sécuriser votre exploitation.
     </p>
     <div class="reveal d3" style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap">
       <a href="#urgence" class="btn btn-primary btn-lg">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Dépannage urgent
+        Demander une intervention
       </a>
       <a href="index.html#contact" class="btn btn-outline btn-lg">Prendre RDV</a>
     </div>

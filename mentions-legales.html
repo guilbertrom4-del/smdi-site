@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Mentions légales du site SMDI — Équipements professionnels pour stations de lavage." />
+  <meta name="description" content="Cadre légal SMDI du site SMDI — Équipements professionnels pour stations de lavage." />
   <meta name="robots" content="noindex, follow" />
   <title>Mentions légales — SMDI</title>
 
@@ -478,6 +478,17 @@
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+    /* --- Global premium continuity layer --- */
+    .site-loader{position:fixed;inset:0;z-index:9999;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,106,26,.12),transparent 55%),rgba(6,8,13,.96);animation:loaderOut .9s 1.1s forwards;}
+    .site-loader::before{content:'SMDI';font-family:var(--ff-title,var(--ft));font-weight:800;letter-spacing:.26em;color:rgba(255,255,255,.86);font-size:clamp(18px,2.8vw,30px);}
+    .site-loader::after{content:'';position:absolute;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);animation:loaderSweep .95s ease-in-out infinite;}
+    @keyframes loaderSweep{0%{transform:translateX(-55px)}50%{transform:translateX(55px)}100%{transform:translateX(-55px)}}
+    @keyframes loaderOut{to{opacity:0;visibility:hidden}}
+    .btn,.nav-link,.toc-item,.faq-item,.svc-card,.value-card,.widget,.prod-card{transition:all .24s cubic-bezier(.22,.61,.36,1);}
+    .btn:hover{transform:translateY(-1px);}
+
 </style>
 
   <!-- Vercel Web Analytics -->
@@ -487,6 +498,7 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+<div class="site-loader" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════════════════════════════
      HEADER — navigation simplifiée pour page satellite
@@ -540,8 +552,8 @@
 <section class="legal-hero" aria-label="En-tête mentions légales">
   <div class="wrap z1">
     <div class="hero-label">Informations légales</div>
-    <h1>Mentions légales</h1>
-    <p>Informations légales et réglementaires relatives au site internet et aux services proposés par la société SMDI, conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN).</p>
+    <h1>Cadre légal SMDI</h1>
+    <p>Informations légales essentielles relatives à l'éditeur, à l'hébergement et à l'usage du site SMDI.</p>
     <div class="hero-meta">
       <div class="hero-meta-item">Dernière mise à jour : Janvier 2026</div>
       <div class="hero-meta-item">Loi LCEN du 21 juin 2004</div>

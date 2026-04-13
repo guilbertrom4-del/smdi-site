@@ -207,6 +207,17 @@
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+    /* --- Global premium continuity layer --- */
+    .site-loader{position:fixed;inset:0;z-index:9999;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,106,26,.12),transparent 55%),rgba(6,8,13,.96);animation:loaderOut .9s 1.1s forwards;}
+    .site-loader::before{content:'SMDI';font-family:var(--ff-title,var(--ft));font-weight:800;letter-spacing:.26em;color:rgba(255,255,255,.86);font-size:clamp(18px,2.8vw,30px);}
+    .site-loader::after{content:'';position:absolute;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);animation:loaderSweep .95s ease-in-out infinite;}
+    @keyframes loaderSweep{0%{transform:translateX(-55px)}50%{transform:translateX(55px)}100%{transform:translateX(-55px)}}
+    @keyframes loaderOut{to{opacity:0;visibility:hidden}}
+    .btn,.nav-link,.toc-item,.faq-item,.svc-card,.value-card,.widget,.prod-card{transition:all .24s cubic-bezier(.22,.61,.36,1);}
+    .btn:hover{transform:translateY(-1px);}
+
 </style>
 
   <!-- Vercel Web Analytics -->
@@ -216,6 +227,7 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+<div class="site-loader" aria-hidden="true"></div>
 
 <header>
   <div id="site-header" role="banner">
@@ -246,8 +258,8 @@
 <section class="legal-hero" aria-label="En-tête cgv professionnelles">
   <div class="wrap z1">
     <div class="hero-label">Conditions générales de vente</div>
-    <h1>Conditions Générales de Vente</h1>
-    <p>Conditions générales de vente applicables aux transactions entre SMDI et ses clients professionnels. L'accès à l'espace professionnel vaut acceptation des présentes conditions.</p>
+    <h1>CGV B2B SMDI</h1>
+    <p>Le cadre contractuel clair pour vos achats professionnels SMDI.</p>
     <div class="hero-meta">
             <div class="hero-meta-item">Clients professionnels B2B uniquement</div>
       <div class="hero-meta-item">Mise à jour : Janvier 2026</div>
