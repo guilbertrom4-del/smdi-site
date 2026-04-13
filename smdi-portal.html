@@ -655,9 +655,63 @@ select.form-ctrl option { background: var(--bg2); }
 /* ═══════════════════════════════════════════
    CATALOGUE VIEW
 ═══════════════════════════════════════════ */
+.catalog-premium {
+  position: relative;
+}
+.catalog-premium::before {
+  content: '';
+  position: absolute;
+  inset: -10px -10px auto -10px;
+  height: 180px;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 220px at 8% 0%, rgba(255,77,0,.14), transparent 62%),
+    radial-gradient(600px 240px at 92% 0%, rgba(255,255,255,.05), transparent 70%);
+  z-index: 0;
+}
+.catalog-premium > * { position: relative; z-index: 1; }
+
+.catalog-header {
+  margin-bottom: 18px;
+  border: 1px solid var(--border2);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.18));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 16px 40px rgba(0,0,0,.22);
+  padding: 18px 18px 16px;
+}
+.catalog-header .page-header-top { margin-bottom: 0; align-items: center; }
+.catalog-title-wrap { display: grid; gap: 6px; }
+.catalog-kicker {
+  font-family: var(--fm);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--orange);
+}
+.catalog-header .page-title {
+  font-size: clamp(1.55rem, 2.1vw, 2rem);
+  letter-spacing: -.03em;
+}
+.catalog-header .page-sub { color: var(--text2); max-width: 64ch; }
+.catalog-actions {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--border2);
+  background: rgba(0,0,0,.28);
+}
+.catalog-actions .btn { min-height: 40px; }
+.catalog-actions .btn-outline { border-color: rgba(255,255,255,.16); color: var(--text); }
+.catalog-actions .btn-outline:hover {
+  border-color: var(--orange);
+  box-shadow: 0 8px 18px rgba(255,77,0,.18);
+}
+
 .cat-toolbar {
   display: flex; align-items: center; gap: 12px;
   margin-bottom: 20px; flex-wrap: wrap;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.015), rgba(0,0,0,.18));
+  border: 1px solid var(--border2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 10px 24px rgba(0,0,0,.15);
 }
 .cat-filters {
   display: flex; gap: 6px;
@@ -669,21 +723,22 @@ select.form-ctrl option { background: var(--bg2); }
 .cat-filter {
   font-family: var(--fb); font-size: 11px; font-weight: 700;
   letter-spacing: .06em; text-transform: uppercase;
-  padding: 7px 16px;
+  padding: 8px 14px;
   border: 1px solid var(--border2); color: var(--muted);
-  background: transparent; white-space: nowrap; cursor: pointer;
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.16)); white-space: nowrap; cursor: pointer;
   transition: all var(--tr);
 }
-.cat-filter:hover { border-color: var(--muted2); color: var(--text2); }
-.cat-filter.active { background: var(--orange); border-color: var(--orange); color: #000; }
+.cat-filter:hover { border-color: rgba(255,77,0,.45); color: var(--text2); transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,.2); }
+.cat-filter.active { background: linear-gradient(180deg, var(--orange-h), var(--orange)); border-color: var(--orange); color: #000; box-shadow: 0 10px 26px rgba(255,77,0,.26); }
 
-.view-toggle { display: flex; gap: 2px; }
+.view-toggle { display: flex; gap: 2px; background: var(--bg2); border: 1px solid var(--border2); padding: 2px; }
 .view-btn {
   width: 34px; height: 34px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--bg3); border: 1px solid var(--border2);
+  background: transparent; border: 1px solid transparent;
   color: var(--muted); cursor: pointer; transition: all var(--tr);
 }
+.view-btn:hover { color: var(--text); border-color: var(--border2); background: var(--bg3); }
 .view-btn.active { background: var(--orange-d); border-color: var(--orange); color: var(--orange); }
 .view-btn svg { width: 14px; height: 14px; }
 
@@ -694,12 +749,13 @@ select.form-ctrl option { background: var(--bg2); }
 
 /* Carte produit catalogue */
 .prod-card {
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(255,255,255,.015), rgba(0,0,0,.06)), var(--card);
   display: flex; flex-direction: column;
   position: relative; overflow: hidden;
-  transition: background var(--tr);
+  border: 1px solid transparent;
+  transition: background var(--tr), border-color var(--tr), transform var(--tr), box-shadow var(--tr);
 }
-.prod-card:hover { background: var(--bg3); }
+.prod-card:hover { background: var(--bg3); border-color: rgba(255,77,0,.22); transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,.3); }
 .prod-card::after {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -710,10 +766,18 @@ select.form-ctrl option { background: var(--bg2); }
 
 /* Zone image des cartes catalogue */
 .prod-img {
-  height: 160px; background: var(--bg3);
+  height: 174px; background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.2)), var(--bg3);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
+}
+.prod-img::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.34));
 }
 .prod-img svg { width: 64px; height: 64px; opacity: .2; }
 /* Image produit — object-fit:cover pour remplir proprement la zone fixe */
@@ -729,9 +793,10 @@ select.form-ctrl option { background: var(--bg2); }
 
 /* Miniature vue liste — même logique d'affichage */
 .prod-row-thumb {
-  width: 72px; height: 56px; background: var(--bg3);
+  width: 74px; height: 58px; background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.2)), var(--bg3);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
+  border: 1px solid var(--border2);
 }
 .prod-row-thumb img {
   width: 100%; height: 100%;
@@ -741,49 +806,79 @@ select.form-ctrl option { background: var(--bg2); }
 .prod-row-thumb svg { width: 28px; height: 28px; opacity: .25; }
 
 .prod-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-.prod-ref  { font-family: var(--fm); font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-.prod-name { font-family: var(--ft); font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.3; }
-.prod-desc { font-size: 12px; color: var(--muted); flex: 1; margin-bottom: 14px; line-height: 1.6; }
+.prod-ref  { font-family: var(--fm); font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.prod-name { font-family: var(--ft); font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+.prod-desc { font-size: 12px; color: var(--muted); flex: 1; margin-bottom: 14px; line-height: 1.65; }
 
 .prod-price-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-top: 1px solid var(--border); margin-bottom: 10px;
+  padding: 12px 0 10px; border-top: 1px solid var(--border); margin-bottom: 10px;
 }
 .prod-price {
   display: flex; flex-direction: column;
 }
 .prod-price-val {
-  font-family: var(--ft); font-size: 18px; font-weight: 800; color: var(--text);
+  font-family: var(--ft); font-size: 20px; font-weight: 800; color: var(--text);
   line-height: 1;
+  letter-spacing: -.01em;
 }
-.prod-price-val.locked { font-size: 13px; color: var(--muted); font-family: var(--fm); }
+.prod-price-val.locked { font-size: 12px; color: var(--muted); font-family: var(--fm); letter-spacing: .08em; text-transform: uppercase; }
 .prod-price-unit { font-size: 10px; color: var(--muted2); font-family: var(--fm); }
 .prod-price-discount {
   font-family: var(--fm); font-size: 10px; font-weight: 700;
-  color: var(--green); letter-spacing: .06em;
-  background: rgba(34,197,94,.10); padding: 3px 8px;
+  color: #72f7a5; letter-spacing: .08em;
+  background: linear-gradient(180deg, rgba(34,197,94,.15), rgba(34,197,94,.08)); padding: 4px 9px;
   border: 1px solid rgba(34,197,94,.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
 }
+
+.prod-cta {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+.prod-cta .btn { min-height: 36px; }
 
 /* Vue liste */
 .prod-row {
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(255,255,255,.01), rgba(0,0,0,.08)), var(--card);
   display: grid;
   grid-template-columns: 72px 1fr auto auto auto;
   align-items: center;
   gap: 16px; padding: 16px 20px;
   border-bottom: 1px solid var(--border);
-  transition: background var(--tr);
+  transition: background var(--tr), border-color var(--tr);
   position: relative;
 }
 .prod-row:last-child { border-bottom: none; }
-.prod-row:hover { background: var(--bg3); }
+.prod-row:hover { background: var(--bg3); border-color: rgba(255,77,0,.2); }
 .prod-row::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0;
   width: 2px; background: var(--orange); transform: scaleY(0);
   transition: transform var(--tr); transform-origin: top;
 }
 .prod-row:hover::before { transform: scaleY(1); }
+.prod-row-main { min-width: 0; }
+.prod-row-ref {
+  font-family:var(--fm);font-size:10px;color:var(--muted2);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;
+}
+.prod-row-name {
+  font-family:var(--ft);font-size:14px;font-weight:700;color:var(--text);
+  margin-bottom:2px;
+}
+.prod-row-desc {
+  font-size:12px;color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  max-width:44ch;
+}
+.prod-row-price { text-align:right; }
+.prod-row-price-val { font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text); }
+.prod-row-price-unit { font-size:11px;color:var(--muted2); }
+.prod-row-actions { display:flex;gap:6px;align-items:center; }
+.prod-row-actions .btn { min-height: 34px; }
 
 /* Tier pricing table */
 .tier-prices {
@@ -1409,6 +1504,9 @@ select.form-ctrl option { background: var(--bg2); }
   .auth-brand { display:none; }
   .products-grid-4, .products-grid-3 { grid-template-columns:repeat(2,1fr); }
   .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .catalog-header { padding: 14px; }
+  .catalog-header .page-header-top { align-items: flex-start; flex-direction: column; }
+  .catalog-actions { width: 100%; justify-content: flex-end; }
 
   /* Fiche produit */
   .pd-layout { grid-template-columns: 1fr; }
@@ -1432,6 +1530,11 @@ select.form-ctrl option { background: var(--bg2); }
   .kpi-grid { grid-template-columns:1fr; }
   .form-row-2, .form-row-3 { grid-template-columns:1fr; }
   .auth-form-side { padding:32px 24px; }
+  .catalog-premium::before { height: 130px; }
+  .catalog-header { padding: 12px; margin-bottom: 14px; }
+  .catalog-actions { width: 100%; }
+  .catalog-actions .btn { width: 100%; justify-content: center; }
+  .cat-toolbar { padding: 10px; gap: 8px; }
 
   /* Fiche produit : layout empilé, barre CTA compacte */
   .pd-img-wrap { flex-direction: column; align-items: center; padding: 16px; }
@@ -1479,11 +1582,13 @@ select.form-ctrl option { background: var(--bg2); }
 /* Empty state */
 .empty-state {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:60px 24px; text-align:center;
+  padding:70px 24px; text-align:center;
+  border: 1px dashed var(--border2);
+  background: linear-gradient(180deg, rgba(255,255,255,.01), rgba(255,77,0,.03));
 }
-.empty-state svg { width:56px; height:56px; opacity:.2; margin-bottom:16px; }
-.empty-state h3 { font-family:var(--ft); font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px; }
-.empty-state p   { font-size:13px; color:var(--muted); max-width:320px; }
+.empty-state svg { width:56px; height:56px; opacity:.28; margin-bottom:16px; }
+.empty-state h3 { font-family:var(--ft); font-size:17px; font-weight:800; color:var(--text); margin-bottom:8px; }
+.empty-state p   { font-size:13px; color:var(--muted); max-width:320px; line-height:1.7; }
 
 
 </style>
@@ -1989,14 +2094,15 @@ select.form-ctrl option { background: var(--bg2); }
       </div><!-- /dashboard -->
 
       <!-- ═══ CATALOGUE ═══ -->
-      <div id="view-catalog" class="view" style="display:none;">
-        <div class="page-header">
+      <div id="view-catalog" class="view catalog-premium" style="display:none;">
+        <div class="page-header catalog-header">
           <div class="page-header-top">
-            <div>
+            <div class="catalog-title-wrap">
+              <span class="catalog-kicker">SMDI PRO SUPPLY</span>
               <h1 class="page-title">Catalogue Professionnel</h1>
               <p class="page-sub">+1 500 références — tarifs B2B personnalisés selon votre niveau</p>
             </div>
-            <div style="display:flex;gap:8px;">
+            <div class="catalog-actions">
               <button class="btn btn-outline" onclick="openCartModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
                 Panier (<span id="cart-count">0</span>)
@@ -2008,6 +2114,7 @@ select.form-ctrl option { background: var(--bg2); }
 
         <!-- Toolbar -->
         <div class="cat-toolbar">
+          <span class="badge badge-orange">Filtres catalogue</span>
           <div class="cat-filters">
             <button class="cat-filter active" data-cf="all">Tous</button>
             <button class="cat-filter" data-cf="entretien">Entretien</button>
@@ -4316,7 +4423,14 @@ async function renderCatalog(filter) {
     ? (catalogViewMode === 'list'
       ? list.map(p => renderProdRow(p, tier, disc)).join('')
       : list.map(p => renderProdCard(p, tier, disc)).join(''))
-    : '<div style="padding:40px;text-align:center;color:var(--muted);">Aucun produit dans cette catégorie.</div>';
+    : `<div class="empty-state">
+         <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8">
+           <circle cx="11" cy="11" r="7"></circle>
+           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+         </svg>
+         <h3>Aucun produit dans cette catégorie</h3>
+         <p>Essayez un autre filtre pour voir plus de références disponibles.</p>
+       </div>`;
   if (typeof renderPagination === 'function') renderPagination();
 }
 
@@ -4353,15 +4467,17 @@ function renderProdCard(p, tier, disc) {
         </div>
         ${disc > 0 && canSee ? `<div class="prod-price-discount">–${disc}% ${tier.toUpperCase()}</div>` : ''}
       </div>
-      <button class="btn btn-primary btn-sm btn-full"
-        onclick="event.stopPropagation(); addToCart('${p.id}')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
-        ${canSee ? 'Ajouter au panier' : 'Se connecter'}
-      </button>
-      <button class="btn btn-outline btn-sm btn-full" style="margin-top:6px;"
-        onclick="event.stopPropagation(); openProductDetail('${p.id}')">
-        Voir la fiche
-      </button>
+      <div class="prod-cta">
+        <button class="btn btn-primary btn-sm btn-full"
+          onclick="event.stopPropagation(); addToCart('${p.id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
+          ${canSee ? 'Ajouter au panier' : 'Se connecter'}
+        </button>
+        <button class="btn btn-outline btn-sm btn-full"
+          onclick="event.stopPropagation(); openProductDetail('${p.id}')">
+          Voir la fiche
+        </button>
+      </div>
     </div>
   </div>`;
   // STEP 2 : bouton "Voir fiche" secondaire — appelle openProductDetail (placeholder)
@@ -4382,16 +4498,16 @@ function renderProdRow(p, tier, disc) {
        </svg>`;
   return `<div class="prod-row" data-cat="${p.cat}">
     <div class="prod-row-thumb">${thumbContent}</div>
-    <div>
-      <div style="font-family:var(--fm);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${p.ref}</div>
-      <div style="font-family:var(--ft);font-size:14px;font-weight:700;color:var(--text);">${p.name}</div>
-      <div style="font-size:12px;color:var(--muted);">${desc}</div>
+    <div class="prod-row-main">
+      <div class="prod-row-ref">${p.ref}</div>
+      <div class="prod-row-name">${p.name}</div>
+      <div class="prod-row-desc">${desc}</div>
     </div>
-    <div style="text-align:right;">
-      ${canSee ? `<div style="font-family:var(--ft);font-size:16px;font-weight:800;color:var(--text);">${fmt(price)} €</div><div style="font-size:11px;color:var(--muted2);">HT / ${p.unit}</div>` : '<div style="font-size:12px;color:var(--muted);">Prix pro</div>'}
+    <div class="prod-row-price">
+      ${canSee ? `<div class="prod-row-price-val">${fmt(price)} €</div><div class="prod-row-price-unit">HT / ${p.unit}</div>` : '<div style="font-size:12px;color:var(--muted);">Prix pro</div>'}
     </div>
     ${disc > 0 && canSee ? `<div class="prod-price-discount" style="white-space:nowrap;">–${disc}%</div>` : '<div></div>'}
-    <div style="display:flex;gap:6px;">
+    <div class="prod-row-actions">
       <button class="btn btn-primary btn-sm" onclick="addToCart('${p.id}')">+ Panier</button>
       <button class="btn btn-outline btn-sm" onclick="openProductDetail('${p.id}')">Fiche</button>
     </div>
