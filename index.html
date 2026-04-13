@@ -374,6 +374,92 @@
     }
     .hero-sub strong { color: var(--text); font-weight: 700; }
 
+    .hero-rotator {
+      position: relative;
+      margin-bottom: 26px;
+      max-width: 620px;
+      padding: 18px 18px 16px;
+      border: 1px solid var(--border2);
+      background: linear-gradient(135deg, rgba(18,18,18,.9), rgba(10,10,10,.9));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      overflow: hidden;
+    }
+    .hero-rotator::after {
+      content: '';
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(255,77,0,.16), transparent 72%);
+      pointer-events: none;
+    }
+    .hero-rotator-kicker {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 10px;
+    }
+    .hero-axis-title {
+      font-family: var(--ff-title);
+      font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+      color: var(--text);
+      line-height: 1.22;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 6px;
+    }
+    .hero-axis-desc {
+      font-size: 13px;
+      color: #b8b8b8;
+      line-height: 1.6;
+      max-width: 500px;
+    }
+    .hero-axis-track {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .hero-axis-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hero-axis-dot {
+      width: 26px;
+      height: 3px;
+      border-radius: 999px;
+      background: #2f2f2f;
+      transition: background var(--tr2), transform var(--tr2);
+    }
+    .hero-axis-dot.active {
+      background: var(--orange);
+      transform: scaleX(1.08);
+    }
+    .hero-axis-index {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .hero-axis-content {
+      will-change: opacity, transform;
+      transition: opacity .45s ease, transform .45s ease, filter .45s ease;
+    }
+    .hero-axis-content.is-leaving {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: blur(1px);
+    }
+
     .hero-ctas {
       display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px;
     }
@@ -1248,22 +1334,38 @@
         <div class="hero-label reveal">
           <span class="hero-label-dot" aria-hidden="true"></span>
           Espace professionnel B2B exclusif
-        </div>
+        </p>
 
         <h1 class="hero-title reveal d1">
-          Vos stations ne peuvent <em>pas attendre</em>.
+          3 leviers pour garder votre station <em>performante</em>.
         </h1>
 
         <p class="hero-sub reveal d2">
-          <strong>Pièces critiques, dépannage terrain et devis rapides</strong> pour maintenir votre activité en continu.
+          Une offre structurée pour <strong>équiper, maintenir et accélérer</strong> vos décisions d'exploitation.
         </p>
+
+        <div class="hero-rotator reveal d2" aria-live="polite" aria-atomic="true">
+          <div class="hero-axis-content" id="hero-axis-content">
+            <div class="hero-rotator-kicker" id="hero-axis-kicker">Axe 01 — Rénovation de station</div>
+            <div class="hero-axis-title" id="hero-axis-title">Modernisez vos pistes de lavage sans interrompre votre activité.</div>
+            <div class="hero-axis-desc" id="hero-axis-desc">Audit technique, remplacement d'ensembles critiques et remise à niveau pour gagner en fiabilité et en image client.</div>
+          </div>
+          <div class="hero-axis-track">
+            <div class="hero-axis-dots" aria-hidden="true">
+              <span class="hero-axis-dot active"></span>
+              <span class="hero-axis-dot"></span>
+              <span class="hero-axis-dot"></span>
+            </div>
+            <div class="hero-axis-index" id="hero-axis-index">01 / 03</div>
+          </div>
+        </div>
 
         <div class="hero-ctas reveal d3">
           <a href="smdi-portal.html#quote" class="btn btn-primary btn-xl" aria-label="Demander un devis professionnel">
-            Demander un devis prioritaire
+            Lancer mon devis pro
           </a>
           <a href="smdi-portal.html#register" class="btn btn-outline btn-lg" aria-label="Créer un compte professionnel">
-            Ouvrir votre portail client
+            Activer le portail B2B
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
@@ -2173,6 +2275,56 @@ const IO = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 
 document.querySelectorAll('.reveal').forEach(el => IO.observe(el));
+
+/* ══════════════════════════════════════
+   HERO ROTATION — AXES MARKETING
+══════════════════════════════════════ */
+(function initHeroRotation() {
+  const content = document.getElementById('hero-axis-content');
+  const kicker  = document.getElementById('hero-axis-kicker');
+  const title   = document.getElementById('hero-axis-title');
+  const desc    = document.getElementById('hero-axis-desc');
+  const index   = document.getElementById('hero-axis-index');
+  const dots    = Array.from(document.querySelectorAll('.hero-axis-dot'));
+
+  if (!content || !kicker || !title || !desc || !index || !dots.length) return;
+
+  const AXES = [
+    {
+      kicker: 'Axe 01 — Rénovation de station',
+      title: 'Modernisez vos pistes de lavage sans interrompre votre activité.',
+      desc: 'Audit technique, remplacement d\'ensembles critiques et remise à niveau pour gagner en fiabilité et en image client.'
+    },
+    {
+      kicker: 'Axe 02 — Maintenance & dépannage',
+      title: 'Réduisez vos arrêts avec une maintenance préventive et curative.',
+      desc: 'Interventions terrain, diagnostics rapides et pièces critiques immédiatement mobilisées pour sécuriser votre continuité de service.'
+    },
+    {
+      kicker: 'Axe 03 — Portail pro, pièces & accompagnement',
+      title: 'Pilotez commandes, devis et support depuis un espace B2B unique.',
+      desc: 'Accès centralisé aux références pro, aux demandes urgentes et au suivi commercial pour accélérer vos opérations.'
+    }
+  ];
+
+  let axisIndex = 0;
+  const switchAxis = () => {
+    axisIndex = (axisIndex + 1) % AXES.length;
+    const next = AXES[axisIndex];
+
+    content.classList.add('is-leaving');
+    setTimeout(() => {
+      kicker.textContent = next.kicker;
+      title.textContent = next.title;
+      desc.textContent = next.desc;
+      index.textContent = `${String(axisIndex + 1).padStart(2, '0')} / 03`;
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === axisIndex));
+      content.classList.remove('is-leaving');
+    }, 230);
+  };
+
+  setInterval(switchAxis, 3800);
+})();
 
 /* ══════════════════════════════════════
    FORMULAIRE CONTACT
