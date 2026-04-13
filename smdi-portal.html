@@ -1616,6 +1616,31 @@ select.form-ctrl option { background: var(--bg2); }
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+/* --- Portal premium UI layer --- */
+.page-header{background:linear-gradient(140deg,rgba(18,24,34,.92),rgba(12,16,24,.88));border:1px solid rgba(255,255,255,.06);box-shadow:0 16px 32px rgba(0,0,0,.26);}
+.portal-trust-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 20px;}
+.pts-item{background:rgba(17,24,34,.7);border:1px solid var(--border2);padding:14px;border-radius:12px;display:flex;flex-direction:column;gap:6px;}
+.pts-item strong{font-family:var(--ft);font-size:14px;color:var(--text);}
+.pts-item span{font-size:12px;color:var(--muted);line-height:1.5;}
+.kpi-card,.widget,.cat-toolbar,.prod-card,.order-card,.modal{box-shadow:0 14px 30px rgba(0,0,0,.22);}
+@media(max-width:900px){.portal-trust-strip{grid-template-columns:1fr;}}
+
+
+
+/* --- Premium UX layer v2 --- */
+#page-content{animation:pageFade .45s ease both;}
+@keyframes pageFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pending-banner,.widget,.kpi-card,.prod-card,.order-card,.cat-toolbar,.modal{backdrop-filter:blur(8px);border-color:rgba(255,255,255,.08)}
+.quick-action,.cat-filter,.view-btn{transition:all .22s cubic-bezier(.22,.61,.36,1)}
+.quick-action:hover{transform:translateY(-2px)}
+.catalog-premium-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.cps-card{background:linear-gradient(150deg,rgba(20,27,37,.9),rgba(13,17,24,.85));border:1px solid var(--border2);padding:14px;border-radius:12px;}
+.cps-card strong{display:block;font-family:var(--ft);font-size:14px;color:var(--text);margin-bottom:6px;}
+.cps-card span{font-size:12px;color:var(--muted);line-height:1.45;}
+@media(max-width:980px){.catalog-premium-strip{grid-template-columns:1fr;}}
+
 </style>
 <!-- Supabase CDN — connexion initiale uniquement -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1964,14 +1989,20 @@ select.form-ctrl option { background: var(--bg2); }
         <div class="page-header">
           <div class="page-header-top">
             <div>
-              <h1 class="page-title" id="dash-title">Bonjour, Pro SMDI 👋</h1>
-              <p class="page-sub">Voici votre tableau de bord — <span id="dash-date"></span></p>
+              <h1 class="page-title" id="dash-title">Pilotage B2B premium</h1>
+              <p class="page-sub">Commandes, devis et interventions dans une interface unique — <span id="dash-date"></span></p>
             </div>
             <button class="btn btn-primary" onclick="navigate('catalog')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nouvelle commande
             </button>
           </div>
+        </div>
+
+        <div class="portal-trust-strip">
+          <div class="pts-item"><strong>Tarifs personnalisés</strong><span>Grille négociée selon volume et niveau de compte</span></div>
+          <div class="pts-item"><strong>Commandes pilotées</strong><span>Historique, suivi et documents centralisés</span></div>
+          <div class="pts-item"><strong>Support projet</strong><span>Interlocuteur pro pour maintenance et rénovation</span></div>
         </div>
 
         <!-- KPIs -->
@@ -2130,7 +2161,7 @@ select.form-ctrl option { background: var(--bg2); }
           <div class="page-header-top">
             <div>
               <h1 class="page-title">Catalogue Professionnel</h1>
-              <p class="page-sub">+1 500 références — tarifs B2B personnalisés selon votre niveau</p>
+              <p class="page-sub">Catalogue orienté exploitation : pièces critiques, équipements, consommables et accompagnement projet</p>
             </div>
             <div style="display:flex;gap:8px;">
               <button class="btn btn-outline" onclick="openCartModal()">
@@ -2140,6 +2171,12 @@ select.form-ctrl option { background: var(--bg2); }
         
             </div>
           </div>
+        </div>
+
+        <div class="catalog-premium-strip">
+          <div class="cps-card"><strong>Achat récurrent</strong><span>Repérez rapidement vos références critiques et recommandez en quelques clics.</span></div>
+          <div class="cps-card"><strong>Projet rénovation</strong><span>Préparez vos lots et demandez un chiffrage complet depuis votre espace client.</span></div>
+          <div class="cps-card"><strong>Support dédié</strong><span>Un interlocuteur pro pour arbitrer vos choix techniques et budgétaires.</span></div>
         </div>
 
         <!-- Toolbar -->

@@ -1095,6 +1095,40 @@
       .section,.page-hero{padding-top:64px}
       .hero,.page-header,.cat-toolbar{border-radius:14px}
     }
+
+
+    /* --- Premium conversion additions --- */
+    .gp-panel{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;background:linear-gradient(140deg,#10151f,#0d1118);border:1px solid var(--border2);padding:38px;border-radius:14px;}
+    .gp-list{margin-top:22px;display:grid;gap:10px;}
+    .gp-item{padding:12px 14px;border:1px solid var(--border2);background:rgba(255,255,255,.01);font-size:13px;color:var(--text2);}
+    .gp-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .gp-stat{padding:18px;border:1px solid var(--border2);background:var(--bg3);display:flex;flex-direction:column;gap:6px;}
+    .gp-stat strong{font-family:var(--ff-title);font-size:1.7rem;color:var(--orange);line-height:1;}
+    .gp-stat span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2);}
+    .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+    .proof-card{background:var(--card);padding:28px;min-height:170px;}
+    .proof-card h3{font-family:var(--ff-title);font-size:18px;color:var(--text);margin-bottom:10px;}
+    .proof-card p{font-size:13px;color:var(--muted);line-height:1.7;}
+    @media(max-width:900px){.gp-panel{grid-template-columns:1fr}.proof-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:640px){.proof-grid{grid-template-columns:1fr;}}
+
+
+
+    /* --- Conversion polish v2 --- */
+    #hero{position:relative;isolation:isolate;}
+    #hero::after{filter:blur(6px);}
+    .hero-sub{max-width:460px;font-size:17px;color:#b9c4d7;}
+    .hero-ctas .btn{min-width:220px;justify-content:center;}
+    .hero-rotator{display:inline-grid;gap:6px;margin-top:2px;}
+    .hero-rotator span{font-family:var(--ff-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted2);padding-left:14px;position:relative;animation:fadePulse 6s infinite;}
+    .hero-rotator span:nth-child(2){animation-delay:1.2s}.hero-rotator span:nth-child(3){animation-delay:2.4s}
+    .hero-rotator span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--orange);position:absolute;left:0;top:6px;}
+    @keyframes fadePulse{0%,100%{opacity:.45}40%{opacity:1}}
+    .section{position:relative}
+    .section::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);opacity:.6;}
+    .svc-card,.proof-card,.gp-stat,.step-card,.testi-card{box-shadow:0 12px 30px rgba(0,0,0,.2)}
+    .section-header .section-sub{max-width:680px}
+
 </style>
   <!-- Vercel Web Analytics -->
   <script>
@@ -1187,64 +1221,35 @@
 <section id="hero" aria-label="Présentation SMDI">
   <div class="wrap z1">
     <div class="hero-layout">
-
-      <!-- Contenu texte -->
       <div class="hero-content">
         <div class="hero-label reveal">
           <span class="hero-label-dot" aria-hidden="true"></span>
-          Espace professionnel B2B exclusif
+          Partenaire B2B pour stations à fort enjeu
         </div>
-
         <h1 class="hero-title reveal d1">
-          L'équipement pro<br>
-          pour vos <em>stations</em><br>
-          de lavage.
+          Vos stations <em>opérationnelles</em>.<br>
+          Vos marges protégées.
         </h1>
-
         <p class="hero-sub reveal d2">
-          <strong>+1 500 références sélectionnées</strong> pour les professionnels du lavage automobile et de la haute pression. Tarifs B2B personnalisés, livraison France &amp; Europe, interventions Île-de-France.
+          Maintenance, rénovation et équipement premium pour exploitants exigeants.
         </p>
-
         <div class="hero-ctas reveal d3">
-          <a href="smdi-portal.html#register" class="btn btn-primary btn-xl" aria-label="Créer un compte professionnel">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
-            Créer un compte pro
-          </a>
-          <a href="smdi-portal.html#login" class="btn btn-outline btn-lg" aria-label="Accéder à l'espace professionnel">
-            Connexion espace pro
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
+          <a href="#contact" class="btn btn-primary btn-xl" aria-label="Demander un devis projet">Demander un devis projet</a>
+          <a href="smdi-portal.html#login" class="btn btn-outline btn-lg" aria-label="Accéder au portail professionnel">Accéder au portail pro</a>
         </div>
-
-        <div class="hero-trust reveal d4">
-          <div class="trust-item">SIRET obligatoire</div>
-          <div class="trust-sep" aria-hidden="true"></div>
-          <div class="trust-item">Validation manuelle</div>
-          <div class="trust-sep" aria-hidden="true"></div>
-          <div class="trust-item">Tarifs personnalisés</div>
+        <div class="hero-rotator reveal d4" aria-label="Messages clés">
+          <span>Intervention rapide</span>
+          <span>Rénovation pilotée</span>
+          <span>Tarifs B2B négociés</span>
         </div>
       </div>
 
-      <!-- Stats cards -->
       <div class="hero-visual reveal d2" aria-label="Chiffres clés SMDI">
-        <div class="hero-stat">
-          <div class="hs-num">1 500+</div>
-          <div class="hs-label">Références pro<br>en stock</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hs-num">20+</div>
-          <div class="hs-label">Ans d'expertise<br>sectorielle</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hs-num">&lt;4h</div>
-          <div class="hs-label">Intervention<br>Île-de-France</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hs-num">24h</div>
-          <div class="hs-label">Réponse garantie<br>sur devis</div>
-        </div>
+        <div class="hero-stat"><div class="hs-num">1 500+</div><div class="hs-label">Références techniques<br>disponibles</div></div>
+        <div class="hero-stat"><div class="hs-num">20+</div><div class="hs-label">Ans d'expertise<br>terrain</div></div>
+        <div class="hero-stat"><div class="hs-num">&lt;4h</div><div class="hs-label">Dépannage IDF<br>selon urgence</div></div>
+        <div class="hero-stat"><div class="hs-num">24h</div><div class="hs-label">Réponse devis<br>professionnel</div></div>
       </div>
-
     </div>
   </div>
 </section>
@@ -1427,7 +1432,7 @@
       <h2 class="section-title reveal d1" id="prest-title">
         Interventions &amp; Services pro<br><em>Île-de-France</em>
       </h2>
-      <p class="section-sub reveal d2">Nos techniciens certifiés interviennent directement sur vos installations pour maximiser votre disponibilité opérationnelle.</p>
+      <p class="section-sub reveal d2">Un dispositif terrain conçu pour réduire vos arrêts et sécuriser votre chiffre d'affaires.</p>
     </div>
 
     <div class="services-grid reveal d1">
@@ -1501,6 +1506,51 @@
   </div>
 </section>
 
+
+<!-- ══════════════════════════════════════════════════════
+     GRANDS PROJETS / RÉNOVATION
+══════════════════════════════════════════════════════ -->
+<section class="section" id="grands-projets" aria-labelledby="gp-title">
+  <div class="wrap">
+    <div class="gp-panel reveal">
+      <div>
+        <div class="eyebrow">Projets stratégiques</div>
+        <h2 class="section-title" id="gp-title">Rénovation complète, montée en gamme et <em>gros chantiers</em></h2>
+        <p class="section-sub">De la remise à niveau technique à la modernisation complète d'un site multi-pistes, SMDI structure votre projet de bout en bout : cadrage, budget, planning, exécution et suivi de performance.</p>
+        <div class="gp-list">
+          <div class="gp-item">Direction de projet dédiée pour sites à fort chiffre d'affaires</div>
+          <div class="gp-item">Planification en phases pour limiter les interruptions d'exploitation</div>
+          <div class="gp-item">Reporting clair pour vos équipes et vos investisseurs</div>
+        </div>
+      </div>
+      <div class="gp-stats">
+        <div class="gp-stat"><strong>48h</strong><span>Pré-cadrage technique</span></div>
+        <div class="gp-stat"><strong>1:1</strong><span>Chef de projet dédié</span></div>
+        <div class="gp-stat"><strong>ROI</strong><span>Scénarios d'optimisation chiffrés</span></div>
+        <div class="gp-stat"><strong>B2B</strong><span>Approche orientée exploitation</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     PREUVES & CRÉDIBILITÉ
+══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="preuves" aria-labelledby="preuves-title">
+  <div class="wrap">
+    <div class="section-header centered">
+      <div class="eyebrow" style="justify-content:center;">Crédibilité opérationnelle</div>
+      <h2 class="section-title" id="preuves-title">Une structure pensée pour des <em>enjeux élevés</em></h2>
+    </div>
+    <div class="proof-grid">
+      <article class="proof-card"><h3>Expertise terrain</h3><p>Techniciens habitués aux contraintes réelles des stations en exploitation continue.</p></article>
+      <article class="proof-card"><h3>Qualité de service</h3><p>Process d'intervention standardisés, communication proactive et suivi après action.</p></article>
+      <article class="proof-card"><h3>Capacité d'exécution</h3><p>Approvisionnement, maintenance et rénovation orchestrés dans une logique de continuité.</p></article>
+      <article class="proof-card"><h3>Portail client pro</h3><p>Tarifs personnalisés, commandes, devis et historique centralisés dans un espace robuste.</p></article>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════════════════════════════════════════════
      COMMENT ÇA MARCHE (logique B2B expliquée)
 ══════════════════════════════════════════════════════ -->
@@ -1512,7 +1562,7 @@
         Comment accéder à l'espace<br><em>professionnel</em> ?
       </h2>
       <p class="section-sub reveal d2">
-        SMDI est un espace 100% B2B. Le catalogue complet, les tarifs personnalisés et les fonctionnalités de commande en ligne sont réservés aux professionnels avec un compte validé.
+        Un parcours simple, 100% pro : compte validé, accès catalogue, commandes et devis centralisés.
       </p>
     </div>
 
