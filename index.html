@@ -173,6 +173,19 @@
     .d4 { transition-delay: .40s; }
     .d5 { transition-delay: .50s; }
 
+    .page-transition {
+      position: fixed; inset: 0; z-index: 1200; pointer-events: none;
+      background: radial-gradient(circle at 20% 20%, rgba(255,77,0,.18), transparent 50%), rgba(7,7,7,.97);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease;
+    }
+    .page-transition.show { opacity: 1; visibility: visible; }
+    .page-transition-mark {
+      font-family: var(--ff-title); letter-spacing: .08em; font-size: 16px; font-weight: 800;
+      color: var(--text); text-transform: uppercase;
+    }
+    .page-transition-mark span { color: var(--orange); }
+
     /* ════════════════════════════════════════════════════════
        NAVIGATION
     ════════════════════════════════════════════════════════ */
@@ -355,17 +368,19 @@
     }
 
     .hero-sub {
-      font-size: 16px; color: var(--muted); line-height: 1.78;
-      margin-bottom: 40px; max-width: 500px;
+      font-size: 16px; color: #c4c4c4; line-height: 1.68;
+      margin-bottom: 28px; max-width: 560px;
+      font-weight: 500;
     }
-    .hero-sub strong { color: var(--text2); font-weight: 600; }
+    .hero-sub strong { color: var(--text); font-weight: 700; }
 
     .hero-ctas {
-      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 44px;
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px;
     }
 
     .hero-trust {
       display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      margin-bottom: 16px;
     }
     .trust-item {
       display: flex; align-items: center; gap: 7px;
@@ -377,6 +392,29 @@
       border-radius: 50%; background: var(--orange); flex-shrink: 0;
     }
     .trust-sep { width: 1px; height: 16px; background: var(--border2); }
+
+    .hero-proof {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+      max-width: 620px;
+    }
+    .hero-proof-item {
+      background: rgba(12,12,12,.78);
+      border: 1px solid var(--border2);
+      padding: 10px 12px;
+      transition: border-color var(--tr), transform var(--tr);
+    }
+    .hero-proof-item:hover { border-color: var(--orange); transform: translateY(-2px); }
+    .hero-proof-kpi {
+      font-family: var(--ff-title); font-size: 20px; font-weight: 800; color: var(--text);
+      line-height: 1; margin-bottom: 5px;
+    }
+    .hero-proof-kpi span { color: var(--orange); }
+    .hero-proof-label {
+      font-family: var(--ff-mono); font-size: 10px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted2);
+    }
 
     /* Visuel droite — stats cards */
     .hero-visual {
@@ -1213,31 +1251,44 @@
         </div>
 
         <h1 class="hero-title reveal d1">
-          Pilotez vos stations avec un partenaire <em>industriel</em><br>
-          conçu pour les exploitants exigeants.
+          Vos stations ne peuvent <em>pas attendre</em>.
         </h1>
 
         <p class="hero-sub reveal d2">
-          <strong>solutions techniques et pièces critiques</strong> pour sécuriser vos revenus d'exploitation. Accompagnement avant-vente, déploiement terrain, maintenance et suivi B2B premium.
+          <strong>Pièces critiques, dépannage terrain et devis rapides</strong> pour maintenir votre activité en continu.
         </p>
 
         <div class="hero-ctas reveal d3">
-          <a href="smdi-portal.html#register" class="btn btn-primary btn-xl" aria-label="Créer un compte professionnel">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
-            Créer un compte pro
+          <a href="smdi-portal.html#quote" class="btn btn-primary btn-xl" aria-label="Demander un devis professionnel">
+            Demander un devis prioritaire
           </a>
-          <a href="smdi-portal.html#login" class="btn btn-outline btn-lg" aria-label="Accéder à l'espace professionnel">
-            Accéder au portail pro
+          <a href="smdi-portal.html#register" class="btn btn-outline btn-lg" aria-label="Créer un compte professionnel">
+            Ouvrir votre portail client
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
 
         <div class="hero-trust reveal d4">
-          <div class="trust-item">SIRET obligatoire</div>
+          <div class="trust-item">Réponse devis sous 24h</div>
           <div class="trust-sep" aria-hidden="true"></div>
-          <div class="trust-item">Validation manuelle</div>
+          <div class="trust-item">Intervention IDF &lt; 4h</div>
           <div class="trust-sep" aria-hidden="true"></div>
-          <div class="trust-item">Tarifs personnalisés</div>
+          <div class="trust-item">Accès B2B validé</div>
+        </div>
+
+        <div class="hero-proof reveal d5" aria-label="Indicateurs de performance">
+          <div class="hero-proof-item">
+            <div class="hero-proof-kpi"><span>1 500+</span></div>
+            <div class="hero-proof-label">Références pro</div>
+          </div>
+          <div class="hero-proof-item">
+            <div class="hero-proof-kpi"><span>20+</span> ans</div>
+            <div class="hero-proof-label">Expertise lavage</div>
+          </div>
+          <div class="hero-proof-item">
+            <div class="hero-proof-kpi"><span>48h</span></div>
+            <div class="hero-proof-label">Livraison France</div>
+          </div>
         </div>
       </div>
 
@@ -1885,6 +1936,10 @@
   </div>
 </footer>
 
+<div class="page-transition" id="page-transition" aria-hidden="true">
+  <div class="page-transition-mark">SMDI<span>.</span></div>
+</div>
+
 <!-- Toast -->
 <div id="toast-wrap" role="region" aria-live="polite" aria-label="Notifications"></div>
 
@@ -2182,6 +2237,17 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       window.scrollTo({ top, behavior: 'smooth' });
     }
   });
+});
+
+document.querySelectorAll('a[href$=".html"], a[href^="smdi-portal.html"], a[href^="a-propos"], a[href^="prestations"], a[href^="faq"], a[href^="mentions"], a[href^="cgv"], a[href^="donnees"], a[href^="cookies"]').forEach(link => {
+  link.addEventListener('click', () => {
+    const overlay = document.getElementById('page-transition');
+    if (overlay) overlay.classList.add('show');
+  });
+});
+window.addEventListener('pageshow', () => {
+  const overlay = document.getElementById('page-transition');
+  if (overlay) overlay.classList.remove('show');
 });
 
 /* ══════════════════════════════════════
